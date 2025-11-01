@@ -189,11 +189,14 @@ public class WFCBuilder2 : MonoBehaviour
         {
             for (int j = 0; j < height; j++)
             {
-                if (grid[i, j] != null)
-                {
-                    grid[i, j].InstantiateObj();
-                }
-
+                if (grid[i, j] == null) continue;
+                grid[i, j].InstantiateObj();
+                
+                // Fill in missing edge walls, i = x, j = z   
+                if (i == 0) grid[i, j].PlaceWallAt(WallPos.LEFT);     // leftmost x
+                if (i == width - 1) grid[i, j].PlaceWallAt(WallPos.RIGHT);  // rightmost x
+                if (j == 0) grid[i, j].PlaceWallAt(WallPos.FRONT);   // frontmost z
+                if (j == height - 1) grid[i, j].PlaceWallAt(WallPos.BACK);  // backmost z
             }
         }
     }
