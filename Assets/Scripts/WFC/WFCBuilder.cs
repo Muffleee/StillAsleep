@@ -92,7 +92,7 @@ public class WFCBuilder2 : MonoBehaviour
         {
             if (grid[currPos.x + offsets, currPos.y].HasWallAt(WallPos.LEFT))
             {
-                wallStatus.right = true;
+                wallStatus.PlaceWallAt(WallPos.RIGHT, grid[currPos.x + offsets, currPos.y].GetWallAt(WallPos.LEFT));
             }
         }
         else
@@ -104,7 +104,7 @@ public class WFCBuilder2 : MonoBehaviour
         {
             if (grid[currPos.x - offsets, currPos.y].HasWallAt(WallPos.RIGHT))
             {
-                wallStatus.left = true;
+                wallStatus.PlaceWallAt(WallPos.LEFT, grid[currPos.x - offsets, currPos.y].GetWallAt(WallPos.RIGHT));
             }
 
         }
@@ -116,7 +116,7 @@ public class WFCBuilder2 : MonoBehaviour
         {
             if (grid[currPos.x, currPos.y + offsets].HasWallAt(WallPos.FRONT))
             {
-                wallStatus.back = true;
+                wallStatus.PlaceWallAt(WallPos.BACK, grid[currPos.x, currPos.y + offsets].GetWallAt(WallPos.FRONT));
             }
 
         }
@@ -128,7 +128,7 @@ public class WFCBuilder2 : MonoBehaviour
         {
             if (grid[currPos.x, currPos.y - offsets].HasWallAt(WallPos.BACK))
             {
-                wallStatus.front = true;
+                wallStatus.PlaceWallAt(WallPos.FRONT, grid[currPos.x, currPos.y - offsets].GetWallAt(WallPos.BACK));
             }
         }
         else
@@ -168,13 +168,13 @@ public class WFCBuilder2 : MonoBehaviour
             switch (wallPositions[i])
             {
                 case WallPos.FRONT:
-                    wallStatus.front = true; break;
+                    wallStatus.PlaceWallAt(WallPos.FRONT); break;
                 case WallPos.BACK:
-                    wallStatus.back = true; break;
+                    wallStatus.PlaceWallAt(WallPos.BACK); break;
                 case WallPos.LEFT:
-                    wallStatus.left = true; break;
+                    wallStatus.PlaceWallAt(WallPos.LEFT); break;
                 case WallPos.RIGHT:
-                    wallStatus.right = true; break;
+                    wallStatus.PlaceWallAt(WallPos.RIGHT); break;
             }
         }
         return wallStatus;

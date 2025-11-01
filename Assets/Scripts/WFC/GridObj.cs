@@ -73,19 +73,19 @@ public class GridObj
         this.floorObj = GameObject.Instantiate(floorPrefab, this.GetWorldPos(), Quaternion.identity);
         this.floorObj.transform.SetParent(this.parentObj.transform);
 
-        if (this.wallStatus.front)
+        if (this.wallStatus.HasWallAt(WallPos.FRONT))
         {
             this.InstantiateWall(WallPos.FRONT);
         }
-        if (this.wallStatus.back)
+        if (this.wallStatus.HasWallAt(WallPos.BACK))
         {
             this.InstantiateWall(WallPos.BACK);
         }
-        if (this.wallStatus.left)
+        if (this.wallStatus.HasWallAt(WallPos.LEFT))
         {
             this.InstantiateWall(WallPos.LEFT);
         }
-        if (this.wallStatus.right)
+        if (this.wallStatus.HasWallAt(WallPos.RIGHT))
         {
             this.InstantiateWall(WallPos.RIGHT);
         }
@@ -110,11 +110,21 @@ public class GridObj
     }
 
     /// <summary>
+    /// Overloaded method to instantiate a WallType.REGULAR wall
+    /// </summary>
+    /// <param name="wallPos"></param>
+    private void InstantiateWall(WallPos wallPos)
+    {
+        this.InstantiateWall(wallPos, WallType.REGULAR);
+    }
+
+    /// <summary>
     /// Instantiate a wall and only change the data on the in-game object, helper method
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
-    private void InstantiateWall(WallPos wallPos)
-    {
+    private void InstantiateWall(WallPos wallPos, WallType wallType)
+    {   
+        // TODO change prefab according to WallType
         if (this.parentObj == null) return;
         int index = WallStatus.WallPosToInt(wallPos);
         if (this.wallObjs[index] != null) return;
@@ -153,5 +163,15 @@ public class GridObj
 
         GameObject.Destroy(this.parentObj);
         this.parentObj = null;
+    }
+
+    /// <summary>
+    /// Get WallType at position
+    /// </summary>
+    /// <param name="wallPos"></param>
+    /// <returns></returns>
+    public WallType GetWallAt(WallPos wallPos)
+    {
+        return this.wallStatus.GetWallAt(wallPos);
     }
 }

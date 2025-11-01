@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class WallStatus
 {
-    [SerializeField] public bool back = false;
-    [SerializeField] public bool front = false;
-    [SerializeField] public bool left = false;
-    [SerializeField] public bool right = false;
+    [SerializeField] public WallType back = WallType.NONE;
+    [SerializeField] public WallType front = WallType.NONE;
+    [SerializeField] public WallType left = WallType.NONE;
+    [SerializeField] public WallType right = WallType.NONE;
 
     public WallStatus() { }
-    public WallStatus(bool front, bool back, bool left, bool right)
+    public WallStatus(WallType front, WallType back, WallType left, WallType right)
     {
         this.front = front;
         this.back = back;
@@ -72,6 +72,23 @@ public class WallStatus
         switch (wallPos)
         {
             case WallPos.FRONT:
+                return this.front != WallType.NONE;
+            case WallPos.BACK:
+                return this.back != WallType.NONE;
+            case WallPos.LEFT:
+                return this.left != WallType.NONE;
+            case WallPos.RIGHT:
+                return this.right != WallType.NONE;
+            default:
+                return false;
+        }
+    }
+
+    public WallType GetWallAt(WallPos wallPos)
+    {
+        switch (wallPos)
+        {
+            case WallPos.FRONT:
                 return this.front;
             case WallPos.BACK:
                 return this.back;
@@ -80,25 +97,30 @@ public class WallStatus
             case WallPos.RIGHT:
                 return this.right;
             default:
-                return false;
+                return WallType.NONE;
         }
     }
 
     public void PlaceWallAt(WallPos wallPos)
     {
+        this.PlaceWallAt(wallPos, WallType.REGULAR);
+    }
+
+    public void PlaceWallAt(WallPos wallPos, WallType wallType)
+    {
         switch (wallPos)
         {
             case WallPos.FRONT:
-                this.front = true;
+                this.front = wallType;
                 break;
             case WallPos.BACK:
-                this.back = true;
+                this.back = wallType;
                 break;
             case WallPos.LEFT:
-                this.left = true;
+                this.left = wallType;
                 break;
             case WallPos.RIGHT:
-                this.right = true;
+                this.right = wallType;
                 break;
         }
     }
@@ -107,4 +129,9 @@ public class WallStatus
 public enum WallPos
 {
     FRONT, BACK, LEFT, RIGHT
+}
+
+public enum WallType
+{
+    NONE, EXIT, DESTRUCTIBLE, REGULAR
 }
