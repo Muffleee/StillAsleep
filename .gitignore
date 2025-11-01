@@ -4,7 +4,12 @@
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
+UserSettings/
 .vscode/
+
+ProjectSettings/EditorBuildSettings.asset
+ProjectSettings/EditorSettings.asset
+ProjectSettings/Layouts/
 
 *.csproj
 *.sln
