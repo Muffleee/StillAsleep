@@ -261,6 +261,11 @@ public class WFCBuilder2 : MonoBehaviour
     }
     
     // TODO generate new map parts
+    /// <summary>
+    /// Called when a wall self destructs
+    /// </summary>
+    /// <param name="gridObj"></param>
+    /// <param name="wallPos"></param>
     private void DestructionCallback(GridObj gridObj, WallPos wallPos)
     {
         Vector2Int gp = gridObj.GetGridPos();
