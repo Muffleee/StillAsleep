@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEngine;
-//using UnityEngine.Rendering.Universal.Internal;
+using UnityEngine.Events;
 
 public class GridObj
 {
@@ -11,23 +12,26 @@ public class GridObj
     public static float WALL_OFFSET = 0.96f;
     private GameObject wallPrefab;
     private GameObject floorPrefab;
+    private GameObject destructibleWallPrefab;
     private Vector2Int gridPos;
     private WallStatus wallStatus;
     private GameObject parentObj = null;
     private GameObject floorObj = null;
     private GameObject[] wallObjs = new GameObject[] { null, null, null, null };
+    private UnityEvent<GridObj, WallPos>[] destructibleWallCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
 
     /// <summary>
     /// Create a GridObj given a Vector3Int (grid position) and a WallStatus
     /// </summary>
     /// <param name="gridPos"></param>
     /// <param name="wallStatus"></param>
-    public GridObj(Vector2Int gridPos, GameObject wallPrefab, GameObject floorPrefab, WallStatus wallStatus)
+    public GridObj(Vector2Int gridPos, GameObject wallPrefab, GameObject floorPrefab, GameObject destructibleWallPrefab, WallStatus wallStatus)
     {
         this.gridPos = gridPos;
         this.wallPrefab = wallPrefab;
         this.floorPrefab = floorPrefab;
         this.wallStatus = wallStatus;
+        this.destructibleWallPrefab = destructibleWallPrefab;
     }
 
     /// <summary>
@@ -91,14 +95,21 @@ public class GridObj
         }
     }
 
+    public void PlaceWallAt(WallPos wallPos)
+    {
+        this.PlaceWallAt(wallPos, WallType.REGULAR);
+    }
+
     /// <summary>
     /// Place a wall on a chosen side
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
-    public void PlaceWallAt(WallPos wallPos)
+    public void PlaceWallAt(WallPos wallPos, WallType wallType)
     {
-        if (this.HasWallAt(wallPos)) return;
-        this.wallStatus.PlaceWallAt(wallPos);
+        if (this.HasWallAt(wallPos)) {
+            this.RemoveWall(wallPos);
+        }
+        this.wallStatus.PlaceWallAt(wallPos, wallType);
 
         if (this.parentObj == null)
         {
@@ -106,7 +117,7 @@ public class GridObj
             return;
         }
 
-        this.InstantiateWall(wallPos);
+        this.InstantiateWall(wallPos, wallType);
     }
 
     /// <summary>
@@ -129,7 +140,18 @@ public class GridObj
         int index = WallStatus.WallPosToInt(wallPos);
         if (this.wallObjs[index] != null) return;
 
-        GameObject newWall = GameObject.Instantiate(wallPrefab, WallStatus.GetWallWorldPos(this.GetWorldPos(), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
+        GameObject newWall = GameObject.Instantiate(this.GetWallPrefab(wallType), WallStatus.GetWallWorldPos(this.GetWorldPos(), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
+        
+        if(wallType == WallType.DESTRUCTIBLE)
+        {
+            DestructibleWall dw = newWall.GetComponentInChildren<DestructibleWall>();
+            dw.gridObj = this;
+            dw.wallPos = wallPos;
+            UnityEvent<GridObj, WallPos> cb = new UnityEvent<GridObj, WallPos>();
+            dw.onDestroy = cb;
+            this.destructibleWallCallbacks[WallStatus.WallPosToInt(wallPos)] = cb;
+        }
+        
         newWall.transform.SetParent(this.parentObj.transform);
         this.wallObjs[index] = newWall;
     }
@@ -140,6 +162,7 @@ public class GridObj
     /// <param name="wallPos"> The side the wall is at </param>
     public void RemoveWall(WallPos wallPos)
     {
+        this.wallStatus.RemoveWallAt(wallPos);
         int index = WallStatus.WallPosToInt(wallPos);
         GameObject obj = this.wallObjs[index];
         if (obj == null) return;
@@ -166,12 +189,49 @@ public class GridObj
     }
 
     /// <summary>
-    /// Get WallType at position
+    /// Returns WallType at position
     /// </summary>
     /// <param name="wallPos"></param>
     /// <returns></returns>
-    public WallType GetWallAt(WallPos wallPos)
+    public WallType GetWallTypeAt(WallPos wallPos)
     {
         return this.wallStatus.GetWallAt(wallPos);
+    }
+
+    /// <summary>
+    /// Returns wall GameObject if instantiated, else null
+    /// </summary>
+    /// <param name="wallPos"></param>
+    /// <returns></returns>
+    public GameObject GetWallObjAt(WallPos wallPos)
+    {
+        if (!this.HasWallAt(wallPos)) return null;
+        return this.wallObjs[WallStatus.WallPosToInt(wallPos)];
+    }
+
+    /// <summary>
+    /// Returns the wall prefab from type
+    /// </summary>
+    /// <param name="wallType"></param>
+    /// <returns></returns>
+    public GameObject GetWallPrefab(WallType wallType)
+    {
+        switch (wallType)
+        {
+            case WallType.DESTRUCTIBLE:
+                return this.destructibleWallPrefab;
+            default:
+                return this.wallPrefab;
+        }
+    }
+
+    /// <summary>
+    /// Returns destructible wall callback or null
+    /// </summary>
+    /// <param name="wallPos"></param>
+    /// <returns></returns>
+    public UnityEvent<GridObj, WallPos> GetDestructibleWallCb(WallPos wallPos)
+    {
+        return this.destructibleWallCallbacks[WallStatus.WallPosToInt(wallPos)];
     }
 }

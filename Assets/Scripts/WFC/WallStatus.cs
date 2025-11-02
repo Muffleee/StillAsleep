@@ -124,6 +124,25 @@ public class WallStatus
                 break;
         }
     }
+
+    public void RemoveWallAt(WallPos wallPos)
+    {
+        switch (wallPos)
+        {
+            case WallPos.FRONT:
+                this.front = WallType.NONE;
+                break;
+            case WallPos.BACK:
+                this.back = WallType.NONE;
+                break;
+            case WallPos.LEFT:
+                this.left = WallType.NONE;
+                break;
+            case WallPos.RIGHT:
+                this.right = WallType.NONE;
+                break;
+        }
+    }
 }
 
 public enum WallPos

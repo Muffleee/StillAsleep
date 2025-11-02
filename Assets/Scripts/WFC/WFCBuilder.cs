@@ -19,6 +19,7 @@ public class WFCBuilder2 : MonoBehaviour
     private int offsets = 1;
     public GameObject wallPrefab;
     public GameObject floorPrefab;
+    public GameObject destructibleWallPrefab;
     private List<Vector2Int> _toCollapse = new List<Vector2Int>();
 
     private GridObj[,] grid;
@@ -92,7 +93,7 @@ public class WFCBuilder2 : MonoBehaviour
         {
             if (grid[currPos.x + offsets, currPos.y].HasWallAt(WallPos.LEFT))
             {
-                wallStatus.PlaceWallAt(WallPos.RIGHT, grid[currPos.x + offsets, currPos.y].GetWallAt(WallPos.LEFT));
+                wallStatus.PlaceWallAt(WallPos.RIGHT, grid[currPos.x + offsets, currPos.y].GetWallTypeAt(WallPos.LEFT));
             }
         }
         else
@@ -104,7 +105,7 @@ public class WFCBuilder2 : MonoBehaviour
         {
             if (grid[currPos.x - offsets, currPos.y].HasWallAt(WallPos.RIGHT))
             {
-                wallStatus.PlaceWallAt(WallPos.LEFT, grid[currPos.x - offsets, currPos.y].GetWallAt(WallPos.RIGHT));
+                wallStatus.PlaceWallAt(WallPos.LEFT, grid[currPos.x - offsets, currPos.y].GetWallTypeAt(WallPos.RIGHT));
             }
 
         }
@@ -116,7 +117,7 @@ public class WFCBuilder2 : MonoBehaviour
         {
             if (grid[currPos.x, currPos.y + offsets].HasWallAt(WallPos.FRONT))
             {
-                wallStatus.PlaceWallAt(WallPos.BACK, grid[currPos.x, currPos.y + offsets].GetWallAt(WallPos.FRONT));
+                wallStatus.PlaceWallAt(WallPos.BACK, grid[currPos.x, currPos.y + offsets].GetWallTypeAt(WallPos.FRONT));
             }
 
         }
@@ -128,7 +129,7 @@ public class WFCBuilder2 : MonoBehaviour
         {
             if (grid[currPos.x, currPos.y - offsets].HasWallAt(WallPos.BACK))
             {
-                wallStatus.PlaceWallAt(WallPos.FRONT, grid[currPos.x, currPos.y - offsets].GetWallAt(WallPos.BACK));
+                wallStatus.PlaceWallAt(WallPos.FRONT, grid[currPos.x, currPos.y - offsets].GetWallTypeAt(WallPos.BACK));
             }
         }
         else
@@ -152,7 +153,7 @@ public class WFCBuilder2 : MonoBehaviour
             .Take(randomCount)
             .ToList();
         }
-        grid[currPos.x, currPos.y] = new GridObj(currPos, wallPrefab, floorPrefab, WallPosToWallStatus(randomSelection, wallStatus));
+        grid[currPos.x, currPos.y] = new GridObj(currPos, wallPrefab, floorPrefab, destructibleWallPrefab, WallPosToWallStatus(randomSelection, wallStatus));
     }
 
     /// <summary>
@@ -185,19 +186,84 @@ public class WFCBuilder2 : MonoBehaviour
     /// </summary>
     private void InstantiateGrid()
     {
+
+        int randLeft = Random.Range(0, height - 1);
+        int randRight = Random.Range(0, height - 1);
+        int randBottom = Random.Range(0, width - 1);
+        int randTop = Random.Range(0, width - 1);
+
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
                 if (grid[i, j] == null) continue;
                 grid[i, j].InstantiateObj();
-                
-                // Fill in missing edge walls, i = x, j = z   
-                if (i == 0) grid[i, j].PlaceWallAt(WallPos.LEFT);     // leftmost x
-                if (i == width - 1) grid[i, j].PlaceWallAt(WallPos.RIGHT);  // rightmost x
-                if (j == 0) grid[i, j].PlaceWallAt(WallPos.FRONT);   // frontmost z
-                if (j == height - 1) grid[i, j].PlaceWallAt(WallPos.BACK);  // backmost z
+
+                /*
+                    Here we fill in random destuctible walls (one on each side)
+                    To get the DestructibleWall script, you can simply call GridObj.GetWallObjAt(WallPos wallPos) and the DestructibleWall component will be on the only *child* of the returned object
+                    We also access the destruction callback and add DestructionCallback() as a listener
+                */
+
+                // Fill in missing edge walls, i = x, j = z
+                if (i == 0)
+                {
+                    if (j == randLeft)
+                    {
+                        grid[i, j].PlaceWallAt(WallPos.LEFT, WallType.DESTRUCTIBLE);
+                        grid[i, j].GetDestructibleWallCb(WallPos.LEFT).AddListener(DestructionCallback);
+                    }
+                    else
+                    {
+                        grid[i, j].PlaceWallAt(WallPos.LEFT);     // leftmost x
+                    }
+                }
+                if (i == width - 1)
+                {
+                    if (j == randRight)
+                    {
+                        grid[i, j].PlaceWallAt(WallPos.RIGHT, WallType.DESTRUCTIBLE);
+                        grid[i, j].GetDestructibleWallCb(WallPos.RIGHT).AddListener(DestructionCallback);
+                    }
+                    else
+                    {
+                        grid[i, j].PlaceWallAt(WallPos.RIGHT);  // rightmost x
+                    }
+                }
+
+                if (j == 0)
+                {
+                    if (i == randBottom)
+                    {
+                        grid[i, j].PlaceWallAt(WallPos.FRONT, WallType.DESTRUCTIBLE);
+                        grid[i, j].GetDestructibleWallCb(WallPos.FRONT).AddListener(DestructionCallback);
+                    }
+                    else
+                    {
+                        grid[i, j].PlaceWallAt(WallPos.FRONT);   // frontmost z
+                    }
+                }
+
+                if (j == height - 1)
+                {
+                    if (i == randTop)
+                    {
+                        grid[i, j].PlaceWallAt(WallPos.BACK, WallType.DESTRUCTIBLE);
+                        grid[i, j].GetDestructibleWallCb(WallPos.BACK).AddListener(DestructionCallback);
+                    }
+                    else
+                    {
+                        grid[i, j].PlaceWallAt(WallPos.BACK);  // backmost z
+                    }
+                }
             }
         }
+    }
+    
+    // TODO generate new map parts
+    private void DestructionCallback(GridObj gridObj, WallPos wallPos)
+    {
+        Vector2Int gp = gridObj.GetGridPos();
+        Debug.Log($"Destroyed wall at {wallPos.ToString()} for GridObj at [{gp.x}, {gp.y}]");
     }
 }
