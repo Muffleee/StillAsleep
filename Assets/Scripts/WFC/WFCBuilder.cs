@@ -11,6 +11,8 @@ public class WFCBuilder2 : MonoBehaviour
 {
     [SerializeField] private int width;
     [SerializeField] private int height;
+    private int lowerWidthBound = 0;
+    private int lowerHeightBound = 0;
     private Vector2Int currPos = new Vector2Int(0, 0);
     private List<WallPos> randomWalls = new List<WallPos>();
     private List<Vector2Int> neighbours = new List<Vector2Int>();
@@ -22,6 +24,8 @@ public class WFCBuilder2 : MonoBehaviour
     public GameObject destructibleWallPrefab;
     private List<Vector2Int> _toCollapse = new List<Vector2Int>();
 
+    private Dictionary<Vector2Int, GridObj[,]> allGrids;
+    //private List<GridObj[,]> allGrids;
     private GridObj[,] grid;
 
     /// <summary>
@@ -29,6 +33,7 @@ public class WFCBuilder2 : MonoBehaviour
     /// </summary>
     void Start()
     {
+        allGrids = new Dictionary<Vector2Int, GridObj[,]>();
         grid = new GridObj[width, height];
         _toCollapse.Clear();
         _toCollapse.Add(currPos);
@@ -53,6 +58,7 @@ public class WFCBuilder2 : MonoBehaviour
             GenerateRandomNode(wallStatus);
         }
         InstantiateGrid();
+        allGrids[new Vector2Int(lowerWidthBound, lowerHeightBound)] = grid;
     }
     /// <summary>
     /// Generating the neighbours and adding them to the Collapse
@@ -78,7 +84,7 @@ public class WFCBuilder2 : MonoBehaviour
     /// <returns></returns>
     private bool IsInsideGrid(Vector2 v2int)
     {
-        return (v2int.x < width && v2int.x > -1 && v2int.y < height && v2int.y > -1);
+        return (v2int.x < width && v2int.x >-1 && v2int.y < height && v2int.y > -1);
     }
 
     /// <summary>
@@ -153,7 +159,7 @@ public class WFCBuilder2 : MonoBehaviour
             .Take(randomCount)
             .ToList();
         }
-        grid[currPos.x, currPos.y] = new GridObj(currPos, wallPrefab, floorPrefab, destructibleWallPrefab, WallPosToWallStatus(randomSelection, wallStatus));
+        grid[currPos.x, currPos.y] = new GridObj(new Vector2Int(lowerWidthBound + currPos.x, lowerHeightBound + currPos.y), wallPrefab, floorPrefab, destructibleWallPrefab, WallPosToWallStatus(randomSelection, wallStatus));
     }
 
     /// <summary>
@@ -263,12 +269,54 @@ public class WFCBuilder2 : MonoBehaviour
     // TODO generate new map parts
     /// <summary>
     /// Called when a wall self destructs
+    /// creates a new grid, sets its bounds in the global position and starts a new collapse progress if there is not one already
     /// </summary>
     /// <param name="gridObj"></param>
     /// <param name="wallPos"></param>
     private void DestructionCallback(GridObj gridObj, WallPos wallPos)
     {
+        grid = new GridObj[width, height];
         Vector2Int gp = gridObj.GetGridPos();
         Debug.Log($"Destroyed wall at {wallPos.ToString()} for GridObj at [{gp.x}, {gp.y}]");
+
+        SetNewBounds(gp, wallPos);
+
+        bool alreadyExpanded = allGrids.ContainsKey(new Vector2Int(lowerWidthBound, lowerHeightBound));
+
+        if (!alreadyExpanded)
+        {
+            currPos = new Vector2Int(0, 0);
+            _toCollapse.Clear();
+            _toCollapse.Add(currPos);
+            CollapseWorld();
+        }
+    }
+
+    /// <summary>
+    /// Sets new bounds of a grid dependant on the current grid Position and the direction to expand
+    /// </summary>
+    /// <param name="gridPos"> The position of the node where the next grid will expand from</param>
+    /// <param name="wallPos"> The direction in which the grid will expand </param>
+    private void SetNewBounds(Vector2Int gridPos, WallPos wallPos)
+    {
+        switch (wallPos)
+        {
+            case WallPos.FRONT:
+                lowerHeightBound = gridPos.y - height;
+                lowerWidthBound = Mathf.FloorToInt(gridPos.x / (float)width) * width;
+                break;
+            case WallPos.BACK:
+                lowerHeightBound = gridPos.y + 1;
+                lowerWidthBound = Mathf.FloorToInt(gridPos.x / (float)width) * width;
+                break;
+            case WallPos.LEFT:
+                lowerWidthBound = gridPos.x - width;
+                lowerHeightBound = Mathf.FloorToInt(gridPos.y / height) * height;
+                break;
+            case WallPos.RIGHT:
+                lowerWidthBound = gridPos.x + 1;
+                lowerHeightBound = Mathf.FloorToInt(gridPos.y / height) * height;
+                break;
+        }
     }
 }
