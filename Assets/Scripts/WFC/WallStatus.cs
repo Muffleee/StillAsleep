@@ -67,6 +67,21 @@ public class WallStatus
         return center + offsetVec;
     }
 
+    public static WallPos GetOppositePos(WallPos wallPos)
+    {
+        switch (wallPos)
+        {
+            case WallPos.FRONT:
+                return WallPos.BACK;
+            case WallPos.BACK:
+                return WallPos.FRONT;
+            case WallPos.LEFT:
+                return WallPos.RIGHT;
+            default:
+                return WallPos.LEFT;
+        }
+    }
+
     public bool HasWallAt(WallPos wallPos)
     {
         switch (wallPos)

@@ -290,6 +290,10 @@ public class WFCBuilder2 : MonoBehaviour
             _toCollapse.Add(currPos);
             CollapseWorld();
         }
+
+        GridObj adj = GetAdjacentGridObj(gridObj.GetGridPos(), wallPos);
+        if (adj == null) return;
+        adj.RemoveWall(WallStatus.GetOppositePos(wallPos));
     }
 
     /// <summary>
@@ -318,5 +322,41 @@ public class WFCBuilder2 : MonoBehaviour
                 lowerHeightBound = Mathf.FloorToInt(gridPos.y / height) * height;
                 break;
         }
+    }
+
+    private GridObj GetAdjacentGridObj(Vector2Int pos, WallPos direction)
+    {
+        Vector2Int targetPos = pos;
+
+        switch (direction)
+        {
+            case WallPos.LEFT:
+                targetPos += new Vector2Int(-1, 0);
+                break;
+            case WallPos.RIGHT:
+                targetPos += new Vector2Int(1, 0);
+                break;
+            case WallPos.FRONT:
+                targetPos += new Vector2Int(0, -1);
+                break;
+            case WallPos.BACK:
+                targetPos += new Vector2Int(0, 1);
+                break;
+        }
+
+        foreach (var pair in allGrids)
+        {
+            GridObj[,] grid = pair.Value;
+            
+            for(int x = 0; x < grid.GetLength(0); x++)
+            {
+                for(int y = 0; y < grid.GetLength(1); y++)
+                {
+                    if (grid[x, y].GetGridPos() == targetPos) return grid[x, y];
+                }
+            }
+        }
+
+        return null;
     }
 }
