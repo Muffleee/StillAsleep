@@ -137,7 +137,6 @@ public class GridObj
     /// <param name="wallPos"> The side to place the wall at </param>
     private void InstantiateWall(WallPos wallPos, WallType wallType)
     {   
-        // TODO change prefab according to WallType
         if (this.parentObj == null) return;
         int index = WallStatus.WallPosToInt(wallPos);
         if (this.wallObjs[index] != null) return;
