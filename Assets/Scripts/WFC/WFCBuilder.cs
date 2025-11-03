@@ -22,6 +22,7 @@ public class WFCBuilder2 : MonoBehaviour
     public GameObject wallPrefab;
     public GameObject floorPrefab;
     public GameObject destructibleWallPrefab;
+    public GameObject exitPrefab;
     private List<Vector2Int> _toCollapse = new List<Vector2Int>();
 
     private Dictionary<Vector2Int, GridObj[,]> allGrids;
@@ -159,7 +160,7 @@ public class WFCBuilder2 : MonoBehaviour
             .Take(randomCount)
             .ToList();
         }
-        grid[currPos.x, currPos.y] = new GridObj(new Vector2Int(lowerWidthBound + currPos.x, lowerHeightBound + currPos.y), wallPrefab, floorPrefab, destructibleWallPrefab, WallPosToWallStatus(randomSelection, wallStatus));
+        grid[currPos.x, currPos.y] = new GridObj(new Vector2Int(lowerWidthBound + currPos.x, lowerHeightBound + currPos.y), wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab, WallPosToWallStatus(randomSelection, wallStatus));
     }
 
     /// <summary>
@@ -241,8 +242,8 @@ public class WFCBuilder2 : MonoBehaviour
                 {
                     if (i == randBottom)
                     {
-                        grid[i, j].PlaceWallAt(WallPos.FRONT, WallType.DESTRUCTIBLE);
-                        grid[i, j].GetDestructibleWallCb(WallPos.FRONT).AddListener(DestructionCallback);
+                        grid[i, j].PlaceWallAt(WallPos.FRONT, WallType.EXIT); // for now lets always place it at the bottom side
+                        grid[i, j].GetExitCb(WallPos.FRONT).AddListener(DestructionCallback);
                     }
                     else
                     {
@@ -265,7 +266,7 @@ public class WFCBuilder2 : MonoBehaviour
             }
         }
     }
-    
+
     // TODO generate new map parts
     /// <summary>
     /// Called when a wall self destructs
@@ -294,6 +295,16 @@ public class WFCBuilder2 : MonoBehaviour
         GridObj adj = GetAdjacentGridObj(gridObj.GetGridPos(), wallPos);
         if (adj == null) return;
         adj.RemoveWall(WallStatus.GetOppositePos(wallPos));
+    }
+    
+    /// <summary>
+    /// Called when an exit self destructs
+    /// </summary>
+    /// <param name="gridObj"></param>
+    /// <param name="wallPos"></param>
+    private void ExitDestructionCallback(GridObj gridObj, WallPos wallPos)
+    {
+        
     }
 
     /// <summary>
@@ -324,6 +335,12 @@ public class WFCBuilder2 : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns adjacent GridObj in WallPos direction or null
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
     private GridObj GetAdjacentGridObj(Vector2Int pos, WallPos direction)
     {
         Vector2Int targetPos = pos;

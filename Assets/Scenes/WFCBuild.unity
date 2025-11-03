@@ -277,6 +277,8 @@ MonoBehaviour:
     type: 3}
   destructibleWallPrefab: {fileID: 5852734629184053177, guid: 81a2fa19464c3d5469133302f759fea0,
     type: 3}
+  exitPrefab: {fileID: 5393983432708434800, guid: 8bef5b077c3bfc146a4c2e4a1004f9b1,
+    type: 3}
 --- !u!4 &1341490366
 Transform:
   m_ObjectHideFlags: 0

@@ -56,6 +56,6 @@ public class DestructibleWall : MonoBehaviour
     {
         if (debug) Debug.Log($"{gameObject.name} destroyed after {destroyTime} seconds!");
         onDestroy.Invoke(this.gridObj, this.wallPos);
-        Destroy(gameObject);
+        Destroy(this.gameObject);
     }
 }

@@ -3,35 +3,37 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UIElements;
 
 public class GridObj
 {
     public static float PLACEMENT_FACTOR = 2f;
     public static float WALL_OFFSET = 0.96f;
-    private GameObject wallPrefab;
-    private GameObject floorPrefab;
-    private GameObject destructibleWallPrefab;
+    private GameObject wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab;
     private Vector2Int gridPos;
     private WallStatus wallStatus;
     private GameObject parentObj = null;
     private GameObject floorObj = null;
     private GameObject[] wallObjs = new GameObject[] { null, null, null, null };
     private UnityEvent<GridObj, WallPos>[] destructibleWallCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
+    private UnityEvent<GridObj, WallPos>[] exitCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
 
     /// <summary>
     /// Create a GridObj given a Vector3Int (grid position) and a WallStatus
     /// </summary>
     /// <param name="gridPos"></param>
     /// <param name="wallStatus"></param>
-    public GridObj(Vector2Int gridPos, GameObject wallPrefab, GameObject floorPrefab, GameObject destructibleWallPrefab, WallStatus wallStatus)
+    public GridObj(Vector2Int gridPos, GameObject wallPrefab, GameObject floorPrefab, GameObject destructibleWallPrefab, GameObject exitPrefab, WallStatus wallStatus)
     {
         this.gridPos = gridPos;
         this.wallPrefab = wallPrefab;
         this.floorPrefab = floorPrefab;
         this.wallStatus = wallStatus;
         this.destructibleWallPrefab = destructibleWallPrefab;
+        this.exitPrefab = exitPrefab;
     }
 
     /// <summary>
@@ -141,8 +143,8 @@ public class GridObj
         if (this.wallObjs[index] != null) return;
 
         GameObject newWall = GameObject.Instantiate(this.GetWallPrefab(wallType), WallStatus.GetWallWorldPos(this.GetWorldPos(), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
-        
-        if(wallType == WallType.DESTRUCTIBLE)
+
+        if (wallType == WallType.DESTRUCTIBLE)
         {
             DestructibleWall dw = newWall.GetComponentInChildren<DestructibleWall>();
             dw.gridObj = this;
@@ -150,6 +152,15 @@ public class GridObj
             UnityEvent<GridObj, WallPos> cb = new UnityEvent<GridObj, WallPos>();
             dw.onDestroy = cb;
             this.destructibleWallCallbacks[WallStatus.WallPosToInt(wallPos)] = cb;
+        }
+        else if (wallType == WallType.EXIT)
+        {
+            Exit exit = newWall.GetComponentInChildren<Exit>();
+            exit.gridObj = this;
+            exit.wallPos = wallPos;
+            UnityEvent<GridObj, WallPos> cb = new UnityEvent<GridObj, WallPos>();
+            exit.onDestroy = cb;
+            this.exitCallbacks[WallStatus.WallPosToInt(wallPos)] = cb;
         }
         
         newWall.transform.SetParent(this.parentObj.transform);
@@ -220,6 +231,8 @@ public class GridObj
         {
             case WallType.DESTRUCTIBLE:
                 return this.destructibleWallPrefab;
+            case WallType.EXIT:
+                return this.exitPrefab;
             default:
                 return this.wallPrefab;
         }
@@ -233,5 +246,15 @@ public class GridObj
     public UnityEvent<GridObj, WallPos> GetDestructibleWallCb(WallPos wallPos)
     {
         return this.destructibleWallCallbacks[WallStatus.WallPosToInt(wallPos)];
+    }
+
+    /// <summary>
+    /// Returns exit callback or null
+    /// </summary>
+    /// <param name="wallPos"></param>
+    /// <returns></returns>
+    public UnityEvent<GridObj, WallPos> GetExitCb(WallPos wallPos)
+    {
+        return this.exitCallbacks[WallStatus.WallPosToInt(wallPos)];
     }
 }
