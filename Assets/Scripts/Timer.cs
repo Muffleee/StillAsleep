@@ -6,42 +6,55 @@ using UnityEngine.Events;
 
 public class Timer : MonoBehaviour
 {
+    private float duration;
     private float timeRemaining;
-    private bool isRunning = false;
     private UnityEvent onFinish;
+    private Coroutine timerRoutine;
+    private bool isPaused = false;
 
-    public void Init(float timeInSeconds, UnityEvent onFinishEvent)
+    public bool IsRunning => timerRoutine != null;
+
+    public void Init(float duration, UnityEvent onFinish)
     {
-        timeRemaining = timeInSeconds;
-        onFinish = onFinishEvent;
+        this.duration = duration;
+        this.onFinish = onFinish;
     }
 
     public void StartTimer()
     {
-        isRunning = true;
+        if (timerRoutine != null)
+            StopCoroutine(timerRoutine);
+
+        timerRoutine = StartCoroutine(RunTimer());
     }
 
     public void StopTimer()
     {
-        isRunning = false;
-    }
-
-    public float GetTimeRemaining()
-    {
-        return timeRemaining;
-    }
-
-    private void Update()
-    {
-        if (!isRunning || timeRemaining <= 0f) return;
-
-        timeRemaining -= Time.deltaTime;
-
-        if (timeRemaining <= 0f)
+        if (timerRoutine != null)
         {
-            timeRemaining = 0f;
-            isRunning = false;
-            onFinish?.Invoke(); // Event auslösen
+            StopCoroutine(timerRoutine);
+            timerRoutine = null;
         }
+    }
+
+    public void Pause() => isPaused = true;
+    public void Resume() => isPaused = false;
+    public float GetTimeRemaining() => Mathf.Max(0f, timeRemaining);
+
+    private IEnumerator RunTimer()
+    {
+        timeRemaining = duration;
+
+        while (timeRemaining > 0f)
+        {
+            if (!isPaused)
+                timeRemaining -= Time.deltaTime;
+
+            yield return null;
+        }
+
+        timeRemaining = 0f;
+        onFinish?.Invoke();
+        timerRoutine = null;
     }
 }
