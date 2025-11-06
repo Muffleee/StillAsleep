@@ -16,6 +16,8 @@ public class WFCBuilder2 : MonoBehaviour
     private Vector2Int currPos = new Vector2Int(0, 0);
     private List<WallPos> randomWalls = new List<WallPos>();
     private List<Vector2Int> neighbours = new List<Vector2Int>();
+    public static List<GridObj> AllGridObjs = new List<GridObj>();
+
 
     // TODO: Get this from GridObj
     private int offsets = 1;
@@ -205,6 +207,7 @@ public class WFCBuilder2 : MonoBehaviour
             {
                 if (grid[i, j] == null) continue;
                 grid[i, j].InstantiateObj();
+                AllGridObjs.Add(grid[i, j]);
 
                 /*
                     Here we fill in random destuctible walls (one on each side)
