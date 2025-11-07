@@ -655,8 +655,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 089deb0c2708283458e95fbb3712687a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 2500
-  rb: {fileID: 6834562829543864869}
+  onPlayerMoved:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

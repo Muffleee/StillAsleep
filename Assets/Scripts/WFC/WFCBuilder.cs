@@ -31,11 +31,22 @@ public class WFCBuilder2 : MonoBehaviour
     //private List<GridObj[,]> allGrids;
     private GridObj[,] grid;
 
+    Grid gridObj;
+
     /// <summary>
     /// initializing the grid, clearing the collapse-list and start the collapsing process from the first node
     /// </summary>
     void Start()
     {
+        this.gridObj = new Grid(this.width, this.height);
+
+        gridObj.CollapseWorld();
+        gridObj.InstantiateMissing();
+        gridObj.IncreaseGrid();
+        gridObj.InstantiateMissing();
+
+
+        if (true) return; // TODO remove old code
         allGrids = new Dictionary<Vector2Int, GridObj[,]>();
         grid = new GridObj[width, height];
         _toCollapse.Clear();
@@ -162,7 +173,7 @@ public class WFCBuilder2 : MonoBehaviour
             .Take(randomCount)
             .ToList();
         }
-        grid[currPos.x, currPos.y] = new GridObj(new Vector2Int(lowerWidthBound + currPos.x, lowerHeightBound + currPos.y), wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab, WallPosToWallStatus(randomSelection, wallStatus));
+        grid[currPos.x, currPos.y] = new GridObj(new Vector2Int(lowerWidthBound + currPos.x, lowerHeightBound + currPos.y), WallPosToWallStatus(randomSelection, wallStatus));
     }
 
     /// <summary>
@@ -279,6 +290,7 @@ public class WFCBuilder2 : MonoBehaviour
     /// <param name="wallPos"></param>
     private void DestructionCallback(GridObj gridObj, WallPos wallPos)
     {
+        if (true) return; // TODO remove old code
         grid = new GridObj[width, height];
         Vector2Int gp = gridObj.GetGridPos();
         Debug.Log($"Destroyed wall at {wallPos.ToString()} for GridObj at [{gp.x}, {gp.y}]");
