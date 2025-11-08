@@ -21,89 +21,100 @@ public class Grid
 
     public void CollapseWorld()
     {
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                grid[x, y] = null;
+        for (int x = 0; x < this.width; x++)
+        {
+            for (int y = 0; y < this.height; y++)
+            {
+                var cell = this.grid[x, y];
+                if (cell == null) continue;
+                if (cell.GetGridType() != GridType.REPLACEABLE) continue;
+                cell.DestroyObj();
+                this.grid[x, y] = null;
+            }
+        }
 
         List<GridObj> allPlaceables = GridObj.GetPossiblePlaceables();
-        foreach (var obj in allPlaceables)
+        foreach (GridObj obj in allPlaceables)
             obj.InitCompatibleList();
 
-        List<GridObj>[,] cellPossibilities = new List<GridObj>[width, height];
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                cellPossibilities[x, y] = new List<GridObj>(allPlaceables);
-
         Queue<Vector2Int> toProcess = new Queue<Vector2Int>();
-        Vector2Int center = new Vector2Int(width / 2, height / 2);
-        toProcess.Enqueue(center);
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (grid[x, y] == null && HasAnyNonNullNeighbor(x, y))
+                    toProcess.Enqueue(new Vector2Int(x, y));
+            }
+        }
+        if (toProcess.Count == 0)
+            toProcess.Enqueue(new Vector2Int(width / 2, height / 2));
+
+        Vector2Int[] offsets = { new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
+        WallPos[] sides = { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
+
+        HashSet<Vector2Int> enqueued = new HashSet<Vector2Int>(toProcess);
 
         while (toProcess.Count > 0)
         {
             Vector2Int pos = toProcess.Dequeue();
-            int x = pos.x;
-            int y = pos.y;
+            int x = pos.x, y = pos.y;
 
             if (grid[x, y] != null) continue;
 
-            List<GridObj> possibilities = cellPossibilities[x, y];
-            if (possibilities.Count == 0)
+            List<GridObj> candidates = new List<GridObj>(allPlaceables);
+
+            for (int i = 0; i < 4; i++)
             {
-                Debug.LogWarning($"No possible tiles for ({x},{y})");
+                Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
+                if (!IsInsideGrid(nPos)) continue;
+
+                GridObj neighbor = grid[nPos.x, nPos.y];
+                if (neighbor == null) continue;
+
+                WallPos sideFromMe = sides[i];
+
+                List<GridObj> filtered = new List<GridObj>();
+                foreach (GridObj cand in candidates)
+                {
+                    if (cand.IsCompatible(neighbor, sideFromMe))
+                        filtered.Add(cand);
+                }
+                candidates = filtered;
+
+                if (candidates.Count == 0) break;
+            }
+
+            if (candidates.Count == 0)
+            {
+                Debug.LogWarning($"No candidates for ({x},{y}); leaving empty this pass.");
                 continue;
             }
 
-            GridObj chosenTemplate = PickWeightedRandom(possibilities);
-
+            GridObj chosenTemplate = PickWeightedRandom(candidates);
             grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-
-            Vector2Int[] offsets = { new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
-            WallPos[] sides = { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
 
             for (int i = 0; i < 4; i++)
             {
                 Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
                 if (!IsInsideGrid(nPos)) continue;
                 if (grid[nPos.x, nPos.y] != null) continue;
-
-                List<GridObj> neighborPossibilities = cellPossibilities[nPos.x, nPos.y];
-                List<GridObj> valid = new List<GridObj>();
-
-                foreach (var node in neighborPossibilities)
-                {
-                    if (AreCompatible(chosenTemplate, node, sides[i]))
-                        valid.Add(node);
-                }
-
-                if (valid.Count > 0)
-                {
-                    cellPossibilities[nPos.x, nPos.y] = valid;
+                if (enqueued.Add(nPos))
                     toProcess.Enqueue(nPos);
-                }
             }
         }
     }
 
-    private bool AreCompatible(GridObj a, GridObj b, WallPos from)
+    private bool HasAnyNonNullNeighbor(int x, int y)
     {
-        WallPos opposite = Opposite(from);
-
-        return a.HasWallAt(from) == b.HasWallAt(opposite);
-    }
-
-    private WallPos Opposite(WallPos p)
-    {
-        switch (p)
+        Vector2Int[] offsets = { new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
+        foreach (var o in offsets)
         {
-            case WallPos.FRONT: return WallPos.BACK;
-            case WallPos.BACK:  return WallPos.FRONT;
-            case WallPos.LEFT:  return WallPos.RIGHT;
-            case WallPos.RIGHT: return WallPos.LEFT;
+            int nx = x + o.x, ny = y + o.y;
+            if (!IsInsideGrid(new Vector2Int(nx, ny))) continue;
+            if (grid[nx, ny] != null) return true;
         }
-        return WallPos.FRONT;
+        return false;
     }
-
-
 
     // To use later
     private GridObj PickWeightedRandom(List<GridObj> nodes)

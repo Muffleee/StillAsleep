@@ -127,7 +127,7 @@ public class GridObj
     /// <param name="other"></param>
     /// <param name="side"></param>
     /// <returns></returns>
-    private bool IsCompatible(GridObj other, WallPos side)
+    public bool IsCompatible(GridObj other, WallPos side)
     {
         switch (side)
         {
@@ -238,19 +238,19 @@ public class GridObj
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
         {
-            this.InstantiateWall(WallPos.FRONT);
+            this.InstantiateWall(WallPos.FRONT, growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.BACK))
         {
-            this.InstantiateWall(WallPos.BACK);
+            this.InstantiateWall(WallPos.BACK, growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.LEFT))
         {
-            this.InstantiateWall(WallPos.LEFT);
+            this.InstantiateWall(WallPos.LEFT, growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.RIGHT))
         {
-            this.InstantiateWall(WallPos.RIGHT);
+            this.InstantiateWall(WallPos.RIGHT, growthIndex);
         }
     }
 
@@ -258,16 +258,16 @@ public class GridObj
     /// Overload to place WallType.REGULAR
     /// </summary>
     /// <param name="wallPos"></param>
-    public void PlaceWallAt(WallPos wallPos)
+    public void PlaceWallAt(WallPos wallPos, int growthIndex)
     {
-        this.PlaceWallAt(wallPos, WallType.REGULAR);
+        this.PlaceWallAt(wallPos, WallType.REGULAR, growthIndex);
     }
 
     /// <summary>
     /// Place a wall on a chosen side
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
-    public void PlaceWallAt(WallPos wallPos, WallType wallType)
+    public void PlaceWallAt(WallPos wallPos, WallType wallType, int growthIndex)
     {
         if (this.HasWallAt(wallPos))
         {
@@ -283,23 +283,23 @@ public class GridObj
 
         if (!this.isPlaceable) return;
 
-        this.InstantiateWall(wallPos, wallType);
+        this.InstantiateWall(wallPos, wallType, growthIndex);
     }
 
     /// <summary>
     /// Overloaded method to instantiate a WallType.REGULAR wall
     /// </summary>
     /// <param name="wallPos"></param>
-    private void InstantiateWall(WallPos wallPos)
+    private void InstantiateWall(WallPos wallPos, int growthIndex)
     {
-        this.InstantiateWall(wallPos, WallType.REGULAR);
+        this.InstantiateWall(wallPos, WallType.REGULAR, growthIndex);
     }
 
     /// <summary>
     /// Instantiate a wall and only change the data on the in-game object, helper method
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
-    private void InstantiateWall(WallPos wallPos, WallType wallType)
+    private void InstantiateWall(WallPos wallPos, WallType wallType, int growthIndex)
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
         if (this.parentObj == null) return;
@@ -312,7 +312,7 @@ public class GridObj
             return;
         }
 
-        GameObject newWall = GameObject.Instantiate(this.GetWallPrefab(wallType), WallStatus.GetWallWorldPos(this.GetWorldPos(), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
+        GameObject newWall = GameObject.Instantiate(this.GetWallPrefab(wallType), WallStatus.GetWallWorldPos(this.GetWorldPos(growthIndex), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
 
         if (wallType == WallType.DESTRUCTIBLE)
         {

@@ -44,6 +44,12 @@ public class WFCBuilder2 : MonoBehaviour
         gridObj.InstantiateMissing();
         gridObj.IncreaseGrid();
         gridObj.InstantiateMissing();
+        gridObj.CollapseWorld();
+        gridObj.IncreaseGrid();
+        gridObj.InstantiateMissing();
+        gridObj.CollapseWorld();
+        gridObj.IncreaseGrid();
+        gridObj.InstantiateMissing();
 
 
         if (true) return; // TODO remove old code
@@ -231,24 +237,24 @@ public class WFCBuilder2 : MonoBehaviour
                 {
                     if (j == randLeft)
                     {
-                        grid[i, j].PlaceWallAt(WallPos.LEFT, WallType.DESTRUCTIBLE);
+                        //grid[i, j].PlaceWallAt(WallPos.LEFT, WallType.DESTRUCTIBLE);
                         grid[i, j].GetDestructibleWallCb(WallPos.LEFT).AddListener(DestructionCallback);
                     }
                     else
                     {
-                        grid[i, j].PlaceWallAt(WallPos.LEFT);     // leftmost x
+                        //grid[i, j].PlaceWallAt(WallPos.LEFT);     // leftmost x
                     }
                 }
                 if (i == width - 1)
                 {
                     if (j == randRight)
                     {
-                        grid[i, j].PlaceWallAt(WallPos.RIGHT, WallType.DESTRUCTIBLE);
+                        //grid[i, j].PlaceWallAt(WallPos.RIGHT, WallType.DESTRUCTIBLE);
                         grid[i, j].GetDestructibleWallCb(WallPos.RIGHT).AddListener(DestructionCallback);
                     }
                     else
                     {
-                        grid[i, j].PlaceWallAt(WallPos.RIGHT);  // rightmost x
+                        //grid[i, j].PlaceWallAt(WallPos.RIGHT);  // rightmost x
                     }
                 }
 
@@ -256,12 +262,12 @@ public class WFCBuilder2 : MonoBehaviour
                 {
                     if (i == randBottom)
                     {
-                        grid[i, j].PlaceWallAt(WallPos.FRONT, WallType.EXIT); // for now lets always place it at the bottom side
+                        //grid[i, j].PlaceWallAt(WallPos.FRONT, WallType.EXIT); // for now lets always place it at the bottom side
                         grid[i, j].GetExitCb(WallPos.FRONT).AddListener(DestructionCallback);
                     }
                     else
                     {
-                        grid[i, j].PlaceWallAt(WallPos.FRONT);   // frontmost z
+                        //grid[i, j].PlaceWallAt(WallPos.FRONT);   // frontmost z
                     }
                 }
 
@@ -269,12 +275,12 @@ public class WFCBuilder2 : MonoBehaviour
                 {
                     if (i == randTop)
                     {
-                        grid[i, j].PlaceWallAt(WallPos.BACK, WallType.DESTRUCTIBLE);
+                        //grid[i, j].PlaceWallAt(WallPos.BACK, WallType.DESTRUCTIBLE);
                         grid[i, j].GetDestructibleWallCb(WallPos.BACK).AddListener(DestructionCallback);
                     }
                     else
                     {
-                        grid[i, j].PlaceWallAt(WallPos.BACK);  // backmost z
+                        //grid[i, j].PlaceWallAt(WallPos.BACK);  // backmost z
                     }
                 }
             }
