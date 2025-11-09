@@ -83,6 +83,15 @@ public class GridObj
         this.isPlaceable = false;
     }
 
+    // TODO fixme
+    public static Vector2Int WorldPosToGridPos(Vector3 pos, int growthIndex)
+    {
+        int gx = Mathf.RoundToInt((pos.x / GridObj.PLACEMENT_FACTOR) + growthIndex);
+        int gy = Mathf.RoundToInt((pos.z / GridObj.PLACEMENT_FACTOR) + growthIndex);
+
+        return new Vector2Int(gx, gy);
+    }
+
     /// <summary>
     /// Get possible pieces in a list
     /// </summary>

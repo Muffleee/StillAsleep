@@ -19,6 +19,20 @@ public class Grid
         this.grid = new GridObj[width, height];
     }
 
+    public void PlaceObj(GridObj gridObj)
+    {
+        this.PlaceObj(gridObj, gridObj.GetWorldPos());
+    }
+
+    public void PlaceObj(GridObj gridObj, Vector3 pos)
+    {
+        Vector2Int gridPos = GridObj.WorldPosToGridPos(pos, this.growthIndex);
+        Debug.Log($"{gridPos.x}, {gridPos.y}");
+        gridObj.SetGridPos(gridPos);
+        this.grid[gridPos.x, gridPos.y] = gridObj;
+        this.grid[gridPos.x, gridPos.y].InstantiateObj(growthIndex);
+    }
+
     public void CollapseWorld()
     {
         for (int x = 0; x < this.width; x++)

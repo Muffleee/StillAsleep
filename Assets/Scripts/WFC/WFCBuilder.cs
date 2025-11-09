@@ -41,9 +41,9 @@ public class WFCBuilder2 : MonoBehaviour
         this.gridObj = new Grid(this.width, this.height);
 
         gridObj.CollapseWorld();
-        gridObj.InstantiateMissing();
         gridObj.IncreaseGrid();
         gridObj.InstantiateMissing();
+        gridObj.PlaceObj(new GridObj(new Vector2Int(0, 0), new WallStatus(WallType.REGULAR, WallType.REGULAR, WallType.REGULAR, WallType.NONE)), new Vector3(-2, 0, -2));
         gridObj.CollapseWorld();
         gridObj.IncreaseGrid();
         gridObj.InstantiateMissing();
