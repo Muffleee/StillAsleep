@@ -155,7 +155,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   debug: 0
-  destroyTime: 60
-  startDelay: 0
+  destroyTime: 10
+  startDelay: 10
   startColor: {r: 0, g: 1, b: 0, a: 1}
   endColor: {r: 1, g: 0, b: 0, a: 1}
