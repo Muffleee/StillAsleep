@@ -73,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FindNearestGridObj()
     {
-        if (WFCBuilder2.AllGridObjs == null || WFCBuilder2.AllGridObjs.Count == 0)
+        if (GameManager.AllGridObjs == null || GameManager.AllGridObjs.Count == 0)
         {
             Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
             return;
@@ -82,7 +82,7 @@ public class PlayerMovement : MonoBehaviour
         float minDist = Mathf.Infinity;
         GridObj nearest = null;
 
-        foreach (var g in WFCBuilder2.AllGridObjs)
+        foreach (var g in GameManager.AllGridObjs)
         {
             float dist = Vector3.Distance(transform.position, g.GetWorldPos());
             if (dist < minDist)
