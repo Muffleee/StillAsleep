@@ -499,6 +499,7 @@ public class GridObj
         if (this.wallStatus.back != WallType.NONE) s += "B";
         if (this.wallStatus.left != WallType.NONE) s += "L";
         if (this.wallStatus.right != WallType.NONE) s += "R";
+        if (s == "") s += "E";
 
         return s;
     }

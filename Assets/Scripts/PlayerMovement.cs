@@ -7,9 +7,11 @@ using UnityEngine.Events;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private GridObj CurrentGridObj;
+    [SerializeField] private GridObj currentGridObj, lastGridObj;
+    [SerializeField] private GameManager gameManager;
 
-    public UnityEvent<GridObj, WallPos, long> onPlayerMoved = new UnityEvent<GridObj, WallPos, long>();
+    public UnityEvent<GridObj, GridObj, WallPos, long> onPlayerMoved = new UnityEvent<GridObj, GridObj, WallPos, long>();
+    private bool DEBUG = false;
     private int stepCounter = 0;
     private bool isMoving = false;
     private void Start()
@@ -36,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void TryMove(WallPos wallPos)
     {
-        if (isValidMove(CurrentGridObj, wallPos))
+        if (IsValidMove(currentGridObj, wallPos))
         {
             Vector3 direction = GetMoveDir(wallPos);
 
@@ -44,12 +46,13 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            Debug.Log("Movement was blocked by wall");
+            if(DEBUG) Debug.Log("Movement was blocked by wall");
         }
         return;
     }
 
-    private bool isValidMove(GridObj gridObj, WallPos wallPos)
+    // TODO prevent movement onto REPLACEABLE GridObj and fix me please
+    private bool IsValidMove(GridObj gridObj, WallPos wallPos)
     {
         return !gridObj.HasWallAt(wallPos);
     }
@@ -62,41 +65,32 @@ public class PlayerMovement : MonoBehaviour
         else if (wallPos == WallPos.LEFT) { return new Vector3(-GridObj.PLACEMENT_FACTOR, 0,0); };
         return Vector3.zero;
     }
-    private void MovePlayer(Vector3 direction,WallPos wallPos )
+    private void MovePlayer(Vector3 direction, WallPos wallPos)
     {
         if (!isMoving)
         {
-            StartCoroutine(MovementCoroutine(direction,wallPos));
+            StartCoroutine(MovementCoroutine(direction, wallPos));
         }
-        
+
     }
 
+    // rewrite code so that this returns nearest object and set it when calling this method
     private void FindNearestGridObj()
     {
-        if (GameManager.AllGridObjs == null || GameManager.AllGridObjs.Count == 0)
+        if (gameManager.GetCurrentGrid() == null || !gameManager.GetCurrentGrid().IsInstantiated())
         {
-            Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
+            if(DEBUG) Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
             return;
         }
 
-        float minDist = Mathf.Infinity;
-        GridObj nearest = null;
-
-        foreach (var g in GameManager.AllGridObjs)
-        {
-            float dist = Vector3.Distance(transform.position, g.GetWorldPos());
-            if (dist < minDist)
-            {
-                minDist = dist;
-                nearest = g;
-            }
-        }
+        GridObj nearest = gameManager.GetCurrentGrid().GetNearestGridObj(transform.position);
 
         if (nearest != null)
         {
-            CurrentGridObj = nearest;
+            lastGridObj = currentGridObj;
+            currentGridObj = nearest;
             if (stepCounter == 0)
-                Debug.Log($"Player steht auf GridObj {nearest.GetGridPos()}");
+                if(DEBUG) Debug.Log($"Player steht auf GridObj {nearest.GetGridPos()}");
         }
     }
 
@@ -118,10 +112,11 @@ public class PlayerMovement : MonoBehaviour
         stepCounter++;
         FindNearestGridObj();
         transform.position = endPos;
-        onPlayerMoved?.Invoke(CurrentGridObj, wallPos, stepCounter);
-        Debug.Log("Event fired");
+        onPlayerMoved?.Invoke(lastGridObj, currentGridObj, wallPos, stepCounter);
+        gameManager.OnMove(lastGridObj, currentGridObj, wallPos, stepCounter);
+        if(DEBUG) Debug.Log("Event fired");
         isMoving = false;
-        Debug.Log(stepCounter);
+        if(DEBUG) Debug.Log(stepCounter);
     }
     
     private void OnWallDestroyed(GridObj gridObj, WallPos wallPos)
@@ -129,7 +124,7 @@ public class PlayerMovement : MonoBehaviour
         if (gridObj != null)
         {
             gridObj.RemoveWall(wallPos);
-            Debug.Log($"Wand an {wallPos} bei {gridObj} wurde entfernt — Movement-Check aktualisiert.");
+            if(DEBUG) Debug.Log($"Wand an {wallPos} bei {gridObj} wurde entfernt — Movement-Check aktualisiert.");
         }
     }
 

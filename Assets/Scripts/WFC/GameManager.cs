@@ -9,6 +9,7 @@ using static UnityEditor.Progress;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] int generateAfter = 4;
     [SerializeField] private int width;
     [SerializeField] private int height;
     [SerializeField] private IngameUI gui;
@@ -33,26 +34,29 @@ public class GameManager : MonoBehaviour
         grid.InstantiateMissing();
 
         gui.FillList();
-
-        if (true) return;
-        grid.PlaceObj(new GridObj(new Vector2Int(0, 0), new WallStatus(WallType.REGULAR, WallType.REGULAR, WallType.REGULAR, WallType.NONE)), new Vector3(-2, 0, -2));
-        grid.CollapseWorld();
-        grid.IncreaseGrid();
-        grid.InstantiateMissing();
-        grid.CollapseWorld();
-        grid.IncreaseGrid();
-        grid.InstantiateMissing();
-
     }
-    
+
+    public void OnMove(GridObj from, GridObj to, WallPos direction, long step)
+    {
+        if (step % this.generateAfter != 0) return;
+        grid.CollapseWorld();
+        grid.IncreaseGrid();
+        grid.InstantiateMissing();
+        this.gui.FillList();
+    }
+
     public void OnClick(GameObject clicked)
     {
         GridObj selected = this.grid.GetGridObjFromGameObj(clicked);
         if (selected == null || selected.GetGridType() != GridType.REPLACEABLE) return;
         if (!this.gui.HasSelectedObj()) return;
 
-        GridObj toPlace = this.gui.GetSelected();
+        GridObj virtualObj = this.gui.GetSelected();
+        GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
         toPlace.SetGridPos(selected.GetGridPos());
         this.grid.PlaceObj(toPlace);
+        this.gui.RemoveSelected(false);
     }
+    
+    public Grid GetCurrentGrid() { return this.grid; }
 }

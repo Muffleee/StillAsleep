@@ -9,7 +9,7 @@ public class IngameUI : MonoBehaviour
     public Toggle[] toggles;
     private GridObj selectedObj;
     private int selectedIndex = -1;
-    private const bool DEBUG = false;
+    private bool DEBUG = false;
 
     public void AddGridObj(GridObj obj)
     {
@@ -26,19 +26,22 @@ public class IngameUI : MonoBehaviour
         }
     }
 
-    public void RemoveSelected()
+    public void RemoveSelected(bool regenerate)
     {
         if (selectedIndex >= 0 && selectedIndex < gridObjs.Count)
         {
             // Remove selected
             gridObjs.RemoveAt(selectedIndex);
 
-            // Replace it with a new random GridObj so toggle stays filled
-            List<GridObj> all = GridObj.GetPossiblePlaceables();
-            if (all.Count > 0)
+            if(regenerate)
             {
-                GridObj replacement = all[Random.Range(0, all.Count)];
-                gridObjs.Insert(selectedIndex, replacement);
+                // Replace it with a new random GridObj so toggle stays filled
+                List<GridObj> all = GridObj.GetPossiblePlaceables();
+                if (all.Count > 0)
+                {
+                    GridObj replacement = all[Random.Range(0, all.Count)];
+                    gridObjs.Insert(selectedIndex, replacement);
+                }
             }
 
             // Clear selection

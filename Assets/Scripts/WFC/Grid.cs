@@ -10,8 +10,6 @@ public class Grid
     public int width => this.grid.GetLength(0);
     public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
-    private List<Vector2Int> toCollapse = new List<Vector2Int>();
-    private List<GridObj> possibilities = new List<GridObj>();
     private int growthIndex = 0;
 
     public Grid(int width, int height)
@@ -21,7 +19,7 @@ public class Grid
 
     public void PlaceObj(GridObj gridObj)
     {
-        this.PlaceObj(gridObj, gridObj.GetWorldPos());
+        this.PlaceObj(gridObj, gridObj.GetWorldPos(this.growthIndex));
     }
 
     public void PlaceObj(GridObj gridObj, Vector3 pos)
@@ -250,14 +248,14 @@ public class Grid
         if (!this.IsInsideGrid(gridPos)) return null;
         return this.grid[gridPos.x, gridPos.y];
     }
-    
+
     /// <summary>
     /// Returns adjacent GridObj in WallPos direction or null
     /// </summary>
     /// <param name="pos"></param>
     /// <param name="direction"></param>
     /// <returns></returns>
-    private GridObj GetAdjacentGridObj(Vector2Int pos, WallPos direction)
+    public GridObj GetAdjacentGridObj(Vector2Int pos, WallPos direction)
     {
         Vector2Int targetPos = pos;
 
@@ -279,4 +277,28 @@ public class Grid
 
         return this.grid[targetPos.x, targetPos.y];
     }
+
+    public GridObj GetNearestGridObj(Vector3 pos)
+    {
+        float minDist = Mathf.Infinity;
+        GridObj nearest = null;
+
+        for(int w = 0; w < this.width; w++)
+        {
+            for(int h = 0; h < this.height; h++)
+            {
+                if (this.grid[w, h] == null) continue;
+                float dist = Vector3.Distance(pos, this.grid[w, h].GetWorldPos());
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    nearest = this.grid[w, h];
+                }
+            }
+        }
+        return nearest;
+    }
+    
+    public bool IsInstantiated() { return this.growthIndex > 0; }
+    public GridObj[,] GetGridArray() { return this.grid; }
 }
