@@ -1,13 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Dynamic;
 
-public class ToggleManager : MonoBehaviour
+public class IngameUI : MonoBehaviour
 {
     private List<GridObj> gridObjs = new List<GridObj>();
     public Toggle[] toggles;
-    public GridObj selectedObj;
+    private GridObj selectedObj;
     private int selectedIndex = -1;
+    private const bool DEBUG = false;
 
     public void AddGridObj(GridObj obj)
     {
@@ -47,11 +49,11 @@ public class ToggleManager : MonoBehaviour
             selectedIndex = -1;
 
             UpdateToggles();
-            Debug.Log("Removed and replaced selected GridObj.");
+            if(DEBUG) Debug.Log("Removed and replaced selected GridObj.");
         }
         else
         {
-            Debug.Log("No valid selection to remove.");
+            if(DEBUG) Debug.Log("No valid selection to remove.");
         }
     }
 
@@ -91,7 +93,7 @@ public class ToggleManager : MonoBehaviour
             string name = changedToggle.GetComponentInChildren<Text>().text;
             selectedIndex = gridObjs.FindIndex(obj => obj.GetName() == name);
             selectedObj = selectedIndex >= 0 ? gridObjs[selectedIndex] : null;
-            Debug.Log("Selected: " + name);
+            if (DEBUG) Debug.Log("Selected: " + name);
         }
         else
         {
@@ -100,9 +102,19 @@ public class ToggleManager : MonoBehaviour
             {
                 selectedObj = null;
                 selectedIndex = -1;
-                Debug.Log("Selected cleared");
+                if (DEBUG) Debug.Log("Selected cleared");
             }
         }
+    }
+
+    public bool HasSelectedObj()
+    {
+        return this.selectedObj != null;
+    }
+
+    public GridObj GetSelected()
+    {
+        return this.selectedObj;
     }
 
     private void Start()

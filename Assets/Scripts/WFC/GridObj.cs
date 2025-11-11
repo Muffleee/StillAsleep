@@ -59,7 +59,7 @@ public class GridObj
             return;
         }
 
-        WFCBuilder2 builder = gameManager.GetComponent<WFCBuilder2>();
+        GameManager builder = gameManager.GetComponent<GameManager>();
 
         if(builder == null)
         {

@@ -27,7 +27,12 @@ public class Grid
     public void PlaceObj(GridObj gridObj, Vector3 pos)
     {
         Vector2Int gridPos = GridObj.WorldPosToGridPos(pos, this.growthIndex);
-        Debug.Log($"{gridPos.x}, {gridPos.y}");
+
+        if (this.grid[gridPos.x, gridPos.y] != null)
+        {
+            this.grid[gridPos.x, gridPos.y].DestroyObj();
+        }
+        
         gridObj.SetGridPos(gridPos);
         this.grid[gridPos.x, gridPos.y] = gridObj;
         this.grid[gridPos.x, gridPos.y].InstantiateObj(growthIndex);
@@ -233,9 +238,45 @@ public class Grid
             this.grid[this.width - 1, h] = b;
         }
     }
-    
+
     public bool IsInsideGrid(Vector2Int v)
     {
         return v.x >= 0 && v.x < this.width && v.y >= 0 && v.y < this.height;
+    }
+
+    public GridObj GetGridObjFromGameObj(GameObject gameObj)
+    {
+        Vector2Int gridPos = GridObj.WorldPosToGridPos(gameObj.transform.position, growthIndex);
+        if (!this.IsInsideGrid(gridPos)) return null;
+        return this.grid[gridPos.x, gridPos.y];
+    }
+    
+    /// <summary>
+    /// Returns adjacent GridObj in WallPos direction or null
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    private GridObj GetAdjacentGridObj(Vector2Int pos, WallPos direction)
+    {
+        Vector2Int targetPos = pos;
+
+        switch (direction)
+        {
+            case WallPos.LEFT:
+                targetPos += new Vector2Int(-1, 0);
+                break;
+            case WallPos.RIGHT:
+                targetPos += new Vector2Int(1, 0);
+                break;
+            case WallPos.FRONT:
+                targetPos += new Vector2Int(0, -1);
+                break;
+            case WallPos.BACK:
+                targetPos += new Vector2Int(0, 1);
+                break;
+        }
+
+        return this.grid[targetPos.x, targetPos.y];
     }
 }

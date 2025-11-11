@@ -499,7 +499,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 4229443194573707348}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: SimpleWindowController, Assembly-CSharp
         m_MethodName: ToggleWindow
         m_Mode: 1
@@ -976,7 +976,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2782157991642529819}
   - component: {fileID: 4769084614447110658}
-  - component: {fileID: 3175610723192281697}
+  - component: {fileID: 8035139586016312334}
   m_Layer: 5
   m_Name: ToggleParent
   m_TagString: Untagged
@@ -1019,7 +1019,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AllowSwitchOff: 1
---- !u!114 &3175610723192281697
+--- !u!114 &8035139586016312334
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1028,14 +1028,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4477013835222999860}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c6f4a5fd2673d14986e62a9222c6d0d, type: 3}
+  m_Script: {fileID: 11500000, guid: be81d5859149785468028c1000dd1285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   toggles:
   - {fileID: 2810716162168736224}
   - {fileID: 2593072523759266695}
   - {fileID: 5741417112125351135}
-  selected: 
 --- !u!1 &5144759291766676543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1475,7 +1474,7 @@ GameObject:
   - component: {fileID: 7630559689352277531}
   - component: {fileID: 27805444504248304}
   - component: {fileID: 5356696187414106282}
-  - component: {fileID: 4229443194573707348}
+  - component: {fileID: 4210689751896875280}
   m_Layer: 5
   m_Name: ObjectWindow
   m_TagString: Untagged
@@ -1541,7 +1540,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4229443194573707348
+--- !u!114 &4210689751896875280
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1550,7 +1549,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8575936869258745883}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8aeb7678ab40c8b4db2bc3fee886f00e, type: 3}
+  m_Script: {fileID: 11500000, guid: 2fe55c23db63fcd41944e651b3bbd08f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   windowPanel: {fileID: 8575936869258745883}
