@@ -4,19 +4,20 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEditor.PlayerSettings;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private GridObj currentGridObj, lastGridObj;
+    [SerializeField] public static Vector2Int currentGridPos, lastGridPos;
     [SerializeField] private GameManager gameManager;
 
-    public UnityEvent<GridObj, GridObj, WallPos, long> onPlayerMoved = new UnityEvent<GridObj, GridObj, WallPos, long>();
+    public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private bool DEBUG = false;
     private int stepCounter = 0;
     private bool isMoving = false;
     private void Start()
     {
-        FindNearestGridObj();
+        currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, gameManager.GetCurrentGrid().GetGrowthIndex());
         foreach(var wall in FindObjectsOfType< DestructibleWall >())
         {
             wall.onDestroy.AddListener(OnWallDestroyed);
@@ -36,9 +37,13 @@ public class PlayerMovement : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.D)) { TryMove(WallPos.RIGHT); };
     }
 
+    /// <summary>
+    /// if the move in direction of wallPos is valif, call MovePlayer
+    /// </summary>
+    /// <param name="wallPos"></param>
     private void TryMove(WallPos wallPos)
     {
-        if (IsValidMove(currentGridObj, wallPos))
+        if (IsValidMove(wallPos))
         {
             Vector3 direction = GetMoveDir(wallPos);
 
@@ -51,12 +56,28 @@ public class PlayerMovement : MonoBehaviour
         return;
     }
 
-    // TODO prevent movement onto REPLACEABLE GridObj and fix me please
-    private bool IsValidMove(GridObj gridObj, WallPos wallPos)
+    /// <summary>
+    /// checks: - is there a wall in direction of wallPos?
+    /// - is the next gridObj to move to a replacable?
+    /// </summary>
+    /// <param name="gridPos"></param>
+    /// <param name="wallPos"></param>
+    /// <returns></returns>
+    private bool IsValidMove(WallPos wallPos)
     {
-        return !gridObj.HasWallAt(wallPos);
+        Vector2Int next = GetNextGridPos(wallPos);
+        GridObj nextObj = gameManager.GetCurrentGrid().GetGridArray()[next.x, next.y];
+        GridObj current = gameManager.GetCurrentGrid().GetGridArray()[currentGridPos.x, currentGridPos.y];
+        
+        return !current.HasWallAt(wallPos) && (nextObj.GetGridType() != GridType.REPLACEABLE);
     }
 
+    /// <summary>
+    /// the offset (for movement) in a specific direction (wallPos)
+    /// In WorldPos
+    /// </summary>
+    /// <param name="wallPos"></param>
+    /// <returns></returns>
     private UnityEngine.Vector3 GetMoveDir(WallPos wallPos)
     {
         if (wallPos == WallPos.BACK) { return new Vector3(0,0, GridObj.PLACEMENT_FACTOR); }
@@ -65,6 +86,39 @@ public class PlayerMovement : MonoBehaviour
         else if (wallPos == WallPos.LEFT) { return new Vector3(-GridObj.PLACEMENT_FACTOR, 0,0); };
         return Vector3.zero;
     }
+
+    /// <summary>
+    /// the offset that needs to be moved depending on the wall position - in gridPos, not worldPos!
+    /// </summary>
+    /// <param name="wallPos"></param>
+    /// <returns></returns>
+    private Vector2Int GetMoveDirGrid(WallPos wallPos)
+    {
+        Vector2Int moveGrid = new Vector2Int(0, 0);
+        switch (wallPos)
+        {
+            case WallPos.FRONT:
+                moveGrid = new Vector2Int(0, -1);
+                break;
+            case WallPos.BACK:
+                moveGrid = new Vector2Int(0, 1);
+                break;
+            case WallPos.LEFT:
+                moveGrid = new Vector2Int(-1, 0);
+                break;
+            case WallPos.RIGHT:
+                moveGrid = new Vector2Int(1, 0);
+                break;
+
+        }
+        return moveGrid;
+    }
+
+    /// <summary>
+    /// Moving the player if it's not already in motion
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <param name="wallPos"></param>
     private void MovePlayer(Vector3 direction, WallPos wallPos)
     {
         if (!isMoving)
@@ -75,6 +129,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // rewrite code so that this returns nearest object and set it when calling this method
+    // Not used right now
     private void FindNearestGridObj()
     {
         if (gameManager.GetCurrentGrid() == null || !gameManager.GetCurrentGrid().IsInstantiated())
@@ -87,13 +142,39 @@ public class PlayerMovement : MonoBehaviour
 
         if (nearest != null)
         {
-            lastGridObj = currentGridObj;
-            currentGridObj = nearest;
+            lastGridPos = currentGridPos;
+            currentGridPos = nearest.GetGridPos();
+            //gameManager.SetCurrentGridPos(currentGridPos);
             if (stepCounter == 0)
                 if(DEBUG) Debug.Log($"Player steht auf GridObj {nearest.GetGridPos()}");
         }
     }
 
+    /// <summary>
+    /// Get the next gridPos depending on the wallPosition
+    /// </summary>
+    /// <param name="wallPos"> equals the direction in which the player wants to go</param>
+    /// <returns></returns>
+    private Vector2Int GetNextGridPos(WallPos wallPos)
+    {
+        if (gameManager.GetCurrentGrid() == null || !gameManager.GetCurrentGrid().IsInstantiated())
+        {
+            if (DEBUG) Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
+            return new Vector2Int(0,0);
+        }
+        Vector2Int next = currentGridPos + GetMoveDirGrid(wallPos);
+        return next;
+    }
+
+    
+
+    /// <summary>
+    /// Moving the player by direction. Setting the new currentGridPos and the lastGridPos.
+    /// Invoking Unity Event onPlayerMoved
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <param name="wallPos"></param>
+    /// <returns></returns>
     private IEnumerator MovementCoroutine(Vector3 direction, WallPos wallPos)
     {
         float duration = 0.5f;
@@ -110,10 +191,14 @@ public class PlayerMovement : MonoBehaviour
             yield return null;
         }
         stepCounter++;
-        FindNearestGridObj();
+
+        lastGridPos = currentGridPos;
+        currentGridPos = GetNextGridPos(wallPos);
+
         transform.position = endPos;
-        onPlayerMoved?.Invoke(lastGridObj, currentGridObj, wallPos, stepCounter);
-        gameManager.OnMove(lastGridObj, currentGridObj, wallPos, stepCounter);
+
+        onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, stepCounter);
+        gameManager.OnMove(lastGridPos, currentGridPos, wallPos, stepCounter);
         if(DEBUG) Debug.Log("Event fired");
         isMoving = false;
         if(DEBUG) Debug.Log(stepCounter);

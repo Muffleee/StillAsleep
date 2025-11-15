@@ -34,8 +34,26 @@ public class Grid
         gridObj.SetGridPos(gridPos);
         this.grid[gridPos.x, gridPos.y] = gridObj;
         this.grid[gridPos.x, gridPos.y].InstantiateObj(growthIndex);
+        InstantiateMissingWalls(gridObj, gridPos);
     }
-
+    /// <summary>
+    /// check for the gridObj at gridPos if there is any wall where the neighbour also hasn't instantiated a wall and then instantiate it
+    /// </summary>
+    /// <param name="gridObj"></param>
+    /// <param name="gridPos"></param>
+    private void InstantiateMissingWalls(GridObj gridObj, Vector2Int gridPos)
+    {
+        WallPos[] wallPos = new WallPos[] { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
+        foreach (WallPos wPos in wallPos)
+        {
+            GridObj neighbour = this.GetAdjacentGridObj(gridPos, wPos);
+            if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE)
+            {
+                neighbour.PlaceWallAt(WallStatus.GetOppositePos(wPos), growthIndex);
+                neighbour.InstantiateWall(WallStatus.GetOppositePos(wPos), growthIndex);
+            }
+        }
+    }
     public void CollapseWorld()
     {
         for (int x = 0; x < this.width; x++)
@@ -66,7 +84,7 @@ public class Grid
         if (toProcess.Count == 0)
             toProcess.Enqueue(new Vector2Int(width / 2, height / 2));
 
-        Vector2Int[] offsets = { new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
+        Vector2Int[] offsets = { new Vector2Int(0, -1), new Vector2Int(0, 1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
         WallPos[] sides = { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
 
         HashSet<Vector2Int> enqueued = new HashSet<Vector2Int>(toProcess);
@@ -109,7 +127,7 @@ public class Grid
 
             GridObj chosenTemplate = PickWeightedRandom(candidates);
             grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-
+           
             for (int i = 0; i < 4; i++)
             {
                 Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
@@ -274,8 +292,14 @@ public class Grid
                 targetPos += new Vector2Int(0, 1);
                 break;
         }
-
-        return this.grid[targetPos.x, targetPos.y];
+        if (IsInsideGrid(targetPos))
+        {
+            return this.grid[targetPos.x, targetPos.y];
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public GridObj GetNearestGridObj(Vector3 pos)
@@ -301,4 +325,5 @@ public class Grid
     
     public bool IsInstantiated() { return this.growthIndex > 0; }
     public GridObj[,] GetGridArray() { return this.grid; }
+    public int GetGrowthIndex() {  return this.growthIndex; }
 }

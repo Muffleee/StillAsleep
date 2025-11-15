@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -151,19 +151,19 @@ public class GridObj
     /// <summary>
     /// Init the list of compatible GridObjs
     /// </summary>
-    public void InitCompatibleList()
-    {
-        List<GridObj> allObjs = GridObj.GetPossiblePlaceables();
-        WallPos[] wallPos = new WallPos[] { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
-        this.compatibleObjs = new List<GridObj>[] { new List<GridObj>(), new List<GridObj>(), new List<GridObj>(), new List<GridObj>() };
+    public void InitCompatibleList() 
+    { 
+        List<GridObj> allObjs = GridObj.GetPossiblePlaceables(); 
+        WallPos[] wallPos = new WallPos[] { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT }; 
+        this.compatibleObjs = new List<GridObj>[] { new List<GridObj>(), new List<GridObj>(), new List<GridObj>(), new List<GridObj>() }; 
 
-        foreach (WallPos wPos in wallPos)
-        {
-            foreach (GridObj obj in allObjs)
-            {
-                if (this.IsCompatible(obj, wPos)) this.compatibleObjs[WallStatus.WallPosToInt(wPos)].Add(obj);
-            }
-        }
+        foreach (WallPos wPos in wallPos) 
+        { 
+            foreach (GridObj obj in allObjs) 
+            { 
+                if (this.IsCompatible(obj, wPos)) this.compatibleObjs[WallStatus.WallPosToInt(wPos)].Add(obj); 
+            } 
+        } 
     }
 
     /// <summary>
@@ -180,10 +180,10 @@ public class GridObj
     /// </summary>
     /// <param name="wallPos"></param>
     /// <returns></returns>
-    public List<GridObj> GetCompatobleObjs(WallPos wallPos)
-    {
-        if (this.compatibleObjs == null) this.InitCompatibleList();
-        return this.compatibleObjs[WallStatus.WallPosToInt(wallPos)];
+    public List<GridObj> GetCompatibleObjs(WallPos wallPos) 
+    { 
+        if (this.compatibleObjs == null) this.InitCompatibleList(); 
+        return this.compatibleObjs[WallStatus.WallPosToInt(wallPos)]; 
     }
 
     /// <summary>
@@ -299,7 +299,7 @@ public class GridObj
     /// Overloaded method to instantiate a WallType.REGULAR wall
     /// </summary>
     /// <param name="wallPos"></param>
-    private void InstantiateWall(WallPos wallPos, int growthIndex)
+    public void InstantiateWall(WallPos wallPos, int growthIndex)
     {
         this.InstantiateWall(wallPos, WallType.REGULAR, growthIndex);
     }

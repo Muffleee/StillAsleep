@@ -31,16 +31,18 @@ public class GameManager : MonoBehaviour
 
         grid.CollapseWorld();
         grid.IncreaseGrid();
+        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
 
         gui.FillList();
     }
 
-    public void OnMove(GridObj from, GridObj to, WallPos direction, long step)
+    public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {
         if (step % this.generateAfter != 0) return;
         grid.CollapseWorld();
         grid.IncreaseGrid();
+        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
         this.gui.FillList();
     }
