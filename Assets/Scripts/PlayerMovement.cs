@@ -67,8 +67,10 @@ public class PlayerMovement : MonoBehaviour
     {
         Grid cGrid = gameManager.GetCurrentGrid();
         Vector2Int next = GetNextGridPos(wallPos);
-        GridObj nextObj = null;
-        if(next.x >= 0 && next.y >= 0 && cGrid.width > next.x && cGrid.height > next.y) nextObj = cGrid.GetGridArray()[next.x, next.y];
+        if (!cGrid.IsInsideGrid(next)) return false;
+
+        GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
+        
         GridObj current = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y];
         
         return !current.HasWallAt(wallPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
