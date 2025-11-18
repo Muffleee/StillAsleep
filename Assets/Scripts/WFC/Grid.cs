@@ -326,4 +326,13 @@ public class Grid
     public bool IsInstantiated() { return this.growthIndex > 0; }
     public GridObj[,] GetGridArray() { return this.grid; }
     public int GetGrowthIndex() {  return this.growthIndex; }
+    /// Returns the GridObj at the given grid position.
+    public GridObj GetGridObj(Vector2Int pos)
+    {
+        if (IsInsideGrid(pos))
+        {
+            return this.grid[pos.x, pos.y];
+        }
+        return null;
+    }
 }

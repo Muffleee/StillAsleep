@@ -199,6 +199,19 @@ public class PlayerMovement : MonoBehaviour
 
         transform.position = endPos;
 
+        //traps detection on movment 
+        Grid cGrid = gameManager.GetCurrentGrid();
+    
+        // Look up the GridObj using the array accessor method already used in IsValidMove
+        GridObj destinationTile = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y]; 
+
+        if (destinationTile != null && destinationTile.IsTrap()) 
+        {
+            // Call your dedicated static class to handle the effect
+            InGameTrapManager.ExecuteTrapEffect(destinationTile); 
+        }
+        //end of trap detection
+
         onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, stepCounter);
         gameManager.OnMove(lastGridPos, currentGridPos, wallPos, stepCounter);
         if(DEBUG) Debug.Log("Event fired");

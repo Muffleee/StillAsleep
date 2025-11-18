@@ -32,8 +32,8 @@ public class GameManager : MonoBehaviour
         grid.CollapseWorld();
         grid.IncreaseGrid();
         PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
+        AssignTraps();
         grid.InstantiateMissing();
-
         gui.FillList();
     }
 
@@ -43,6 +43,7 @@ public class GameManager : MonoBehaviour
         grid.CollapseWorld();
         grid.IncreaseGrid();
         PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
+        AssignTraps();
         grid.InstantiateMissing();
         this.gui.FillList();
     }
@@ -59,6 +60,30 @@ public class GameManager : MonoBehaviour
         this.grid.PlaceObj(toPlace);
         this.gui.RemoveSelected(false);
     }
-    
+    private void AssignTraps()
+    {
+        int maxWidth = grid.width;
+        int maxHeight = grid.height;
+
+        foreach (GridObj tile in AllGridObjs)
+        {
+            Vector2Int pos = tile.GetGridPos();
+            
+            bool isInteriorTile = 
+                pos.x > 0 && 
+                pos.x < maxWidth - 1 && 
+                pos.y > 0 && 
+                pos.y < maxHeight - 1;
+
+            if (isInteriorTile)
+            {
+                if (Random.value < 0.10f) // 10% chance
+                {
+                    tile.SetTrap(true);
+                }
+            }
+        }
+    }
+
     public Grid GetCurrentGrid() { return this.grid; }
 }
