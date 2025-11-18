@@ -220,6 +220,9 @@ public class Grid
             newGrid[newW - 1, y] = MakeReplaceable(new Vector2Int(newW - 1, y));
         }
 
+        // Adjustment for the grid array growing by 2 in the positive direction while the actual grid grows by 1 in both directions
+        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
+
         this.grid = newGrid;
     }
 
