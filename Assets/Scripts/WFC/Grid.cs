@@ -322,6 +322,54 @@ public class Grid
         }
         return nearest;
     }
+
+    public void RemoveObjectsBehindPlayer(Vector2Int playerGridPos, WallPos moveDirection)
+    {
+       
+        WallPos behindDirection = GetBehindDirection(moveDirection);
+        
+        Vector2Int posBehindPlayer = playerGridPos;
+        
+        switch (behindDirection)
+        {
+            case WallPos.FRONT:
+                posBehindPlayer += new Vector2Int(0, -1);
+                break;
+            case WallPos.BACK:
+                posBehindPlayer += new Vector2Int(0, 1);
+                break;
+            case WallPos.LEFT:
+                posBehindPlayer += new Vector2Int(-1, 0);
+                break;
+            case WallPos.RIGHT:
+                posBehindPlayer += new Vector2Int(1, 0);
+                break;
+        }
+        
+       
+        if (!IsInsideGrid(posBehindPlayer)) return;
+        
+      
+        GridObj objBehind = grid[posBehindPlayer.x, posBehindPlayer.y];
+        if (objBehind != null && objBehind.GetGridType() == GridType.REPLACEABLE)
+        {
+            objBehind.DestroyObj();
+            grid[posBehindPlayer.x, posBehindPlayer.y] = null;
+        }
+    }
+
+  
+    private WallPos GetBehindDirection(WallPos moveDirection)
+    {
+        switch (moveDirection)
+        {
+            case WallPos.FRONT: return WallPos.BACK;   // Wenn nach vorne, dann ist hinten zurück
+            case WallPos.BACK: return WallPos.FRONT;   // Wenn nach hinten, dann ist hinten vorne
+            case WallPos.LEFT: return WallPos.RIGHT;   // Wenn nach links, dann ist hinten rechts
+            case WallPos.RIGHT: return WallPos.LEFT;   // Wenn nach rechts, dann ist hinten links
+            default: return WallPos.BACK;
+        }
+    }
     
     public bool IsInstantiated() { return this.growthIndex > 0; }
     public GridObj[,] GetGridArray() { return this.grid; }

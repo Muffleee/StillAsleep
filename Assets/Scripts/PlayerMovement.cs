@@ -197,14 +197,21 @@ public class PlayerMovement : MonoBehaviour
         stepCounter++;
 
         lastGridPos = currentGridPos;
+        
         currentGridPos = GetNextGridPos(wallPos);
 
         transform.position = endPos;
 
+        gameManager.GetCurrentGrid().RemoveObjectsBehindPlayer(currentGridPos, wallPos);
+
         onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, stepCounter);
+
         gameManager.OnMove(lastGridPos, currentGridPos, wallPos, stepCounter);
+
         if(DEBUG) Debug.Log("Event fired");
+
         isMoving = false;
+
         if(DEBUG) Debug.Log(stepCounter);
     }
     
