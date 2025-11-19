@@ -33,8 +33,13 @@ public class Grid
         
         gridObj.SetGridPos(gridPos);
         this.grid[gridPos.x, gridPos.y] = gridObj;
+        if (gridObj.GetInteract() == null)
+        {
+            gridObj.InitType(GridType.REGULAR);
+        }
         this.grid[gridPos.x, gridPos.y].InstantiateObj(growthIndex);
         InstantiateMissingWalls(gridObj, gridPos);
+        
     }
     /// <summary>
     /// check for the gridObj at gridPos if there is any wall where the neighbour also hasn't instantiated a wall and then instantiate it
@@ -127,7 +132,7 @@ public class Grid
 
             GridObj chosenTemplate = PickWeightedRandom(candidates);
             grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-           
+            SetRandomGridType(grid[x,y]);
             for (int i = 0; i < 4; i++)
             {
                 Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
@@ -139,6 +144,17 @@ public class Grid
         }
     }
 
+    public void SetRandomGridType(GridObj gridObj)
+    {
+        int rand = Random.Range(0, 100);
+        if(rand < 10)
+        {
+            gridObj.InitType(GridType.TRAP);
+        } else
+        {
+            gridObj.InitType(GridType.REGULAR);
+        }
+    }
     private bool HasAnyNonNullNeighbor(int x, int y)
     {
         Vector2Int[] offsets = { new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
@@ -227,6 +243,7 @@ public class Grid
     {
         GridObj obj = new GridObj(pos, new WallStatus());
         obj.SetGridType(GridType.REPLACEABLE);
+        obj.InitType(GridType.REPLACEABLE);
         return obj;
     }
 

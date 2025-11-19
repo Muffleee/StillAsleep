@@ -70,8 +70,7 @@ public class PlayerMovement : MonoBehaviour
         GridObj nextObj = null;
         if(next.x >= 0 && next.y >= 0 && cGrid.width > next.x && cGrid.height > next.y) nextObj = cGrid.GetGridArray()[next.x, next.y];
         GridObj current = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y];
-        
-        return !current.HasWallAt(wallPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+        return current.GetInteract().IsValidMove(current, nextObj, wallPos);
     }
 
     /// <summary>
@@ -203,14 +202,15 @@ public class PlayerMovement : MonoBehaviour
         Grid cGrid = gameManager.GetCurrentGrid();
     
         // Look up the GridObj using the array accessor method already used in IsValidMove
-        GridObj destinationTile = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y]; 
+        GridObj destinationTile = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y];
 
-        if (destinationTile != null && destinationTile.IsTrap()) 
-        {
-            // Call your dedicated static class to handle the effect
-            InGameTrapManager.ExecuteTrapEffect(destinationTile); 
-        }
-        //end of trap detection
+        destinationTile.GetInteract().OnUse(destinationTile);
+        //if (destinationTile != null && destinationTile.IsTrap()) 
+        //{
+        //    // Call your dedicated static class to handle the effect
+        //    InGameTrapManager.ExecuteTrapEffect(destinationTile); 
+        //}
+        ////end of trap detection
 
         onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, stepCounter);
         gameManager.OnMove(lastGridPos, currentGridPos, wallPos, stepCounter);

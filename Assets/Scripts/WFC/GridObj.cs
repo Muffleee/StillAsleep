@@ -24,7 +24,7 @@ public class GridObj
     private UnityEvent<GridObj, WallPos>[] exitCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
     private List<GridObj>[] compatibleObjs = null;
     private GridType gridType = GridType.REGULAR;
-    private bool isTrap = false;
+    private IInteractable interactable = null;
 
     /// <summary>
     /// Create a GridObj given a Vector2Int (grid position) and a WallStatus as well as some prefabs
@@ -83,6 +83,25 @@ public class GridObj
     {
         this.wallStatus = wallStatus;
         this.isPlaceable = false;
+    }
+
+    public void InitType(GridType type)
+    {
+        switch (type)
+        {
+            case GridType.REGULAR: 
+                interactable = new Regular();
+                gridType = GridType.REGULAR;
+                break;
+            case GridType.TRAP: 
+                interactable = new Trap();
+                gridType = GridType.TRAP; 
+                break;
+            case GridType.REPLACEABLE: 
+                interactable = new Replaceable();
+                gridType = GridType.REPLACEABLE;
+                break;
+        }
     }
 
     // TODO fixme
@@ -240,24 +259,26 @@ public class GridObj
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
         this.floorObj = GameObject.Instantiate(floorPrefab, this.GetWorldPos(growthIndex), Quaternion.identity);
 
-        if(this.gridType == GridType.REPLACEABLE)
-        {
-            floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
-        }
         
-        if (isTrap)
-        {
-            // Change the floor color to red if it's a trap
-            MeshRenderer renderer = floorObj.GetComponentInChildren<MeshRenderer>();
-            if (renderer != null)
-            {
-                renderer.material.color = Color.red;
-            }
-            else
-            {
-                Debug.LogWarning($"GridObj at {gridPos} is a trap, but no MeshRenderer found to color red!");
-            }
-        }
+        this.interactable.SetColor(floorObj);
+        //if(this.gridType == GridType.REPLACEABLE)
+        //{
+        //    floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+        //}
+        
+        //if (isTrap)
+        //{
+        //    // Change the floor color to red if it's a trap
+        //    MeshRenderer renderer = floorObj.GetComponentInChildren<MeshRenderer>();
+        //    if (renderer != null)
+        //    {
+        //        renderer.material.color = Color.red;
+        //    }
+        //    else
+        //    {
+        //        Debug.LogWarning($"GridObj at {gridPos} is a trap, but no MeshRenderer found to color red!");
+        //    }
+        //}
 
         this.floorObj.transform.SetParent(this.parentObj.transform);
 
@@ -564,7 +585,8 @@ public class GridObj
     public GridType GetGridType() { return this.gridType; }
     public Vector2Int GetGridPos() { return this.gridPos; }
     public WallStatus GetWallStatus() { return this.wallStatus; }
-    public bool IsTrap() { return this.isTrap; }
+    //public bool IsTrap() { return this.isTrap; }
+    public IInteractable GetInteract() { return this.interactable; }
     
 
     // Generic setters
@@ -578,10 +600,10 @@ public class GridObj
     public void SetIsPlaceable(bool isPlaceable) { this.isPlaceable = isPlaceable; }
     public void SetGridType(GridType gridType) { this.gridType = gridType; }
     public void SetGridPos(Vector2Int gridPos) { this.gridPos = gridPos; }
-    public void SetTrap(bool value) { isTrap = value; }
+    //public void SetTrap(bool value) { isTrap = value; }
 }
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE
+    REGULAR, REPLACEABLE, TRAP
 }
