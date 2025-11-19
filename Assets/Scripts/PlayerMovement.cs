@@ -26,6 +26,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+
+        // NEU: Check if movement is blocked by dice system
+        var adapter = GetComponent<PlayerMovementAdapter>();
+        if (adapter != null && adapter.ShouldBlockMovement()) return;
+
         if (isMoving)
         {
             return;

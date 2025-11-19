@@ -33,7 +33,7 @@ public class IngameUI : MonoBehaviour
             // Remove selected
             gridObjs.RemoveAt(selectedIndex);
 
-            if(regenerate)
+            if (regenerate)
             {
                 // Replace it with a new random GridObj so toggle stays filled
                 List<GridObj> all = GridObj.GetPossiblePlaceables();
@@ -52,11 +52,11 @@ public class IngameUI : MonoBehaviour
             selectedIndex = -1;
 
             UpdateToggles();
-            if(DEBUG) Debug.Log("Removed and replaced selected GridObj.");
+            if (DEBUG) Debug.Log("Removed and replaced selected GridObj.");
         }
         else
         {
-            if(DEBUG) Debug.Log("No valid selection to remove.");
+            if (DEBUG) Debug.Log("No valid selection to remove.");
         }
     }
 
