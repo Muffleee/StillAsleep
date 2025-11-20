@@ -153,8 +153,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   generateAfter: 4
-  width: 8
-  height: 8
+  replaceExitAfter: 2
+  width: 3
+  height: 3
   gui: {fileID: 944478704}
   wallPrefab: {fileID: 2144594829894418979, guid: f70bbc641b70bd4499a0156471aac54f,
     type: 3}

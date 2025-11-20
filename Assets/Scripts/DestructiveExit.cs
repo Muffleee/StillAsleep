@@ -5,7 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Exit : MonoBehaviour
+public class DestructiveExit : MonoBehaviour
 {
     public GridObj gridObj;
     public WallPos wallPos;
