@@ -97,6 +97,10 @@ public class GridObj
                 interactable = new Trap();
                 gridType = GridType.TRAP; 
                 break;
+            case GridType.JUMPINGPAD: 
+                interactable = new JumpingPads();
+                gridType = GridType.JUMPINGPAD;
+                break;
             case GridType.REPLACEABLE: 
                 interactable = new Replaceable();
                 gridType = GridType.REPLACEABLE;
@@ -261,25 +265,6 @@ public class GridObj
 
         
         this.interactable.SetColor(floorObj);
-        //if(this.gridType == GridType.REPLACEABLE)
-        //{
-        //    floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
-        //}
-        
-        //if (isTrap)
-        //{
-        //    // Change the floor color to red if it's a trap
-        //    MeshRenderer renderer = floorObj.GetComponentInChildren<MeshRenderer>();
-        //    if (renderer != null)
-        //    {
-        //        renderer.material.color = Color.red;
-        //    }
-        //    else
-        //    {
-        //        Debug.LogWarning($"GridObj at {gridPos} is a trap, but no MeshRenderer found to color red!");
-        //    }
-        //}
-
         this.floorObj.transform.SetParent(this.parentObj.transform);
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
@@ -585,7 +570,6 @@ public class GridObj
     public GridType GetGridType() { return this.gridType; }
     public Vector2Int GetGridPos() { return this.gridPos; }
     public WallStatus GetWallStatus() { return this.wallStatus; }
-    //public bool IsTrap() { return this.isTrap; }
     public IInteractable GetInteract() { return this.interactable; }
     
 
@@ -600,10 +584,9 @@ public class GridObj
     public void SetIsPlaceable(bool isPlaceable) { this.isPlaceable = isPlaceable; }
     public void SetGridType(GridType gridType) { this.gridType = gridType; }
     public void SetGridPos(Vector2Int gridPos) { this.gridPos = gridPos; }
-    //public void SetTrap(bool value) { isTrap = value; }
 }
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE, TRAP
+    REGULAR, REPLACEABLE, TRAP, JUMPINGPAD
 }

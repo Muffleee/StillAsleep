@@ -54,6 +54,7 @@ public class Trap : IInteractable
         // =========================================================================
         // PLACEHOLDER LOGIC: later trap effects go here
         // =========================================================================
+        // can be losing Energy or maybe lose Vision like FogOfWar for the next 3 move or whatever
     }
 
     private void ResetTrapVisual(GridObj tile)
@@ -86,6 +87,27 @@ public class Trap : IInteractable
     }
 }
 
+public class JumpingPads : IInteractable
+{
+    void IInteractable.SetColor(GameObject obj)
+    {
+        obj.GetComponentInChildren<MeshRenderer>().material.color = Color.magenta;
+    }
+    void IInteractable.OnUse(GridObj obj)
+    {
+        //can be extended later in case we wanna have an effect when standing on a jumbad boucning for example
+        return;
+    }
+
+    /// <summary>
+    /// For JumpingBads logic, a move is valid even if there's a wall.
+    /// The only blocking condition is if the destination tile is a REPLACEABLE one, 
+    /// </summary>
+    bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    {
+        return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+    }
+}
 public class Replaceable : IInteractable
 {
     void IInteractable.SetColor(GameObject obj)

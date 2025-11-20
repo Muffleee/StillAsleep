@@ -145,11 +145,23 @@ public class Grid
     }
 
     public void SetRandomGridType(GridObj gridObj)
-    {
+    {   
+        int Trapchance = 5;
+        int JumpingBadChance= 7;
+        int PlaceHolderChance=0;
         int rand = Random.Range(0, 100);
-        if(rand < 10)
+        if(rand <= Trapchance)
         {
             gridObj.InitType(GridType.TRAP);
+        }
+        else if(rand > Trapchance && rand < (JumpingBadChance +Trapchance  ))
+        {
+            gridObj.InitType(GridType.JUMPINGPAD);
+        }
+         else if(rand > (JumpingBadChance+Trapchance) && rand < (PlaceHolderChance+JumpingBadChance +Trapchance  ))
+        {
+            //Regular should be changed later for place Holder whatever that is (maybe teleport)
+            gridObj.InitType(GridType.REGULAR);
         } else
         {
             gridObj.InitType(GridType.REGULAR);
