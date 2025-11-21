@@ -3,6 +3,9 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Dynamic;
 
+/// <summary>
+/// Class handling the game's user interface, including providing the player with placeable tiles and handling placing selected tiles.
+/// </summary>
 public class IngameUI : MonoBehaviour
 {
     private List<GridObj> gridObjs = new List<GridObj>();
@@ -11,12 +14,20 @@ public class IngameUI : MonoBehaviour
     private int selectedIndex = -1;
     private bool DEBUG = false;
 
+    /// <summary>
+    /// Add a GridObj to the list of selectable GridObjs.
+    /// </summary>
+    /// <param name="obj">GridObj to be added.</param>
     public void AddGridObj(GridObj obj)
     {
         gridObjs.Add(obj);
         UpdateToggles();
     }
 
+    /// <summary>
+    /// Remove a GridObj from the list of selectable GridObjs.
+    /// </summary>
+    /// <param name="obj">GridObj to be removed.</param>
     public void RemoveGridObj(GridObj obj)
     {
         if (gridObjs.Contains(obj))
@@ -26,6 +37,10 @@ public class IngameUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Remove the selected GridObj from the selectable GridObj list, deselect it, and fill the respective spot with a new selectable GridObj if desired.
+    /// </summary>
+    /// <param name="regenerate"></param>
     public void RemoveSelected(bool regenerate)
     {
         if (selectedIndex >= 0 && selectedIndex < gridObjs.Count)
@@ -60,6 +75,9 @@ public class IngameUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Fill the list of selectable GridObjs with random GridObjs..
+    /// </summary>
     public void FillList()
     {
         List<GridObj> all = GridObj.GetPossiblePlaceables();
@@ -73,6 +91,9 @@ public class IngameUI : MonoBehaviour
         UpdateToggles();
     }
 
+    /// <summary>
+    /// Update the toggle buttons on the user interface to reflect any changes in selectable GridObjs.
+    /// </summary>
     private void UpdateToggles()
     {
         for (int i = 0; i < toggles.Length; i++)
@@ -89,6 +110,10 @@ public class IngameUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles any presses of the toggle buttons and selects/deselects a GridObj if needed.
+    /// </summary>
+    /// <param name="changedToggle">The changed toggle button.</param>
     public void OnToggleChanged(Toggle changedToggle)
     {
         if (changedToggle.isOn)
@@ -110,16 +135,13 @@ public class IngameUI : MonoBehaviour
         }
     }
 
-    public bool HasSelectedObj()
-    {
-        return this.selectedObj != null;
-    }
+    public bool HasSelectedObj() {return this.selectedObj != null;}
 
-    public GridObj GetSelected()
-    {
-        return this.selectedObj;
-    }
+    public GridObj GetSelected() {return this.selectedObj;}
 
+    /// <summary>
+    /// At game start, fill the list of selectable GridObjs and add listeners to all toggles.
+    /// </summary>
     private void Start()
     {
         FillList();
