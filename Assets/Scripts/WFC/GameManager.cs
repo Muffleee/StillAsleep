@@ -38,7 +38,6 @@ public class GameManager : MonoBehaviour
 
         grid.CreateExit(new Vector2Int(4, 4), 1);
         grid.InstantiateMissing();
-
         gui.FillList();
     }
 

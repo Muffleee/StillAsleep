@@ -56,6 +56,7 @@ public class Grid
         
         gridObj.SetGridPos(gridPos);
         grid[gridPos.x, gridPos.y] = gridObj;
+        if (gridObj.GetInteract() == null) gridObj.InitType(GridType.REGULAR);
         grid[gridPos.x, gridPos.y].InstantiateObj(growthIndex);
         InstantiateMissingWalls(gridObj);
     }
@@ -155,7 +156,7 @@ public class Grid
 
             GridObj chosenTemplate = PickWeightedRandom(candidates);
             grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-           
+            SetRandomGridType(grid[x,y]);
             for (int i = 0; i < 4; i++)
             {
                 Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
@@ -167,6 +168,34 @@ public class Grid
         }
     }
 
+    /// <summary>
+    /// Sets the given GridObj to a random object type.
+    /// </summary>
+    /// <param name="gridObj">GridObj to be randomised.</param>
+    public void SetRandomGridType(GridObj gridObj)
+    {   
+        int Trapchance = 5;
+        int JumpingBadChance= 7;
+        int PlaceHolderChance=0;
+        int rand = UnityEngine.Random.Range(0, 100);
+        if(rand <= Trapchance)
+        {
+            gridObj.InitType(GridType.TRAP);
+        }
+        else if(rand > Trapchance && rand < (JumpingBadChance +Trapchance  ))
+        {
+            gridObj.InitType(GridType.JUMPINGPAD);
+        }
+         else if(rand > (JumpingBadChance+Trapchance) && rand < (PlaceHolderChance+JumpingBadChance +Trapchance  ))
+        {
+            //Regular should be changed later for place Holder whatever that is (maybe teleport)
+            gridObj.InitType(GridType.REGULAR);
+        } else
+        {
+            gridObj.InitType(GridType.REGULAR);
+        }
+    }
+    
     /// <summary>
     /// Check whether the tile at the given position has any non-null adjacent tiles.
     /// </summary>
@@ -285,6 +314,7 @@ public class Grid
     {
         GridObj obj = new GridObj(pos, new WallStatus());
         obj.SetGridType(GridType.REPLACEABLE);
+        obj.InitType(GridType.REPLACEABLE);
         return obj;
     }
 
@@ -350,8 +380,11 @@ public class Grid
         {
             return grid[targetPos.x, targetPos.y];
         }
-        
-        return null;
+        else
+        {
+            return null;
+        }
+
     }
 
     /// <summary>
@@ -445,4 +478,18 @@ public class Grid
     public bool IsInstantiated() { return growthIndex > 0; }
     public GridObj[,] GetGridArray() { return grid; }
     public int GetGrowthIndex() {  return growthIndex; }
+
+    /// <summary>
+    /// Get the GridObj at the given grid position.
+    /// </summary>
+    /// <param name="pos">Grid position to be searched.</param>
+    /// <returns></returns>
+    public GridObj GetGridObj(Vector2Int pos)
+    {
+        if (IsInsideGrid(pos))
+        {
+            return grid[pos.x, pos.y];
+        }
+        return null;
+    }
 }
