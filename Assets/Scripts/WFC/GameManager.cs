@@ -35,7 +35,6 @@ public class GameManager : MonoBehaviour
         grid.CreateExit(new Vector2Int(4, 4), 1);
         PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
-
         gui.FillList();
     }
 
@@ -73,6 +72,6 @@ public class GameManager : MonoBehaviour
         this.grid.PlaceObj(toPlace);
         this.gui.RemoveSelected(false);
     }
-    
+
     public Grid GetCurrentGrid() { return this.grid; }
 }

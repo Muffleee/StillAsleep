@@ -35,8 +35,13 @@ public class Grid
         
         gridObj.SetGridPos(gridPos);
         this.grid[gridPos.x, gridPos.y] = gridObj;
+        if (gridObj.GetInteract() == null)
+        {
+            gridObj.InitType(GridType.REGULAR);
+        }
         this.grid[gridPos.x, gridPos.y].InstantiateObj(growthIndex);
         InstantiateMissingWalls(gridObj, gridPos);
+        
     }
     /// <summary>
     /// check for the gridObj at gridPos if there is any wall where the neighbour also hasn't instantiated a wall and then instantiate it
@@ -129,7 +134,7 @@ public class Grid
 
             GridObj chosenTemplate = PickWeightedRandom(candidates);
             grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-           
+            SetRandomGridType(grid[x,y]);
             for (int i = 0; i < 4; i++)
             {
                 Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
@@ -141,6 +146,29 @@ public class Grid
         }
     }
 
+    public void SetRandomGridType(GridObj gridObj)
+    {   
+        int Trapchance = 5;
+        int JumpingBadChance= 7;
+        int PlaceHolderChance=0;
+        int rand = Random.Range(0, 100);
+        if(rand <= Trapchance)
+        {
+            gridObj.InitType(GridType.TRAP);
+        }
+        else if(rand > Trapchance && rand < (JumpingBadChance +Trapchance  ))
+        {
+            gridObj.InitType(GridType.JUMPINGPAD);
+        }
+         else if(rand > (JumpingBadChance+Trapchance) && rand < (PlaceHolderChance+JumpingBadChance +Trapchance  ))
+        {
+            //Regular should be changed later for place Holder whatever that is (maybe teleport)
+            gridObj.InitType(GridType.REGULAR);
+        } else
+        {
+            gridObj.InitType(GridType.REGULAR);
+        }
+    }
     private bool HasAnyNonNullNeighbor(int x, int y)
     {
         Vector2Int[] offsets = { new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
@@ -235,6 +263,7 @@ public class Grid
     {
         GridObj obj = new GridObj(pos, new WallStatus());
         obj.SetGridType(GridType.REPLACEABLE);
+        obj.InitType(GridType.REPLACEABLE);
         return obj;
     }
 
@@ -315,8 +344,11 @@ public class Grid
         {
             return this.grid[targetPos.x, targetPos.y];
         }
-        
-        return null;
+        else
+        {
+            return null;
+        }
+
     }
 
     public GridObj GetNearestGridObj(Vector3 pos)
@@ -400,4 +432,13 @@ public class Grid
     public bool IsInstantiated() { return this.growthIndex > 0; }
     public GridObj[,] GetGridArray() { return this.grid; }
     public int GetGrowthIndex() {  return this.growthIndex; }
+    /// Returns the GridObj at the given grid position.
+    public GridObj GetGridObj(Vector2Int pos)
+    {
+        if (IsInsideGrid(pos))
+        {
+            return this.grid[pos.x, pos.y];
+        }
+        return null;
+    }
 }
