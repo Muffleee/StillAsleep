@@ -63,7 +63,7 @@ public class PlayerMovement : MonoBehaviour
 
     /// <summary>
     /// Check if a movement in a given direction is valid.
-    /// It is valid when there are no walls nor replaceable GridObjs in that direction.
+    /// Validity is based on the tile type.
     /// </summary>
     /// <param name="wallPos">Movement direction to be checked.</param>
     /// <returns></returns>
