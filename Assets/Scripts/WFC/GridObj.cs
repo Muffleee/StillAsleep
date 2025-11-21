@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.PackageManager;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
@@ -269,19 +271,19 @@ public class GridObj
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
         {
-            this.InstantiateWall(WallPos.FRONT, growthIndex);
+            this.InstantiateWall(WallPos.FRONT, this.GetWallAt(WallPos.FRONT), growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.BACK))
         {
-            this.InstantiateWall(WallPos.BACK, growthIndex);
+            this.InstantiateWall(WallPos.BACK, this.GetWallAt(WallPos.BACK), growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.LEFT))
         {
-            this.InstantiateWall(WallPos.LEFT, growthIndex);
+            this.InstantiateWall(WallPos.LEFT, this.GetWallAt(WallPos.LEFT), growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.RIGHT))
         {
-            this.InstantiateWall(WallPos.RIGHT, growthIndex);
+            this.InstantiateWall(WallPos.RIGHT, this.GetWallAt(WallPos.RIGHT), growthIndex);
         }
     }
 
@@ -335,7 +337,10 @@ public class GridObj
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
         if (this.parentObj == null) return;
         int index = WallStatus.WallPosToInt(wallPos);
-        if (this.wallObjs[index] != null) return;
+        if (this.wallObjs[index] != null)
+        {
+            GameObject.Destroy(this.wallObjs[index]);   
+        }
 
         if (wallType == WallType.NONE)
         {
@@ -355,13 +360,15 @@ public class GridObj
             this.destructibleWallCallbacks[WallStatus.WallPosToInt(wallPos)] = cb;
         }
         else if (wallType == WallType.EXIT)
-        {
+        {   
+            /* Disable for now
             Exit exit = newWall.GetComponentInChildren<Exit>();
             exit.gridObj = this;
             exit.wallPos = wallPos;
             UnityEvent<GridObj, WallPos> cb = new UnityEvent<GridObj, WallPos>();
             exit.onDestroy = cb;
             this.exitCallbacks[WallStatus.WallPosToInt(wallPos)] = cb;
+            */
         }
 
         newWall.transform.SetParent(this.parentObj.transform);
@@ -376,6 +383,8 @@ public class GridObj
     {
         this.wallStatus.RemoveWallAt(wallPos);
         int index = WallStatus.WallPosToInt(wallPos);
+        this.exitCallbacks[index] = null;
+        this.destructibleWallCallbacks[index] = null;
         GameObject obj = this.wallObjs[index];
         if (obj == null) return;
         this.wallObjs[index] = null;
@@ -508,6 +517,33 @@ public class GridObj
     public bool IsInstantiated()
     {
         return this.parentObj != null;
+    }
+
+    /// <summary>
+    /// Removes all exit walls from this GameObj and replaces them with normal ones
+    /// </summary>
+    public void RemoveExitWalls()
+    {
+        foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
+        {
+            if(this.GetWallAt(pos) != WallType.EXIT) continue;
+            this.RemoveWall(pos);
+        }
+    }
+
+    /// <summary>
+    /// Returns a list of all free WallPos that have no wall
+    /// </summary>
+    /// <returns></returns>
+    public List<WallPos> GetFreeWalls()
+    {   
+        List<WallPos> list = new List<WallPos>();
+        foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
+        {
+            if(this.HasWallAt(pos)) continue;
+            list.Add(pos);
+        }
+        return list;
     }
 
     /// <summary>

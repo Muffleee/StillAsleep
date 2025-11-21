@@ -10,6 +10,7 @@ using static UnityEditor.Progress;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] int generateAfter = 4;
+    [SerializeField] int replaceExitAfter = 2;
     [SerializeField] private int width;
     [SerializeField] private int height;
     [SerializeField] private IngameUI gui;
@@ -31,18 +32,31 @@ public class GameManager : MonoBehaviour
 
         grid.CollapseWorld();
         grid.IncreaseGrid();
+        grid.CreateExit(new Vector2Int(4, 4), 1);
         PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
         gui.FillList();
     }
 
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
-    {
-        if (step % this.generateAfter != 0) return;
+    {   
+
+        if (step % this.generateAfter != 0)
+        {
+            if(step % this.replaceExitAfter == 0)
+            {
+                grid.RepositionExit(WallPos.BACK);
+            }
+            return;
+        }
         grid.CollapseWorld();
         grid.IncreaseGrid();
         PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
+        if(step % this.replaceExitAfter == 0)
+        {
+            grid.RepositionExit(WallPos.BACK);
+        }
         this.gui.FillList();
     }
 
