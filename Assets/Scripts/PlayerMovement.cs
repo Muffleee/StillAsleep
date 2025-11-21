@@ -1,11 +1,11 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using static UnityEditor.PlayerSettings;
 
+
+/// <summary>
+/// Attached to the player, this class handles the player's movement throughout the game.
+/// </summary>
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] public static Vector2Int currentGridPos, lastGridPos;
@@ -15,6 +15,10 @@ public class PlayerMovement : MonoBehaviour
     private bool DEBUG = false;
     private int stepCounter = 0;
     private bool isMoving = false;
+    
+    /// <summary>
+    /// Move the player to an initial position and add listeners for any destructible walls.
+    /// </summary>
     private void Start()
     {
         currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, gameManager.GetCurrentGrid().GetGrowthIndex());
@@ -24,6 +28,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Check for the player's input each frame and handles movements accordingly. Only allows one move at a time.
+    /// </summary>
     private void Update()
     {
         if (isMoving)
@@ -38,16 +45,14 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// if the move in direction of wallPos is valif, call MovePlayer
+    /// Assert whether a movement in a given direction is valid and, if so, execute that move.
     /// </summary>
-    /// <param name="wallPos"></param>
+    /// <param name="wallPos">Direction in which the player wants to move.</param>
     private void TryMove(WallPos wallPos)
     {
         if (IsValidMove(wallPos))
         {
-            Vector3 direction = GetMoveDir(wallPos);
-
-            MovePlayer(direction, wallPos);
+            MovePlayer(wallPos);
         }
         else
         {
@@ -57,11 +62,10 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// checks: - is there a wall in direction of wallPos?
-    /// - is the next gridObj to move to a replacable?
+    /// Check if a movement in a given direction is valid.
+    /// It is valid when there are no walls nor replaceable GridObjs in that direction.
     /// </summary>
-    /// <param name="gridPos"></param>
-    /// <param name="wallPos"></param>
+    /// <param name="wallPos">Movement direction to be checked.</param>
     /// <returns></returns>
     private bool IsValidMove(WallPos wallPos)
     {
@@ -77,57 +81,49 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// the offset (for movement) in a specific direction (wallPos)
-    /// In WorldPos
+    /// Get the movement vector in world space for a given direction.
     /// </summary>
-    /// <param name="wallPos"></param>
+    /// <param name="wallPos">Direction for which the vector shall be calculated.</param>
     /// <returns></returns>
-    private UnityEngine.Vector3 GetMoveDir(WallPos wallPos)
+    private Vector3 GetMoveDir(WallPos wallPos)
     {
-        if (wallPos == WallPos.BACK) { return new Vector3(0,0, GridObj.PLACEMENT_FACTOR); }
-        else if (wallPos == WallPos.FRONT) { return new Vector3(0,0, -GridObj.PLACEMENT_FACTOR); }
-        else if (wallPos == WallPos.RIGHT) { return new Vector3(GridObj.PLACEMENT_FACTOR, 0,0); }
-        else if (wallPos == WallPos.LEFT) { return new Vector3(-GridObj.PLACEMENT_FACTOR, 0,0); };
-        return Vector3.zero;
+        return wallPos switch
+        {
+            WallPos.BACK => new Vector3(0, 0, GridObj.PLACEMENT_FACTOR),
+            WallPos.FRONT => new Vector3(0, 0, -GridObj.PLACEMENT_FACTOR),
+            WallPos.LEFT => new Vector3(-GridObj.PLACEMENT_FACTOR, 0, 0),
+            WallPos.RIGHT => new Vector3(GridObj.PLACEMENT_FACTOR, 0, 0),
+            _ => Vector3.zero
+        };
     }
 
     /// <summary>
-    /// the offset that needs to be moved depending on the wall position - in gridPos, not worldPos!
+    /// Get the movement vector in grid space for a given direction.
     /// </summary>
-    /// <param name="wallPos"></param>
+    /// <param name="wallPos">Direction for which the vector shall be calculated.</param>
     /// <returns></returns>
     private Vector2Int GetMoveDirGrid(WallPos wallPos)
     {
-        Vector2Int moveGrid = new Vector2Int(0, 0);
-        switch (wallPos)
+        return wallPos switch
         {
-            case WallPos.FRONT:
-                moveGrid = new Vector2Int(0, -1);
-                break;
-            case WallPos.BACK:
-                moveGrid = new Vector2Int(0, 1);
-                break;
-            case WallPos.LEFT:
-                moveGrid = new Vector2Int(-1, 0);
-                break;
-            case WallPos.RIGHT:
-                moveGrid = new Vector2Int(1, 0);
-                break;
-
-        }
-        return moveGrid;
+            WallPos.BACK => new Vector2Int(0, 1),
+            WallPos.FRONT => new Vector2Int(0, -1),
+            WallPos.LEFT => new Vector2Int(-1, 0),
+            WallPos.RIGHT => new Vector2Int(1, 0),
+            _ => Vector2Int.zero
+        };
     }
 
     /// <summary>
-    /// Moving the player if it's not already in motion
+    /// Move the player in a given direction if they aren't already in motion.
     /// </summary>
     /// <param name="direction"></param>
     /// <param name="wallPos"></param>
-    private void MovePlayer(Vector3 direction, WallPos wallPos)
+    private void MovePlayer(WallPos wallPos)
     {
         if (!isMoving)
         {
-            StartCoroutine(MovementCoroutine(direction, wallPos));
+            StartCoroutine(MovementCoroutine(wallPos));
         }
 
     }
@@ -155,9 +151,9 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Get the next gridPos depending on the wallPosition
+    /// Get the grid position after a move in a given direction.
     /// </summary>
-    /// <param name="wallPos"> equals the direction in which the player wants to go</param>
+    /// <param name="wallPos">Direction to be checked.</param>
     /// <returns></returns>
     private Vector2Int GetNextGridPos(WallPos wallPos)
     {
@@ -173,19 +169,18 @@ public class PlayerMovement : MonoBehaviour
     
 
     /// <summary>
-    /// Moving the player by direction. Setting the new currentGridPos and the lastGridPos.
-    /// Invoking Unity Event onPlayerMoved
+    /// Move the player in a given direction. Set the new currentGridPos and the lastGridPos.
+    /// Invoke UnityEvent onPlayerMoved
     /// </summary>
-    /// <param name="direction"></param>
-    /// <param name="wallPos"></param>
+    /// <param name="wallPos">Direction of movement</param>
     /// <returns></returns>
-    private IEnumerator MovementCoroutine(Vector3 direction, WallPos wallPos)
+    private IEnumerator MovementCoroutine(WallPos wallPos)
     {
         float duration = 0.5f;
         float elapsed = 0f;
         isMoving = true;
         Vector3 startPos = transform.position;
-        Vector3 endPos = startPos + direction;
+        Vector3 endPos = startPos + GetMoveDir(wallPos);
 
         while (elapsed < duration)
         {
@@ -208,6 +203,11 @@ public class PlayerMovement : MonoBehaviour
         if(DEBUG) Debug.Log(stepCounter);
     }
     
+    /// <summary>
+    /// Called whenever a wall gets destroyed. Removes the respective wall at the WallPos of the GridObj.
+    /// </summary>
+    /// <param name="gridObj">GridObj of which a wall has been destroyed.</param>
+    /// <param name="wallPos">Specific wall side which has been destroyed.</param>
     private void OnWallDestroyed(GridObj gridObj, WallPos wallPos)
     {
         if (gridObj != null)
