@@ -7,6 +7,9 @@ using UnityEngine;
 using static Unity.VisualScripting.Member;
 using static UnityEditor.Progress;
 
+/// <summary>
+/// Main game manager class, handles game initialization, world generation, and move and click events
+/// </summary>
 public class GameManager : MonoBehaviour
 {
     [SerializeField] int generateAfter = 4;
@@ -24,26 +27,32 @@ public class GameManager : MonoBehaviour
     Grid grid;
 
     /// <summary>
-    /// initializing the grid, clearing the collapse-list and start the collapsing process from the first node
+    /// Initializes the grid, clearing the collapse-list and start the collapsing process from the first node
     /// </summary>
     void Start()
     {
-        this.grid = new Grid(this.width, this.height);
+        grid = new Grid(width, height);
 
         grid.CollapseWorld();
         grid.IncreaseGrid();
+
         grid.CreateExit(new Vector2Int(4, 4), 1);
-        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
         gui.FillList();
     }
 
+    /// <summary>
+    /// Function to be called on player movement, handles dynamic map generation and movement of the exit
+    /// </summary>
+    /// <param name="from">Coordinate *from* which the player is moving</param>
+    /// <param name="to">Coordinate *to* which the player is moving</param>
+    /// <param name="direction">Direction of movement</param>
+    /// <param name="step">Count of all movement steps taken by the player</param>
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {   
-
-        if (step % this.generateAfter != 0)
+        if (step % generateAfter != 0)
         {
-            if(step % this.replaceExitAfter == 0)
+            if(step % replaceExitAfter == 0)
             {
                 grid.RepositionExit(WallPos.BACK);
             }
@@ -51,27 +60,36 @@ public class GameManager : MonoBehaviour
         }
         grid.CollapseWorld();
         grid.IncreaseGrid();
-        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
-        if(step % this.replaceExitAfter == 0)
+
+        if(step % replaceExitAfter == 0)
         {
             grid.RepositionExit(WallPos.BACK);
         }
-        this.gui.FillList();
+
+        gui.FillList();
     }
 
+    /// <summary>
+    /// Function to be called whenever the player clicks in the world, handles placing player-selected tiles
+    /// </summary>
+    /// <param name="clicked">Clicked game object</param>
     public void OnClick(GameObject clicked)
     {
-        GridObj selected = this.grid.GetGridObjFromGameObj(clicked);
-        if (selected == null || selected.GetGridType() != GridType.REPLACEABLE) return;
-        if (!this.gui.HasSelectedObj()) return;
+        GridObj selectedTile = grid.GetGridObjFromGameObj(clicked);
+        if (selectedTile == null || selectedTile.GetGridType() != GridType.REPLACEABLE) return;
+        if (!gui.HasSelectedObj()) return;
 
-        GridObj virtualObj = this.gui.GetSelected();
-        GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
-        toPlace.SetGridPos(selected.GetGridPos());
-        this.grid.PlaceObj(toPlace);
-        this.gui.RemoveSelected(false);
+        GridObj virtualObj = gui.GetSelected();
+        GridObj toPlace = new GridObj(selectedTile.GetGridPos(), virtualObj.GetWallStatus());
+        grid.PlaceObj(toPlace);
+
+        gui.RemoveSelected(false);
     }
-
-    public Grid GetCurrentGrid() { return this.grid; }
+    
+    /// <summary>
+    /// Gets the grid in its current state
+    /// </summary>
+    /// <returns>Grid</returns>
+    public Grid GetCurrentGrid() { return grid; }
 }

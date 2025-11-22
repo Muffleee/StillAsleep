@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// Class describing a destructible wall on a specific GridObj at a specific WallPos.
+/// </summary>
 public class DestructibleWall : MonoBehaviour
 {
     public GridObj gridObj;
@@ -19,6 +22,9 @@ public class DestructibleWall : MonoBehaviour
     private Timer timer;
     private MeshRenderer rend;
 
+    /// <summary>
+    /// Initialise the wall with its timer and the appropriate events
+    /// </summary>
     private void Start()
     {
         rend = GetComponent<MeshRenderer>();
@@ -38,12 +44,19 @@ public class DestructibleWall : MonoBehaviour
             timer.StartTimer();
     }
 
+    /// <summary>
+    /// Hold the timer execution for the defined start delay.
+    /// </summary>
+    /// <returns></returns>
     private System.Collections.IEnumerator StartTimerWithDelay()
     {
         yield return new WaitForSeconds(startDelay);
         timer.StartTimer();
     }
 
+    /// <summary>
+    /// Render the wall's colour depending on the remaining time.
+    /// </summary>
     private void Update()
     {
         if (timer == null || !timer.IsRunning || rend == null) return;
@@ -52,6 +65,9 @@ public class DestructibleWall : MonoBehaviour
         rend.material.color = Color.Lerp(startColor, endColor, progress);
     }
 
+    /// <summary>
+    /// Destroy the wall.
+    /// </summary>
     private void DestroyWall()
     {
         if (debug) Debug.Log($"{gameObject.name} destroyed after {destroyTime} seconds!");

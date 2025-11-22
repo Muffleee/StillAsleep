@@ -1,32 +1,56 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
+/// <summary>
+/// Interface describing an interactable GridObject.
+/// </summary>
 public interface IInteractable
 {
+    /// <summary>
+    /// Set the colour of the GridObj.
+    /// </summary>
+    /// <param name="obj">GridObj of which the colour should be changed.</param>
     void SetColor(GameObject obj);
+
+    /// <summary>
+    /// Executed if the tile is used/stepped upon.
+    /// </summary>
+    /// <param name="obj">Current grid object.</param>
     void OnUse(GridObj obj);
+    
+    /// <summary>
+    /// Check whether a given move is valid.
+    /// </summary>
+    /// <param name="curr">Origin GridObj</param>
+    /// <param name="nextObj">Destination GridObj</param>
+    /// <param name="wPos">Direction</param>
+    /// <returns></returns>
     bool IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos);
 }
 
+/// <summary>
+/// Class describing a regular tile with no special functionality.
+/// </summary>
 public class Regular : IInteractable
 {
-    void IInteractable.SetColor(GameObject obj)
-    {
-        return;
-    }
-    void IInteractable.OnUse(GridObj obj)
-    {
-        return;
-    }
+    void IInteractable.SetColor(GameObject obj) {return;}
+    void IInteractable.OnUse(GridObj obj) {return;}
 
+    /// <summary>
+    /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.
+    /// </summary>
+    /// <param name="curr">Origin GridObj</param>
+    /// <param name="nextObj">Destination GridObj</param>
+    /// <param name="wPos">Direction</param>
+    /// <returns></returns>
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
     }
 }
 
+/// <summary>
+/// Class describing a trap. No functionality at the moment except being red and turning back to white once stepped on.
+/// </summary>
 public class Trap : IInteractable
 {
     private bool activated = true;
@@ -81,12 +105,22 @@ public class Trap : IInteractable
         }
     }
 
+    /// <summary>
+    /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.
+    /// </summary>
+    /// <param name="curr">Origin GridObj</param>
+    /// <param name="nextObj">Destination GridObj</param>
+    /// <param name="wPos">Direction</param>
+    /// <returns></returns>
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
     }
 }
 
+/// <summary>
+/// Class describing a jumping pad. Allows the player to jump over walls.
+/// </summary>
 public class JumpingPads : IInteractable
 {
     void IInteractable.SetColor(GameObject obj)
@@ -100,14 +134,21 @@ public class JumpingPads : IInteractable
     }
 
     /// <summary>
-    /// For JumpingBads logic, a move is valid even if there's a wall.
-    /// The only blocking condition is if the destination tile is a REPLACEABLE one, 
+    /// Check whether a given move is valid. Movement is valid unless the destination tile is invalid or replaceable.
     /// </summary>
+    /// <param name="curr">Origin GridObj</param>
+    /// <param name="nextObj">Destination GridObj</param>
+    /// <param name="wPos">Direction</param>
+    /// <returns></returns>
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
     }
 }
+
+/// <summary>
+/// Class describing a replaceable tile. It cannot be moved onto and poses as a placeholder for the next WFC call,.
+/// </summary>
 public class Replaceable : IInteractable
 {
     void IInteractable.SetColor(GameObject obj)
