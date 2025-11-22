@@ -1,10 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.PackageManager;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
@@ -24,6 +26,7 @@ public class GridObj
     private UnityEvent<GridObj, WallPos>[] exitCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
     private List<GridObj>[] compatibleObjs = null;
     private GridType gridType = GridType.REGULAR;
+    private IInteractable interactable = null;
 
     /// <summary>
     /// Create a GridObj given a Vector2Int (grid position) and a WallStatus as well as some prefabs
@@ -71,6 +74,7 @@ public class GridObj
         this.floorPrefab = builder.floorPrefab;
         this.destructibleWallPrefab = builder.destructibleWallPrefab;
         this.exitPrefab = builder.exitPrefab;
+        GameManager.AllGridObjs.Add(this);
     }
 
     /// <summary>
@@ -81,6 +85,29 @@ public class GridObj
     {
         this.wallStatus = wallStatus;
         this.isPlaceable = false;
+    }
+
+    public void InitType(GridType type)
+    {
+        switch (type)
+        {
+            case GridType.REGULAR: 
+                interactable = new Regular();
+                gridType = GridType.REGULAR;
+                break;
+            case GridType.TRAP: 
+                interactable = new Trap();
+                gridType = GridType.TRAP; 
+                break;
+            case GridType.JUMPINGPAD: 
+                interactable = new JumpingPads();
+                gridType = GridType.JUMPINGPAD;
+                break;
+            case GridType.REPLACEABLE: 
+                interactable = new Replaceable();
+                gridType = GridType.REPLACEABLE;
+                break;
+        }
     }
 
     // TODO fixme
@@ -238,28 +265,25 @@ public class GridObj
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
         this.floorObj = GameObject.Instantiate(floorPrefab, this.GetWorldPos(growthIndex), Quaternion.identity);
 
-        if(this.gridType == GridType.REPLACEABLE)
-        {
-            floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
-        }
-
+        
+        this.interactable.SetColor(floorObj);
         this.floorObj.transform.SetParent(this.parentObj.transform);
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
         {
-            this.InstantiateWall(WallPos.FRONT, growthIndex);
+            this.InstantiateWall(WallPos.FRONT, this.GetWallAt(WallPos.FRONT), growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.BACK))
         {
-            this.InstantiateWall(WallPos.BACK, growthIndex);
+            this.InstantiateWall(WallPos.BACK, this.GetWallAt(WallPos.BACK), growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.LEFT))
         {
-            this.InstantiateWall(WallPos.LEFT, growthIndex);
+            this.InstantiateWall(WallPos.LEFT, this.GetWallAt(WallPos.LEFT), growthIndex);
         }
         if (this.wallStatus.HasWallAt(WallPos.RIGHT))
         {
-            this.InstantiateWall(WallPos.RIGHT, growthIndex);
+            this.InstantiateWall(WallPos.RIGHT, this.GetWallAt(WallPos.RIGHT), growthIndex);
         }
     }
 
@@ -313,7 +337,10 @@ public class GridObj
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
         if (this.parentObj == null) return;
         int index = WallStatus.WallPosToInt(wallPos);
-        if (this.wallObjs[index] != null) return;
+        if (this.wallObjs[index] != null)
+        {
+            GameObject.Destroy(this.wallObjs[index]);   
+        }
 
         if (wallType == WallType.NONE)
         {
@@ -333,13 +360,15 @@ public class GridObj
             this.destructibleWallCallbacks[WallStatus.WallPosToInt(wallPos)] = cb;
         }
         else if (wallType == WallType.EXIT)
-        {
+        {   
+            /* Disable for now
             Exit exit = newWall.GetComponentInChildren<Exit>();
             exit.gridObj = this;
             exit.wallPos = wallPos;
             UnityEvent<GridObj, WallPos> cb = new UnityEvent<GridObj, WallPos>();
             exit.onDestroy = cb;
             this.exitCallbacks[WallStatus.WallPosToInt(wallPos)] = cb;
+            */
         }
 
         newWall.transform.SetParent(this.parentObj.transform);
@@ -354,6 +383,8 @@ public class GridObj
     {
         this.wallStatus.RemoveWallAt(wallPos);
         int index = WallStatus.WallPosToInt(wallPos);
+        this.exitCallbacks[index] = null;
+        this.destructibleWallCallbacks[index] = null;
         GameObject obj = this.wallObjs[index];
         if (obj == null) return;
         this.wallObjs[index] = null;
@@ -489,6 +520,33 @@ public class GridObj
     }
 
     /// <summary>
+    /// Removes all exit walls from this GameObj and replaces them with normal ones
+    /// </summary>
+    public void RemoveExitWalls()
+    {
+        foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
+        {
+            if(this.GetWallAt(pos) != WallType.EXIT) continue;
+            this.RemoveWall(pos);
+        }
+    }
+
+    /// <summary>
+    /// Returns a list of all free WallPos that have no wall
+    /// </summary>
+    /// <returns></returns>
+    public List<WallPos> GetFreeWalls()
+    {   
+        List<WallPos> list = new List<WallPos>();
+        foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
+        {
+            if(this.HasWallAt(pos)) continue;
+            list.Add(pos);
+        }
+        return list;
+    }
+
+    /// <summary>
     /// Returns a makeshift name for this GridObj
     /// </summary>
     /// <returns></returns>
@@ -548,6 +606,8 @@ public class GridObj
     public GridType GetGridType() { return this.gridType; }
     public Vector2Int GetGridPos() { return this.gridPos; }
     public WallStatus GetWallStatus() { return this.wallStatus; }
+    public IInteractable GetInteract() { return this.interactable; }
+    
 
     // Generic setters
 
@@ -564,5 +624,5 @@ public class GridObj
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE
+    REGULAR, REPLACEABLE, TRAP, JUMPINGPAD
 }

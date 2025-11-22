@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -11,6 +12,7 @@ public class Grid
     public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
     private int growthIndex = 0;
+    private Exit exit;
 
     public Grid(int width, int height)
     {
@@ -33,8 +35,13 @@ public class Grid
         
         gridObj.SetGridPos(gridPos);
         this.grid[gridPos.x, gridPos.y] = gridObj;
+        if (gridObj.GetInteract() == null)
+        {
+            gridObj.InitType(GridType.REGULAR);
+        }
         this.grid[gridPos.x, gridPos.y].InstantiateObj(growthIndex);
         InstantiateMissingWalls(gridObj, gridPos);
+        
     }
     /// <summary>
     /// check for the gridObj at gridPos if there is any wall where the neighbour also hasn't instantiated a wall and then instantiate it
@@ -127,7 +134,7 @@ public class Grid
 
             GridObj chosenTemplate = PickWeightedRandom(candidates);
             grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-           
+            SetRandomGridType(grid[x,y]);
             for (int i = 0; i < 4; i++)
             {
                 Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
@@ -139,6 +146,29 @@ public class Grid
         }
     }
 
+    public void SetRandomGridType(GridObj gridObj)
+    {   
+        int Trapchance = 5;
+        int JumpingBadChance= 7;
+        int PlaceHolderChance=0;
+        int rand = Random.Range(0, 100);
+        if(rand <= Trapchance)
+        {
+            gridObj.InitType(GridType.TRAP);
+        }
+        else if(rand > Trapchance && rand < (JumpingBadChance +Trapchance  ))
+        {
+            gridObj.InitType(GridType.JUMPINGPAD);
+        }
+         else if(rand > (JumpingBadChance+Trapchance) && rand < (PlaceHolderChance+JumpingBadChance +Trapchance  ))
+        {
+            //Regular should be changed later for place Holder whatever that is (maybe teleport)
+            gridObj.InitType(GridType.REGULAR);
+        } else
+        {
+            gridObj.InitType(GridType.REGULAR);
+        }
+    }
     private bool HasAnyNonNullNeighbor(int x, int y)
     {
         Vector2Int[] offsets = { new Vector2Int(0, 1), new Vector2Int(0, -1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
@@ -163,7 +193,7 @@ public class Grid
             totalWeight += weight;
         }
 
-        int roll = Random.Range(0, totalWeight);
+        int roll = UnityEngine.Random.Range(0, totalWeight);
         foreach (var node in nodes)
         {
             int weight = node.IsPlaceable() ? 1 : 1; 
@@ -194,6 +224,12 @@ public class Grid
         this.growthIndex++;
 
         GridObj[,] newGrid = new GridObj[newW, newH];
+        
+        if(this.exit != null && this.growthIndex == this.exit.growthIndex)
+        {
+            Vector2Int exitPos = this.exit.gridObj.GetGridPos();
+            newGrid[exitPos.x, exitPos.y] = exit.gridObj;
+        }
 
         // copy old objects into the middle
         for (int x = 0; x < this.width; x++)
@@ -210,14 +246,14 @@ public class Grid
         // create new REPLACEABLE border objects
         for (int x = 0; x < newW; x++)
         {
-            newGrid[x, 0] = MakeReplaceable(new Vector2Int(x, 0));
-            newGrid[x, newH - 1] = MakeReplaceable(new Vector2Int(x, newH - 1));
+            if(newGrid[x, 0] == null) newGrid[x, 0] = MakeReplaceable(new Vector2Int(x, 0));
+            if(newGrid[x, newH - 1] == null) newGrid[x, newH - 1] = MakeReplaceable(new Vector2Int(x, newH - 1));
         }
 
         for (int y = 1; y < newH - 1; y++)
         {
-            newGrid[0, y] = MakeReplaceable(new Vector2Int(0, y));
-            newGrid[newW - 1, y] = MakeReplaceable(new Vector2Int(newW - 1, y));
+            if(newGrid[0, y] == null) newGrid[0, y] = MakeReplaceable(new Vector2Int(0, y));
+            if(newGrid[newW - 1, y] == null) newGrid[newW - 1, y] = MakeReplaceable(new Vector2Int(newW - 1, y));
         }
 
         this.grid = newGrid;
@@ -227,6 +263,7 @@ public class Grid
     {
         GridObj obj = new GridObj(pos, new WallStatus());
         obj.SetGridType(GridType.REPLACEABLE);
+        obj.InitType(GridType.REPLACEABLE);
         return obj;
     }
 
@@ -270,6 +307,17 @@ public class Grid
     /// <summary>
     /// Returns adjacent GridObj in WallPos direction or null
     /// </summary>
+    /// <param name="gridObj"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    public GridObj GetAdjacentGridObj(GridObj gridObj, WallPos direction)
+    {
+        return this.GetAdjacentGridObj(gridObj.GetGridPos(), direction);
+    }
+
+    /// <summary>
+    /// Returns adjacent GridObj in WallPos direction or null
+    /// </summary>
     /// <param name="pos"></param>
     /// <param name="direction"></param>
     /// <returns></returns>
@@ -300,6 +348,7 @@ public class Grid
         {
             return null;
         }
+
     }
 
     public GridObj GetNearestGridObj(Vector3 pos)
@@ -307,9 +356,9 @@ public class Grid
         float minDist = Mathf.Infinity;
         GridObj nearest = null;
 
-        for(int w = 0; w < this.width; w++)
+        for (int w = 0; w < this.width; w++)
         {
-            for(int h = 0; h < this.height; h++)
+            for (int h = 0; h < this.height; h++)
             {
                 if (this.grid[w, h] == null) continue;
                 float dist = Vector3.Distance(pos, this.grid[w, h].GetWorldPos());
@@ -323,7 +372,73 @@ public class Grid
         return nearest;
     }
     
+    public void CreateExit(Vector2Int pos, int growthIndex)
+    {
+        this.exit = new Exit(new GridObj(pos, new WallStatus(WallType.EXIT, WallType.NONE, WallType.NONE, WallType.NONE)), growthIndex);
+        // this.exit.gridObj.InstantiateObj(growthIndex); // TODO fix this
+    }
+
+    /// <summary>
+    /// Places a new exit ond an adjacent GridObj in the given direction. If no wall is free or no object exists it will try to place the exit in another direction.
+    /// </summary>
+    /// <param name="direction"></param>
+    public void RepositionExit(WallPos direction)
+    {   
+        // if(this.exit.growthIndex < this.growthIndex) return; // TODO Somehow this does not work properly, no idea why
+        if(this.growthIndex < 1) return; // TODO remove magic number once code above is fixed
+        Debug.Log("Repositioned " + this.growthIndex);
+        GridObj exit = this.exit.gridObj;
+        Vector2Int exitPos = exit.GetGridPos();
+        GridObj newExit = this.GetAdjacentGridObj(exit, direction);
+
+        newExit = this.PlaceExit(newExit);
+
+        if(newExit != null)
+        {
+            this.exit.gridObj = newExit;
+            this.grid[exitPos.x, exitPos.y].RemoveExitWalls();
+            return;
+        }
+
+        foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
+        {
+            if(pos == direction) continue;
+            newExit = this.GetAdjacentGridObj(exit, pos);
+            newExit = this.PlaceExit(newExit);
+            if(newExit != null)
+            {
+                this.exit.gridObj = newExit;
+                this.grid[exitPos.x, exitPos.y].RemoveExitWalls();
+                break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Attempts to place an exit on a random free spot. If no spot is free, it returns null
+    /// </summary>
+    /// <param name="gridObj"></param>
+    /// <returns></returns>
+    private GridObj PlaceExit(GridObj gridObj)
+    {   
+        if(gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE) return null;
+        List<WallPos> free = gridObj.GetFreeWalls();
+        if(free.Count == 0) return null;
+
+        gridObj.PlaceWallAt(free[UnityEngine.Random.Range(0, free.Count)], WallType.EXIT, this.growthIndex);
+        return gridObj;
+    }
+    
     public bool IsInstantiated() { return this.growthIndex > 0; }
     public GridObj[,] GetGridArray() { return this.grid; }
     public int GetGrowthIndex() {  return this.growthIndex; }
+    /// Returns the GridObj at the given grid position.
+    public GridObj GetGridObj(Vector2Int pos)
+    {
+        if (IsInsideGrid(pos))
+        {
+            return this.grid[pos.x, pos.y];
+        }
+        return null;
+    }
 }
