@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
     public GameObject exitPrefab;
 
     Grid grid;
+    private int remainingTilesToPlace = 0;
 
     /// <summary>
     /// initializing the grid, clearing the collapse-list and start the collapsing process from the first node
@@ -35,29 +36,46 @@ public class GameManager : MonoBehaviour
         grid.CreateExit(new Vector2Int(4, 4), 1);
         PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
-        gui.FillList();
     }
 
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {   
 
-        if (step % this.generateAfter != 0)
+    }
+
+    public void OnDiceRolled(int movementSteps, int tileReward)
+    {
+        remainingTilesToPlace = tileReward;
+
+        if (gui != null)
         {
-            if(step % this.replaceExitAfter == 0)
-            {
-                grid.RepositionExit(WallPos.BACK);
-            }
-            return;
+            gui.GenerateTiles(tileReward);
         }
+
+        Debug.Log($"You can now place {remainingTilesToPlace} tiles this turn!");
+    }
+
+    public void OnTurnStart(int turnNumber)
+    {
         grid.CollapseWorld();
-        grid.IncreaseGrid();
-        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
         grid.InstantiateMissing();
-        if(step % this.replaceExitAfter == 0)
+
+        // Check if we should expand the grid
+        if (turnNumber > 0 && turnNumber % this.generateAfter == 0)
+        {
+            grid.IncreaseGrid();
+            PlayerMovement.currentGridPos = new Vector2Int(
+                PlayerMovement.currentGridPos.x + 1,
+                PlayerMovement.currentGridPos.y + 1
+            );
+            grid.InstantiateMissing();
+        }
+
+        // Check if we should reposition the exit
+        if (turnNumber > 0 && turnNumber % this.replaceExitAfter == 0)
         {
             grid.RepositionExit(WallPos.BACK);
         }
-        this.gui.FillList();
     }
 
     public void OnClick(GameObject clicked)
@@ -66,12 +84,27 @@ public class GameManager : MonoBehaviour
         if (selected == null || selected.GetGridType() != GridType.REPLACEABLE) return;
         if (!this.gui.HasSelectedObj()) return;
 
+        // Check if player has tiles left to place
+        if (remainingTilesToPlace <= 0)
+        {
+            Debug.Log("No tiles left to place this turn!");
+            return;
+        }
+
         GridObj virtualObj = this.gui.GetSelected();
         GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
         toPlace.SetGridPos(selected.GetGridPos());
         this.grid.PlaceObj(toPlace);
         this.gui.RemoveSelected(false);
+
+        remainingTilesToPlace--;
+    }
+
+    public void OnTurnEnd()
+    {
+        remainingTilesToPlace = 0;
     }
 
     public Grid GetCurrentGrid() { return this.grid; }
+    public int GetRemainingTilesToPlace() { return remainingTilesToPlace; }
 }

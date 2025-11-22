@@ -3,7 +3,16 @@ guid: be81d5859149785468028c1000dd1285
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - tileButtonPrefab: {fileID: 5599869619554013931, guid: a1765776308fdda4fa0d6da5eafc5131,
+      type: 3}
+  - tileContainer: {fileID: 6763224701089545938, guid: aabcee5bdf288c74384d234083f6b664,
+      type: 3}
+  - remainingTilesText: {instanceID: 0}
+  - wallPreviewPrefab: {fileID: 2144594829894418979, guid: f70bbc641b70bd4499a0156471aac54f,
+      type: 3}
+  - floorPreviewPrefab: {fileID: 5365367703789444965, guid: 03741992903a35148bbfca60e9108b1a,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

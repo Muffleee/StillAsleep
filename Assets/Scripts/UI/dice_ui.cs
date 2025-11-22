@@ -7,11 +7,13 @@ public class DiceUI : MonoBehaviour
     [Header("References")]
     [SerializeField] private DiceSystem diceSystem;
     [SerializeField] private TurnManager turnManager;
+    [SerializeField] private GameManager gameManager;
 
     [Header("UI Elements")]
     [SerializeField] private TextMeshProUGUI turnCounterText;
     [SerializeField] private TextMeshProUGUI movementStepsText;
     [SerializeField] private TextMeshProUGUI tileRewardText;
+    [SerializeField] private TextMeshProUGUI tilesRemainingText;
     [SerializeField] private TextMeshProUGUI skipBonusText;
     [SerializeField] private TextMeshProUGUI phaseText;
     [SerializeField] private TextMeshProUGUI instructionsText;
@@ -25,9 +27,12 @@ public class DiceUI : MonoBehaviour
     {
         if (diceSystem == null)
             diceSystem = FindObjectOfType<DiceSystem>();
-        
+
         if (turnManager == null)
             turnManager = FindObjectOfType<TurnManager>();
+
+        if (gameManager == null)
+            gameManager = FindObjectOfType<GameManager>();
 
         if (diceSystem != null)
         {
@@ -66,7 +71,14 @@ public class DiceUI : MonoBehaviour
 
             if (tileRewardText != null && diceSystem.HasRolledThisTurn)
             {
-                tileRewardText.text = $"Tiles: {diceSystem.RolledTileReward}";
+                tileRewardText.text = $"Tiles Rolled: {diceSystem.RolledTileReward}";
+            }
+
+            if (tilesRemainingText != null && gameManager != null)
+            {
+                int remaining = gameManager.GetRemainingTilesToPlace();
+                tilesRemainingText.text = $"Tiles Left: {remaining}";
+                tilesRemainingText.color = remaining > 0 ? highlightColor : normalColor;
             }
 
             if (skipBonusText != null)
@@ -84,7 +96,9 @@ public class DiceUI : MonoBehaviour
                     instructionsText.text = "[R] Roll Dice | [K] Skip Turn";
                     break;
                 case TurnPhase.Moving:
-                    instructionsText.text = "[WASD] Move | Steps remaining: " + diceSystem.RolledMovementSteps;
+                    string tilesInfo = gameManager != null ?
+                        $" | Tiles: {gameManager.GetRemainingTilesToPlace()}" : "";
+                    instructionsText.text = $"[WASD] Move | Steps: {diceSystem.RolledMovementSteps}{tilesInfo}";
                     break;
                 case TurnPhase.TurnEnd:
                     instructionsText.text = "Turn Ending...";

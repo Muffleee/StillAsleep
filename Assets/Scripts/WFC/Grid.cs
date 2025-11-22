@@ -151,7 +151,7 @@ public class Grid
         int Trapchance = 5;
         int JumpingBadChance= 7;
         int PlaceHolderChance=0;
-        int rand = Random.Range(0, 100);
+        int rand = UnityEngine.Random.Range(0, 100);
         if(rand <= Trapchance)
         {
             gridObj.InitType(GridType.TRAP);

@@ -39,6 +39,13 @@ public class TurnManager : MonoBehaviour
     {
         turnCounter++;
         currentPhase = TurnPhase.WaitingForRoll;
+
+        // GameManager to handle generation
+        if (gameManager != null)
+        {
+            gameManager.OnTurnStart(turnCounter);
+        }
+
         onTurnStart?.Invoke();
         onPhaseChanged?.Invoke(currentPhase);
         
@@ -76,7 +83,8 @@ public class TurnManager : MonoBehaviour
         onPhaseChanged?.Invoke(currentPhase);
 
         if (gameManager != null)
-        {
+        {   
+            gameManager.OnDiceRolled(movement, tiles);
             Debug.Log($"Player awarded {tiles} tiles");
         }
         Debug.Log($"Movement phase: You have {movement} steps to move");
@@ -104,6 +112,12 @@ public class TurnManager : MonoBehaviour
     {
         currentPhase = TurnPhase.TurnEnd;
         onPhaseChanged?.Invoke(currentPhase);
+
+        if (gameManager != null)
+        {
+            gameManager.OnTurnEnd();
+        }
+
         onTurnEnd?.Invoke();
 
         Debug.Log($"=== Turn {turnCounter} Ended ===\n");
@@ -119,6 +133,6 @@ public class TurnManager : MonoBehaviour
 public enum TurnPhase
 {
     WaitingForRoll,  
-    Moving,          
+    Moving,             
     TurnEnd          
 }
