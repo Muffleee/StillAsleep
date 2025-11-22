@@ -420,7 +420,7 @@ public class Grid
     /// <param name="growthIndex">Growth index to be passed to the Exit</param>
     public void CreateExit(Vector2Int pos, int growthIndex)
     {
-        exit = new Exit(new GridObj(pos, new WallStatus(WallType.EXIT, WallType.NONE, WallType.NONE, WallType.NONE)), growthIndex);
+        exit = new Exit(new GridObj(pos, new WallStatus(WallType.EXIT, WallType.NONE, WallType.NONE, WallType.NONE)), new Pair<GridObj, WallPos>(null, WallPos.FRONT), growthIndex);
         // this.exit.gridObj.InstantiateObj(growthIndex); // TODO fix this
     }
 
@@ -431,18 +431,15 @@ public class Grid
     public void RepositionExit(WallPos direction)
     {   
         // if(this.exit.growthIndex < this.growthIndex) return; // TODO Somehow this does not work properly, no idea why
-        if(growthIndex < 1) return; // TODO remove magic number once code above is fixed
-        Debug.Log("Repositioned " + growthIndex);
+        if(this.growthIndex < 1) return; // TODO remove magic number once code above is fixed
         GridObj exit = this.exit.gridObj;
-        Vector2Int exitPos = exit.GetGridPos();
-        GridObj newExit = GetAdjacentGridObj(exit, direction);
+        GridObj newExit = this.GetAdjacentGridObj(exit, direction);
 
         newExit = PlaceExit(newExit);
 
         if(newExit != null)
         {
-            this.exit.gridObj = newExit;
-            grid[exitPos.x, exitPos.y].RemoveExitWalls();
+            this.MoveExit(exit, newExit);
             return;
         }
 
@@ -453,15 +450,48 @@ public class Grid
             newExit = PlaceExit(newExit);
             if(newExit != null)
             {
-                this.exit.gridObj = newExit;
-                grid[exitPos.x, exitPos.y].RemoveExitWalls();
+                this.MoveExit(exit, newExit);
                 break;
             }
         }
     }
 
     /// <summary>
-    /// Attempt to place an exit on a random free spot. If no spot is free, returns null
+    /// This is a helper method and you should never use this except in RepositionExit()
+    /// Set newExit into grid and remove adjacent wall if it was placed to cover exit
+    /// </summary>
+    /// <param name="oldExit"></param>
+    /// <param name="newExit"></param>
+    private void MoveExit(GridObj oldExit, GridObj newExit)
+    {   
+        Vector2Int oldExitPos = oldExit.GetGridPos();
+        this.grid[oldExitPos.x, oldExitPos.y].RemoveExitWalls();
+
+        this.exit.gridObj = newExit;
+
+        // remove adjacent wall
+        if(this.exit.adjacent.first != null) this.exit.adjacent.first.RemoveWall(this.exit.adjacent.second);
+
+        // place new adjacent wall
+        if(!newExit.HasExit()) return;
+        WallPos exitPos = newExit.GetExitPos();
+        WallPos opposite = WallStatus.GetOppositePos(exitPos);
+        GridObj adj = this.GetAdjacentGridObj(newExit, exitPos);
+
+        if(adj != null && adj.GetGridType() != GridType.REPLACEABLE && !adj.HasWallAt(opposite))
+        {   
+            Debug.Log($"and placed {opposite}");
+            adj.PlaceWallAt(opposite, this.growthIndex);
+            this.exit.adjacent.first = adj;
+            this.exit.adjacent.second = opposite;
+        } else
+        {
+            this.exit.adjacent.first = null;
+        }
+    }
+
+    /// <summary>
+    /// Attempts to place an exit on a random free spot. If no spot is free, it returns null
     /// </summary>
     /// <param name="gridObj"></param>
     /// <returns>The newly placed exit GridObj, or null if no space</returns>

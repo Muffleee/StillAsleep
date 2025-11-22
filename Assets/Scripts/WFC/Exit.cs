@@ -9,16 +9,20 @@ public class Exit
 {
     public GridObj gridObj;
     public int growthIndex;
+    public Pair<GridObj, WallPos> adjacent;
 
     /// <summary>
     /// Create the Exit from a GridObj and a growthIndex
     /// </summary>
     /// <param name="gridObj">GridObj at which the exit should be</param>
     /// <param name="growthIndex"></param>
-    public Exit(GridObj gridObj, int growthIndex)
+    /// <param name="adjacent"></param>
+
+    public Exit(GridObj gridObj, Pair<GridObj, WallPos> adjacent, int growthIndex)
     {
         this.gridObj = gridObj;
         this.growthIndex = growthIndex;
+        this.adjacent = adjacent;    
     }
 
     
