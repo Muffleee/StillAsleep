@@ -31,6 +31,11 @@ public class GridObj
     private GridType gridType = GridType.REGULAR;
     private IInteractable interactable = null;
 
+    [SerializeField] private GameObject energyCrystalPrefab;
+
+    [SerializeField] private int placementCost = 1;
+    public int PlacementCost => placementCost;
+
     /// <summary>
     /// Create a GridObj given a grid position and a WallStatus, as well as some prefabs
     /// </summary>
@@ -77,6 +82,7 @@ public class GridObj
         floorPrefab = builder.floorPrefab;
         destructibleWallPrefab = builder.destructibleWallPrefab;
         exitPrefab = builder.exitPrefab;
+        this.energyCrystalPrefab = builder.energyCrystalPrefab;
         GameManager.AllGridObjs.Add(this);
     }
 
@@ -291,6 +297,16 @@ public class GridObj
         if (wallStatus.HasWallAt(WallPos.RIGHT))
         {
             InstantiateWall(WallPos.RIGHT, GetWallAt(WallPos.RIGHT), growthIndex);
+        }
+        if (this.gridType == GridType.REGULAR && UnityEngine.Random.value < 0.1f)
+        {
+            EnergyCrystal.PrepareSpawn(this.GetWorldPos(growthIndex), 10);
+
+            GameObject.Instantiate(
+                energyCrystalPrefab,
+                this.GetWorldPos(growthIndex),
+                Quaternion.identity
+            );
         }
     }
 

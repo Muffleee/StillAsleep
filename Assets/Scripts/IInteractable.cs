@@ -130,7 +130,12 @@ public class JumpingPads : IInteractable
     void IInteractable.OnUse(GridObj obj)
     {
         //can be extended later in case we wanna have an effect when standing on a jumbad boucning for example
-        return;
+        PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
+        if (pr != null)
+        {
+            pr.Spend(1);   // 1 Energie abziehen
+        }
+
     }
 
     /// <summary>
