@@ -210,7 +210,7 @@ public class PlayerMovement : MonoBehaviour
         //}
         ////end of trap detection
         
-        CheckForExit(destinationTile, wallPos);
+        CheckForExit(destinationTile);
 
         onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, stepCounter);
         gameManager.OnMove(lastGridPos, currentGridPos, wallPos, stepCounter);
@@ -234,16 +234,17 @@ public class PlayerMovement : MonoBehaviour
     }
 
     //Checks if we went through an exit
-    private void CheckForExit(GridObj currentTile, WallPos entryDirection)
+    private void CheckForExit(GridObj currentTile)
     {
         if (currentTile == null) return;
 
-        if(currentTile.GetWallAt(entryDirection) == WallType.EXIT)
+        if(currentTile.GetWallAt(WallPos.FRONT) == WallType.EXIT || currentTile.GetWallAt(WallPos.BACK) == WallType.EXIT || currentTile.GetWallAt(WallPos.RIGHT) == WallType.EXIT || currentTile.GetWallAt(WallPos.LEFT) == WallType.EXIT)
         {
             if (winScreen != null)
             {
                 winScreen.ShowWinScreen();
             } 
+
         } else
         {
             Debug.LogWarning("Kein WinScreen gefunden");
