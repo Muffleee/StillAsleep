@@ -1099,8 +1099,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ee59591d4335ea459582fdbd63b4997, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startEnergy: 0
-  maxEnergy: 10
+  startEnergy: 1
+  maxEnergy: 16
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

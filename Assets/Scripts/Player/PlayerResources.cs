@@ -2,12 +2,13 @@ using UnityEngine;
 
 public class PlayerResources : MonoBehaviour
 {
-    [SerializeField] private int startEnergy = 0;
-    [SerializeField] private int maxEnergy = 10;
+    [SerializeField] private int startEnergy = 1;
+    [SerializeField] private int maxEnergy = 12;
 
     private int currentEnergy;
 
     public int CurrentEnergy => currentEnergy;
+    public int MaxEnergy => maxEnergy;
 
     void Start()
     {
