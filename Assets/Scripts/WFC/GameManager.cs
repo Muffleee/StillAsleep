@@ -17,6 +17,15 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int width;
     [SerializeField] private int height;
     [SerializeField] private IngameUI gui;
+    [SerializeField] private int corridor = 0;
+    [SerializeField] private int corner = 0;
+    [SerializeField] private int oneWall = 0;
+    [SerializeField] private int empty = 0;
+
+    public static int emptyWeight;
+    public static int corridorWeight;
+    public static int cornerWeight;
+    public static int oneWallWeight;
     public static List<GridObj> AllGridObjs = new List<GridObj>();
 
     public GameObject wallPrefab;
@@ -31,6 +40,10 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
+        corridorWeight = corridor;
+        cornerWeight = corner;
+        oneWallWeight = oneWall;
+        emptyWeight = empty;
         grid = new Grid(width, height);
 
         grid.CollapseWorld();

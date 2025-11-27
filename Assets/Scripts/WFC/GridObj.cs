@@ -30,13 +30,14 @@ public class GridObj
     private List<GridObj>[] compatibleObjs = null;
     private GridType gridType = GridType.REGULAR;
     private IInteractable interactable = null;
+    private int weight = 0;
 
     /// <summary>
     /// Create a GridObj given a grid position and a WallStatus, as well as some prefabs
     /// </summary>
     /// <param name="gridPos"></param>
     /// <param name="wallStatus"></param>
-    public GridObj(Vector2Int gridPos, GameObject wallPrefab, GameObject floorPrefab, GameObject destructibleWallPrefab, GameObject exitPrefab, WallStatus wallStatus)
+    public GridObj(Vector2Int gridPos, GameObject wallPrefab, GameObject floorPrefab, GameObject destructibleWallPrefab, GameObject exitPrefab, WallStatus wallStatus, int weight)
     {
         this.gridPos = gridPos;
         this.wallPrefab = wallPrefab;
@@ -44,6 +45,7 @@ public class GridObj
         this.wallStatus = wallStatus;
         this.destructibleWallPrefab = destructibleWallPrefab;
         this.exitPrefab = exitPrefab;
+        this.weight = weight;
         isPlaceable = true;
     }
 
@@ -84,9 +86,10 @@ public class GridObj
     /// Create virtual, non placeable GridObj that knows no position
     /// </summary>
     /// <param name="wallStatus"></param>
-    public GridObj(WallStatus wallStatus)
+    public GridObj(WallStatus wallStatus, int weight)
     {
         this.wallStatus = wallStatus;
+        this.weight = weight;
         isPlaceable = false;
     }
 
@@ -131,10 +134,10 @@ public class GridObj
         List<GridObj> objs = new List<GridObj>();
 
         // empty (only floor)
-        objs.Add(new GridObj(new WallStatus()));
+        objs.Add(new GridObj(new WallStatus(), GameManager.emptyWeight));
 
         // corridors
-        GridObj corridor = new GridObj(new WallStatus(WallType.REGULAR, WallType.REGULAR, WallType.NONE, WallType.NONE));
+        GridObj corridor = new GridObj(new WallStatus(WallType.REGULAR, WallType.REGULAR, WallType.NONE, WallType.NONE), GameManager.corridorWeight);
         for (int i = 0; i < 2; i++)
         {
             objs.Add(corridor.Clone());
@@ -142,7 +145,7 @@ public class GridObj
         }
 
         // only one wall
-        GridObj oneWall = new GridObj(new WallStatus(WallType.REGULAR, WallType.NONE, WallType.NONE, WallType.NONE));
+        GridObj oneWall = new GridObj(new WallStatus(WallType.REGULAR, WallType.NONE, WallType.NONE, WallType.NONE), GameManager.oneWallWeight);
         for (int i = 0; i < 4; i++)
         {
             objs.Add(oneWall.Clone());
@@ -150,7 +153,7 @@ public class GridObj
         }
 
         // corners
-        GridObj corner = new GridObj(new WallStatus(WallType.REGULAR, WallType.NONE, WallType.REGULAR, WallType.NONE));
+        GridObj corner = new GridObj(new WallStatus(WallType.REGULAR, WallType.NONE, WallType.REGULAR, WallType.NONE), GameManager.cornerWeight);
         for (int i = 0; i < 4; i++)
         {
             objs.Add(corner.Clone());
@@ -604,7 +607,7 @@ public class GridObj
     /// <returns> GridObj clone </returns>
     public GridObj Clone()
     {
-        GridObj clone = new GridObj(gridPos, wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab, wallStatus.Clone());
+        GridObj clone = new GridObj(gridPos, wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab, wallStatus.Clone(), weight);
 
         clone.SetIsPlaceable(isPlaceable);
         clone.SetGridType(gridType);
@@ -643,6 +646,7 @@ public class GridObj
     public Vector2Int GetGridPos() { return gridPos; }
     public WallStatus GetWallStatus() { return wallStatus; }
     public IInteractable GetInteract() { return interactable; }
+    public int GetWeight() { return weight; }
 
     // Generic setters
 
@@ -655,6 +659,7 @@ public class GridObj
     public void SetIsPlaceable(bool isPlaceable) { this.isPlaceable = isPlaceable; }
     public void SetGridType(GridType gridType) { this.gridType = gridType; }
     public void SetGridPos(Vector2Int gridPos) { this.gridPos = gridPos; }
+    public void SetWeight(int weight) {  this.weight = weight; }
 }
 
 public enum GridType
