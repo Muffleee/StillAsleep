@@ -26,12 +26,17 @@ public class GameManager : MonoBehaviour
     public static int corridorWeight;
     public static int cornerWeight;
     public static int oneWallWeight;
+
+    [SerializeField] private GameObject player;
+
     public static List<GridObj> AllGridObjs = new List<GridObj>();
 
     public GameObject wallPrefab;
     public GameObject floorPrefab;
     public GameObject destructibleWallPrefab;
     public GameObject exitPrefab;
+
+    public GameObject energyCrystalPrefab;
 
     Grid grid;
 
@@ -94,6 +99,17 @@ public class GameManager : MonoBehaviour
         if (!gui.HasSelectedObj()) return;
 
         GridObj virtualObj = gui.GetSelected();
+
+        PlayerResources pr = player.GetComponent<PlayerResources>();
+        int cost = virtualObj.PlacementCost;
+
+        if (!pr.CanAfford(cost))
+        {
+            Debug.Log("Nicht genug Energie!");
+            return;
+        }
+        pr.Spend(cost);
+
         GridObj toPlace = new GridObj(selectedTile.GetGridPos(), virtualObj.GetWallStatus());
         grid.PlaceObj(toPlace);
 

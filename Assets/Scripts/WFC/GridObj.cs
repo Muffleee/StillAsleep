@@ -32,6 +32,11 @@ public class GridObj
     private IInteractable interactable = null;
     private int weight = 0;
 
+    [SerializeField] private GameObject energyCrystalPrefab;
+
+    [SerializeField] private int placementCost = 1;
+    public int PlacementCost => placementCost;
+
     /// <summary>
     /// Create a GridObj given a grid position and a WallStatus, as well as some prefabs
     /// </summary>
@@ -79,6 +84,7 @@ public class GridObj
         floorPrefab = builder.floorPrefab;
         destructibleWallPrefab = builder.destructibleWallPrefab;
         exitPrefab = builder.exitPrefab;
+        this.energyCrystalPrefab = builder.energyCrystalPrefab;
         GameManager.AllGridObjs.Add(this);
     }
 
@@ -294,6 +300,36 @@ public class GridObj
         if (wallStatus.HasWallAt(WallPos.RIGHT))
         {
             InstantiateWall(WallPos.RIGHT, GetWallAt(WallPos.RIGHT), growthIndex);
+        }
+
+        PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
+        if (pr != null)
+        {
+            float energyRatio = (float)pr.CurrentEnergy / pr.MaxEnergy;
+
+            float baseChance = 0.10f; 
+            float spawnChance = baseChance * (1.5f - energyRatio);
+            spawnChance = Mathf.Clamp(spawnChance, 0.02f, 0.25f); 
+            //      spawnChance = baseChance * (1.5 - energyRatio)
+            //        → Spieler mit wenig Energie erhalten bis zu +50 % höhere Spawn-Chance
+            //        → Spieler mit voller Energie erhalten 50 % weniger Spawn-Chance
+
+            int baseMax = 6;
+            int bonus = 10;
+            int maxCrystals = baseMax + Mathf.FloorToInt((1f - energyRatio) * bonus);
+            //      maxCrystals = baseMax + (1 - energyRatio) * bonus
+            //        → Obergrenze steigt bei wenig Energie (bis zu 16)
+            //        → Obergrenze sinkt bei viel Energie (mindestens 6)
+
+            Debug.Log(
+            $"[CRYSTAL BALANCING] energyRatio={energyRatio:F2}, spawnChance={spawnChance:P2}, maxCrystals={maxCrystals}"
+            );
+
+            if (gridType == GridType.REGULAR && UnityEngine.Random.value < spawnChance)
+            {
+                EnergyCrystal.PrepareSpawn(this.GetWorldPos(growthIndex), maxCrystals);
+                GameObject.Instantiate(energyCrystalPrefab, this.GetWorldPos(growthIndex), Quaternion.identity);
+            }
         }
     }
 
