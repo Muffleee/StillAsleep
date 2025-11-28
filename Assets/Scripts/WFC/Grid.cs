@@ -141,10 +141,11 @@ public class Grid
                 foreach (GridObj cand in candidates)
                 {
                     if (cand.IsCompatible(neighbor, sideFromMe))
-                        filtered.Add(cand);
+                        filtered.Add(cand.Clone());
                 }
+                IncreaseWeight(filtered, neighbor, sideFromMe);
                 candidates = filtered;
-
+                
                 if (candidates.Count == 0) break;
             }
 
@@ -167,7 +168,37 @@ public class Grid
             }
         }
     }
+    private void IncreaseWeight(List<GridObj> filtered, GridObj neighbor, WallPos side)
+    {
+        if (side == WallPos.FRONT || side == WallPos.BACK)
+        {
+            foreach(GridObj cand in filtered)
+            {
+                if(cand.GetWallStatus().left == neighbor.GetWallStatus().left)
+                {
+                    cand.SetWeight(cand.GetWeight() + 2);
+                }
+                if (cand.GetWallStatus().right == neighbor.GetWallStatus().right)
+                {
+                    cand.SetWeight(cand.GetWeight() + 2);
+                }
+            }
 
+        } else
+        {
+            foreach (GridObj cand in filtered)
+            {
+                if (cand.GetWallStatus().front == neighbor.GetWallStatus().front)
+                {
+                    cand.SetWeight(cand.GetWeight() + 2);
+                }
+                if (cand.GetWallStatus().back == neighbor.GetWallStatus().back)
+                {
+                    cand.SetWeight(cand.GetWeight() + 2);
+                }
+            }
+        }
+    }
     /// <summary>
     /// Sets the given GridObj to a random object type.
     /// </summary>
@@ -226,14 +257,14 @@ public class Grid
         int totalWeight = 0;
         foreach (var node in nodes)
         {
-            int weight = node.IsPlaceable() ? 1 : 1;
+            int weight = node.IsPlaceable() ? node.GetWeight() : node.GetWeight();
             totalWeight += weight;
         }
 
         int roll = UnityEngine.Random.Range(0, totalWeight);
         foreach (var node in nodes)
         {
-            int weight = node.IsPlaceable() ? 1 : 1; 
+            int weight = node.IsPlaceable() ? node.GetWeight() : node.GetWeight(); 
             if (roll < weight) return node;
             roll -= weight;
         }

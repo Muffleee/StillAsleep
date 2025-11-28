@@ -30,13 +30,19 @@ public class GridObj
     private List<GridObj>[] compatibleObjs = null;
     private GridType gridType = GridType.REGULAR;
     private IInteractable interactable = null;
+    private int weight = 0;
+
+    [SerializeField] private GameObject energyCrystalPrefab;
+
+    [SerializeField] private int placementCost = 1;
+    public int PlacementCost => placementCost;
 
     /// <summary>
     /// Create a GridObj given a grid position and a WallStatus, as well as some prefabs
     /// </summary>
     /// <param name="gridPos"></param>
     /// <param name="wallStatus"></param>
-    public GridObj(Vector2Int gridPos, GameObject wallPrefab, GameObject floorPrefab, GameObject destructibleWallPrefab, GameObject exitPrefab, WallStatus wallStatus)
+    public GridObj(Vector2Int gridPos, GameObject wallPrefab, GameObject floorPrefab, GameObject destructibleWallPrefab, GameObject exitPrefab, WallStatus wallStatus, int weight)
     {
         this.gridPos = gridPos;
         this.wallPrefab = wallPrefab;
@@ -44,6 +50,7 @@ public class GridObj
         this.wallStatus = wallStatus;
         this.destructibleWallPrefab = destructibleWallPrefab;
         this.exitPrefab = exitPrefab;
+        this.weight = weight;
         isPlaceable = true;
     }
 
@@ -77,6 +84,7 @@ public class GridObj
         floorPrefab = builder.floorPrefab;
         destructibleWallPrefab = builder.destructibleWallPrefab;
         exitPrefab = builder.exitPrefab;
+        this.energyCrystalPrefab = builder.energyCrystalPrefab;
         GameManager.AllGridObjs.Add(this);
     }
 
@@ -84,9 +92,10 @@ public class GridObj
     /// Create virtual, non placeable GridObj that knows no position
     /// </summary>
     /// <param name="wallStatus"></param>
-    public GridObj(WallStatus wallStatus)
+    public GridObj(WallStatus wallStatus, int weight)
     {
         this.wallStatus = wallStatus;
+        this.weight = weight;
         isPlaceable = false;
     }
 
@@ -131,10 +140,10 @@ public class GridObj
         List<GridObj> objs = new List<GridObj>();
 
         // empty (only floor)
-        objs.Add(new GridObj(new WallStatus()));
+        objs.Add(new GridObj(new WallStatus(), GameManager.emptyWeight));
 
         // corridors
-        GridObj corridor = new GridObj(new WallStatus(WallType.REGULAR, WallType.REGULAR, WallType.NONE, WallType.NONE));
+        GridObj corridor = new GridObj(new WallStatus(WallType.REGULAR, WallType.REGULAR, WallType.NONE, WallType.NONE), GameManager.corridorWeight);
         for (int i = 0; i < 2; i++)
         {
             objs.Add(corridor.Clone());
@@ -142,7 +151,7 @@ public class GridObj
         }
 
         // only one wall
-        GridObj oneWall = new GridObj(new WallStatus(WallType.REGULAR, WallType.NONE, WallType.NONE, WallType.NONE));
+        GridObj oneWall = new GridObj(new WallStatus(WallType.REGULAR, WallType.NONE, WallType.NONE, WallType.NONE), GameManager.oneWallWeight);
         for (int i = 0; i < 4; i++)
         {
             objs.Add(oneWall.Clone());
@@ -150,7 +159,7 @@ public class GridObj
         }
 
         // corners
-        GridObj corner = new GridObj(new WallStatus(WallType.REGULAR, WallType.NONE, WallType.REGULAR, WallType.NONE));
+        GridObj corner = new GridObj(new WallStatus(WallType.REGULAR, WallType.NONE, WallType.REGULAR, WallType.NONE), GameManager.cornerWeight);
         for (int i = 0; i < 4; i++)
         {
             objs.Add(corner.Clone());
@@ -291,6 +300,36 @@ public class GridObj
         if (wallStatus.HasWallAt(WallPos.RIGHT))
         {
             InstantiateWall(WallPos.RIGHT, GetWallAt(WallPos.RIGHT), growthIndex);
+        }
+
+        PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
+        if (pr != null)
+        {
+            float energyRatio = (float)pr.CurrentEnergy / pr.MaxEnergy;
+
+            float baseChance = 0.10f; 
+            float spawnChance = baseChance * (1.5f - energyRatio);
+            spawnChance = Mathf.Clamp(spawnChance, 0.02f, 0.25f); 
+            //      spawnChance = baseChance * (1.5 - energyRatio)
+            //        → Spieler mit wenig Energie erhalten bis zu +50 % höhere Spawn-Chance
+            //        → Spieler mit voller Energie erhalten 50 % weniger Spawn-Chance
+
+            int baseMax = 6;
+            int bonus = 10;
+            int maxCrystals = baseMax + Mathf.FloorToInt((1f - energyRatio) * bonus);
+            //      maxCrystals = baseMax + (1 - energyRatio) * bonus
+            //        → Obergrenze steigt bei wenig Energie (bis zu 16)
+            //        → Obergrenze sinkt bei viel Energie (mindestens 6)
+
+            Debug.Log(
+            $"[CRYSTAL BALANCING] energyRatio={energyRatio:F2}, spawnChance={spawnChance:P2}, maxCrystals={maxCrystals}"
+            );
+
+            if (gridType == GridType.REGULAR && UnityEngine.Random.value < spawnChance)
+            {
+                EnergyCrystal.PrepareSpawn(this.GetWorldPos(growthIndex), maxCrystals);
+                GameObject.Instantiate(energyCrystalPrefab, this.GetWorldPos(growthIndex), Quaternion.identity);
+            }
         }
     }
 
@@ -604,7 +643,7 @@ public class GridObj
     /// <returns> GridObj clone </returns>
     public GridObj Clone()
     {
-        GridObj clone = new GridObj(gridPos, wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab, wallStatus.Clone());
+        GridObj clone = new GridObj(gridPos, wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab, wallStatus.Clone(), weight);
 
         clone.SetIsPlaceable(isPlaceable);
         clone.SetGridType(gridType);
@@ -643,6 +682,7 @@ public class GridObj
     public Vector2Int GetGridPos() { return gridPos; }
     public WallStatus GetWallStatus() { return wallStatus; }
     public IInteractable GetInteract() { return interactable; }
+    public int GetWeight() { return weight; }
 
     // Generic setters
 
@@ -655,6 +695,7 @@ public class GridObj
     public void SetIsPlaceable(bool isPlaceable) { this.isPlaceable = isPlaceable; }
     public void SetGridType(GridType gridType) { this.gridType = gridType; }
     public void SetGridPos(Vector2Int gridPos) { this.gridPos = gridPos; }
+    public void SetWeight(int weight) {  this.weight = weight; }
 }
 
 public enum GridType
