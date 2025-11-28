@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] public static Vector2Int currentGridPos, lastGridPos;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private WinScreen winScreen;
 
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private bool DEBUG = false;
@@ -208,6 +209,8 @@ public class PlayerMovement : MonoBehaviour
         //    InGameTrapManager.ExecuteTrapEffect(destinationTile); 
         //}
         ////end of trap detection
+        
+        CheckForExit(destinationTile);
 
         onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, stepCounter);
         gameManager.OnMove(lastGridPos, currentGridPos, wallPos, stepCounter);
@@ -230,5 +233,21 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    //Checks if we went through an exit
+    private void CheckForExit(GridObj currentTile)
+    {
+        if (currentTile == null) return;
 
+        if(currentTile.GetWallAt(WallPos.FRONT) == WallType.EXIT || currentTile.GetWallAt(WallPos.BACK) == WallType.EXIT || currentTile.GetWallAt(WallPos.RIGHT) == WallType.EXIT || currentTile.GetWallAt(WallPos.LEFT) == WallType.EXIT)
+        {
+            if (winScreen != null)
+            {
+                winScreen.ShowWinScreen();
+            } 
+
+        } else
+        {
+            Debug.LogWarning("Kein WinScreen gefunden");
+        }
+    }
 }
