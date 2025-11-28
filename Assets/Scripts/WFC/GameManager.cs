@@ -1,11 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Serialization;
-using Unity.VisualScripting;
 using UnityEngine;
-using static Unity.VisualScripting.Member;
-using static UnityEditor.Progress;
 
 /// <summary>
 /// Main game manager class, handles game initialization, world generation, and move and click events
@@ -17,12 +11,26 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int width;
     [SerializeField] private int height;
     [SerializeField] private IngameUI gui;
+    [SerializeField] private int corridor = 0;
+    [SerializeField] private int corner = 0;
+    [SerializeField] private int oneWall = 0;
+    [SerializeField] private int empty = 0;
+
+    public static int emptyWeight;
+    public static int corridorWeight;
+    public static int cornerWeight;
+    public static int oneWallWeight;
+
+    [SerializeField] private GameObject player;
+
     public static List<GridObj> AllGridObjs = new List<GridObj>();
 
     public GameObject wallPrefab;
     public GameObject floorPrefab;
     public GameObject destructibleWallPrefab;
     public GameObject exitPrefab;
+
+    public GameObject energyCrystalPrefab;
 
     Grid grid;
 
@@ -31,6 +39,10 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
+        corridorWeight = corridor;
+        cornerWeight = corner;
+        oneWallWeight = oneWall;
+        emptyWeight = empty;
         grid = new Grid(width, height);
 
         grid.CollapseWorld();
@@ -76,12 +88,23 @@ public class GameManager : MonoBehaviour
     /// <param name="clicked">Clicked game object</param>
     public void OnClick(GameObject clicked)
     {
-        GridObj selectedTile = grid.GetGridObjFromGameObj(clicked);
-        if (selectedTile == null || selectedTile.GetGridType() != GridType.REPLACEABLE) return;
-        if (!gui.HasSelectedObj()) return;
+        GridObj selected = this.grid.GetGridObjFromGameObj(clicked);
+        if (selected == null || (selected.GetGridType() != GridType.REPLACEABLE && selected.GetGridType() != GridType.MANUAL_REPLACEABLE)) return;
+        if (!this.gui.HasSelectedObj()) return;
 
         GridObj virtualObj = gui.GetSelected();
-        GridObj toPlace = new GridObj(selectedTile.GetGridPos(), virtualObj.GetWallStatus());
+
+        PlayerResources pr = player.GetComponent<PlayerResources>();
+        int cost = virtualObj.PlacementCost;
+
+        if (!pr.CanAfford(cost))
+        {
+            Debug.Log("Nicht genug Energie!");
+            return;
+        }
+        pr.Spend(cost);
+
+        GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
         grid.PlaceObj(toPlace);
 
         gui.RemoveSelected(false);

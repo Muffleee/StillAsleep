@@ -44,7 +44,7 @@ public class Regular : IInteractable
     /// <returns></returns>
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
     }
 }
 
@@ -75,10 +75,11 @@ public class Trap : IInteractable
 
     private void ActivateTrap()
     {
-        // =========================================================================
-        // PLACEHOLDER LOGIC: later trap effects go here
-        // =========================================================================
-        // can be losing Energy or maybe lose Vision like FogOfWar for the next 3 move or whatever
+        PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
+        if (pr != null)
+        {
+            pr.Spend(3);   // 1 Energie abziehen
+        }
     }
 
     private void ResetTrapVisual(GridObj tile)
@@ -114,7 +115,7 @@ public class Trap : IInteractable
     /// <returns></returns>
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
     }
 }
 
@@ -130,7 +131,6 @@ public class JumpingPads : IInteractable
     void IInteractable.OnUse(GridObj obj)
     {
         //can be extended later in case we wanna have an effect when standing on a jumbad boucning for example
-        return;
     }
 
     /// <summary>
@@ -142,7 +142,13 @@ public class JumpingPads : IInteractable
     /// <returns></returns>
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+        PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
+        if (pr != null && pr.CurrentEnergy >0 && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE)&& curr.HasWallAt(wPos))
+        {
+            pr.Spend(1);   // 1 Energie abziehen
+            return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+        }
+        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
     }
 }
 
@@ -163,5 +169,22 @@ public class Replaceable : IInteractable
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         return false;
+    }
+}
+
+public class ManualReplaceable : IInteractable
+{
+    void IInteractable.SetColor(GameObject obj)
+    {
+        obj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+    }
+    void IInteractable.OnUse(GridObj obj)
+    {
+        return;
+    }
+
+    bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    {
+        return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
     }
 }
