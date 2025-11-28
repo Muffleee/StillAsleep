@@ -469,8 +469,6 @@ public class Grid
         Vector2Int optimalRepositionVector = playerGridPosition - currentExitGridObj.GetGridPos();
         float optimalRepositionDirection = math.atan2(optimalRepositionVector.y, optimalRepositionVector.x) * 2 / math.PI + 2;
 
-        UnityEngine.Debug.Log(optimalRepositionDirection);
-
         WallPos[] optimalRepositionWallPos = new WallPos[3];
         optimalRepositionWallPos[0] = WallStatus.IntToWallPos((int)Math.Round(optimalRepositionDirection, MidpointRounding.AwayFromZero));
         if (optimalRepositionDirection % 1 < .5)
