@@ -321,10 +321,6 @@ public class GridObj
             //        → Obergrenze steigt bei wenig Energie (bis zu 16)
             //        → Obergrenze sinkt bei viel Energie (mindestens 6)
 
-            Debug.Log(
-            $"[CRYSTAL BALANCING] energyRatio={energyRatio:F2}, spawnChance={spawnChance:P2}, maxCrystals={maxCrystals}"
-            );
-
             if (gridType == GridType.REGULAR && UnityEngine.Random.value < spawnChance)
             {
                 EnergyCrystal.PrepareSpawn(this.GetWorldPos(growthIndex), maxCrystals);

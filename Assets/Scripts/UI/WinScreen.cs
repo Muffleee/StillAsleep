@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class WinScreen : MonoBehaviour
 {
 
     [SerializeField] private GameObject winScreenPanel;
-    [SerializeField] private Text winText;
+    [SerializeField] private TMP_Text winText;
     [SerializeField] private Button restartButton;
     [SerializeField] private Button quitButton;
 
