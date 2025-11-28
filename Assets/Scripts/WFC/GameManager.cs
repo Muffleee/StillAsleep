@@ -15,13 +15,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int corner = 0;
     [SerializeField] private int oneWall = 0;
     [SerializeField] private int empty = 0;
-    [SerializeField] private int manualPlaceable = 0;
 
     public static int emptyWeight;
     public static int corridorWeight;
     public static int cornerWeight;
     public static int oneWallWeight;
-    public static int manualPlaceableWeight;
 
     [SerializeField] private GameObject player;
 
@@ -45,7 +43,6 @@ public class GameManager : MonoBehaviour
         cornerWeight = corner;
         oneWallWeight = oneWall;
         emptyWeight = empty;
-        manualPlaceableWeight = manualPlaceable;
         grid = new Grid(width, height);
 
         grid.CollapseWorld();

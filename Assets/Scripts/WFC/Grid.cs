@@ -264,14 +264,14 @@ public class Grid
         int totalWeight = 0;
         foreach (var node in nodes)
         {
-            int weight = node.IsPlaceable() ? node.GetWeight() : node.GetWeight();
+            int weight = node.GetWeight();
             totalWeight += weight;
         }
 
         int roll = UnityEngine.Random.Range(0, totalWeight);
         foreach (var node in nodes)
         {
-            int weight = node.IsPlaceable() ? node.GetWeight() : node.GetWeight(); 
+            int weight = node.GetWeight();
             if (roll < weight) return node;
             roll -= weight;
         }

@@ -157,6 +157,10 @@ MonoBehaviour:
   width: 3
   height: 3
   gui: {fileID: 944478704}
+  corridor: 6
+  corner: 8
+  oneWall: 6
+  empty: 10
   player: {fileID: 6834562829543864865}
   wallPrefab: {fileID: 2144594829894418979, guid: f70bbc641b70bd4499a0156471aac54f,
     type: 3}
