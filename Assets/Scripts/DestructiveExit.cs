@@ -1,10 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// Class describing a destructible exit. Has a fixed time after which the exit is destroyed.
+/// </summary>
 public class DestructiveExit : MonoBehaviour
 {
     public GridObj gridObj;
@@ -16,6 +15,9 @@ public class DestructiveExit : MonoBehaviour
     private float startTime;
     private MeshRenderer meshRenderer;
     
+    /// <summary>
+    /// Initialise the timer, its associated end event, and the progression-based rendering of the exit.
+    /// </summary>
     private void Start()
     {
         startTime = time;
@@ -32,12 +34,19 @@ public class DestructiveExit : MonoBehaviour
         timer.StartTimer();
     }
 
+    /// <summary>
+    /// Every frame, change the colour according to the remaining time.
+    /// </summary>
     private void Update()
     {
         float timeLeft = timer.GetTimeRemaining();
         ColorChange(timeLeft);
     }
 
+    /// <summary>
+    /// Change the colour of the exit according to the time remaining.
+    /// </summary>
+    /// <param name="timeRemaining">Time remaining in seconds.</param>
     private void ColorChange(float timeRemaining)
     {
         float t = timeRemaining / startTime;
@@ -48,6 +57,9 @@ public class DestructiveExit : MonoBehaviour
         meshRenderer.material.color = currentColor;
     }
 
+    /// <summary>
+    /// Once the timer is finished, invoke the onDestroy event and destroy this GameObject.
+    /// </summary>
     private void OnTimerFinished()
     {   
         onDestroy.Invoke(this.gridObj, this.wallPos);
