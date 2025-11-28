@@ -23,7 +23,7 @@ public class Regular : IInteractable
 
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
     }
 }
 
@@ -83,7 +83,7 @@ public class Trap : IInteractable
 
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
     }
 }
 
@@ -105,7 +105,7 @@ public class JumpingPads : IInteractable
     /// </summary>
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+        return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
     }
 }
 public class Replaceable : IInteractable
@@ -122,5 +122,22 @@ public class Replaceable : IInteractable
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         return false;
+    }
+}
+
+public class ManualReplaceable : IInteractable
+{
+    void IInteractable.SetColor(GameObject obj)
+    {
+        obj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
+    }
+    void IInteractable.OnUse(GridObj obj)
+    {
+        return;
+    }
+
+    bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    {
+        return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
     }
 }

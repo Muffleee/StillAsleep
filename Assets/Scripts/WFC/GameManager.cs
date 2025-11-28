@@ -63,7 +63,7 @@ public class GameManager : MonoBehaviour
     public void OnClick(GameObject clicked)
     {
         GridObj selected = this.grid.GetGridObjFromGameObj(clicked);
-        if (selected == null || selected.GetGridType() != GridType.REPLACEABLE) return;
+        if (selected == null || (selected.GetGridType() != GridType.REPLACEABLE && selected.GetGridType() != GridType.MANUAL_REPLACEABLE)) return;
         if (!this.gui.HasSelectedObj()) return;
 
         GridObj virtualObj = this.gui.GetSelected();

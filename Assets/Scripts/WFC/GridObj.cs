@@ -87,25 +87,24 @@ public class GridObj
         this.isPlaceable = false;
     }
 
-    public void InitType(GridType type)
+    private void InitType(GridType type)
     {
         switch (type)
         {
             case GridType.REGULAR: 
-                interactable = new Regular();
-                gridType = GridType.REGULAR;
+                this.interactable = new Regular();
                 break;
             case GridType.TRAP: 
-                interactable = new Trap();
-                gridType = GridType.TRAP; 
+                this.interactable = new Trap(); 
                 break;
             case GridType.JUMPINGPAD: 
-                interactable = new JumpingPads();
-                gridType = GridType.JUMPINGPAD;
+                this.interactable = new JumpingPads();
                 break;
             case GridType.REPLACEABLE: 
-                interactable = new Replaceable();
-                gridType = GridType.REPLACEABLE;
+                this.interactable = new Replaceable();
+                break;
+            case GridType.MANUAL_REPLACEABLE:
+                this.interactable = new ManualReplaceable();
                 break;
         }
     }
@@ -126,6 +125,11 @@ public class GridObj
     public static List<GridObj> GetPossiblePlaceables()
     {
         List<GridObj> objs = new List<GridObj>();
+
+        // Replaceable
+        GridObj replaceable = new GridObj(new WallStatus());
+        replaceable.SetGridType(GridType.MANUAL_REPLACEABLE);
+        objs.Add(replaceable);
 
         // empty (only floor)
         objs.Add(new GridObj(new WallStatus()));
@@ -164,7 +168,8 @@ public class GridObj
     /// <param name="side"></param>
     /// <returns></returns>
     public bool IsCompatible(GridObj other, WallPos side)
-    {
+    {   
+        if(this.GetGridType() == GridType.MANUAL_REPLACEABLE || other.GetGridType() == GridType.MANUAL_REPLACEABLE) return true;
         switch (side)
         {
             case WallPos.FRONT: return this.HasWallAt(WallPos.FRONT) == other.HasWallAt(WallPos.BACK);
@@ -561,6 +566,18 @@ public class GridObj
     }
 
     /// <summary>
+    /// Removes all walls
+    /// </summary>
+    public void RemoveAllWalls()
+    {
+        foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
+        {
+            if(!this.HasWallAt(pos)) continue;
+            this.RemoveWall(pos);
+        }
+    }
+
+    /// <summary>
     /// Returns a list of all free WallPos that have no wall
     /// </summary>
     /// <returns></returns>
@@ -647,11 +664,11 @@ public class GridObj
     public void SetExitCallbacks(UnityEvent<GridObj, WallPos>[] exitCallbacks) { this.exitCallbacks = exitCallbacks; }
     public void SetCompatibleObjs(List<GridObj>[] compatibleObjs) { this.compatibleObjs = compatibleObjs; }
     public void SetIsPlaceable(bool isPlaceable) { this.isPlaceable = isPlaceable; }
-    public void SetGridType(GridType gridType) { this.gridType = gridType; }
+    public void SetGridType(GridType gridType) { this.gridType = gridType; this.InitType(gridType); }
     public void SetGridPos(Vector2Int gridPos) { this.gridPos = gridPos; }
 }
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE, TRAP, JUMPINGPAD
+    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD
 }
