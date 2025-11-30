@@ -22,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, gameManager.GetCurrentGrid().GetGrowthIndex());
+        currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, gameManager.GetCurrentGrid().GetWorldOffsetX(), gameManager.GetCurrentGrid().GetWorldOffsetY());
         foreach(var wall in FindObjectsOfType< DestructibleWall >())
         {
             wall.onDestroy.AddListener(OnWallDestroyed);

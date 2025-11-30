@@ -8,7 +8,8 @@ using UnityEngine;
 public class Exit
 {
     public GridObj gridObj;
-    public int growthIndex;
+    public int worldOffsetX;
+    public int worldOffsetY;
     public Pair<GridObj, WallPos> adjacent;
 
     /// <summary>
@@ -18,10 +19,11 @@ public class Exit
     /// <param name="growthIndex"></param>
     /// <param name="adjacent"></param>
 
-    public Exit(GridObj gridObj, Pair<GridObj, WallPos> adjacent, int growthIndex)
+    public Exit(GridObj gridObj, Pair<GridObj, WallPos> adjacent, int worldOffsetX, int worldOffsetY)
     {
         this.gridObj = gridObj;
-        this.growthIndex = growthIndex;
+        this.worldOffsetX = worldOffsetX;
+        this.worldOffsetY = worldOffsetX;
         this.adjacent = adjacent;    
     }
 

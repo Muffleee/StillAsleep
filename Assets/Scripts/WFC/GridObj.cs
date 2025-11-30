@@ -121,11 +121,17 @@ public class GridObj
         }
     }
 
-    // TODO fixme
-    public static Vector2Int WorldPosToGridPos(Vector3 pos, int growthIndex)
+    /// <summary>
+    /// Calculates world position from grid indexes
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="worldOffsetX"></param>
+    /// <param name="worldOffsetY"></param>
+    /// <returns></returns>
+    public static Vector2Int WorldPosToGridPos(Vector3 pos, int worldOffsetX, int worldOffsetY)
     {
-        int gx = Mathf.RoundToInt((pos.x / GridObj.PLACEMENT_FACTOR) + growthIndex);
-        int gy = Mathf.RoundToInt((pos.z / GridObj.PLACEMENT_FACTOR) + growthIndex);
+        int gx = Mathf.RoundToInt((pos.x / GridObj.PLACEMENT_FACTOR) + worldOffsetX);
+        int gy = Mathf.RoundToInt((pos.z / GridObj.PLACEMENT_FACTOR) + worldOffsetY);
 
         return new Vector2Int(gx, gy);
     }
@@ -231,17 +237,18 @@ public class GridObj
     /// <returns></returns>
     public Vector3 GetWorldPos()
     {
-        return this.GetWorldPos(0);
+        return this.GetWorldPos(0, 0);
     }
 
     /// <summary>
     /// Get the world position of this object
     /// </summary>
     /// <returns> Vector3 </returns>
-    public Vector3 GetWorldPos(int growthIndex)
+    public Vector3 GetWorldPos(int worldOffsetX, int worldOffsetY)
     {
-        if (!this.isPlaceable) throw new System.Exception("Attempted to call GetWorldPos() on non placeable GridObj");
-        return new Vector3((gridPos.x - growthIndex) * GridObj.PLACEMENT_FACTOR, 0, (gridPos.y - growthIndex) * GridObj.PLACEMENT_FACTOR);
+        if (!isPlaceable) throw new System.Exception("Attempted to call GetWorldPos() on non placeable GridObj");
+
+        return new Vector3((this.gridPos.x - worldOffsetX) * GridObj.PLACEMENT_FACTOR, 0, (this.gridPos.y - worldOffsetY) * GridObj.PLACEMENT_FACTOR);
     }
 
     /// <summary>
@@ -259,13 +266,13 @@ public class GridObj
     /// </summary>
     public void InstantiateObj()
     {
-        InstantiateObj(0);
+        InstantiateObj(0, 0);
     }
 
     /// <summary>
     /// Instantiate the object in its current state into the game world
     /// </summary>
-    public void InstantiateObj(int growthIndex)
+    public void InstantiateObj(int worldOffsetX, int worldOffsetY)
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateObj() on non placeable GridObj");
         if (this.parentObj != null)
@@ -273,9 +280,9 @@ public class GridObj
             Debug.LogWarning("Attempted to instantiate already existing GridObj");
             return;
         }
-        Vector3 worldPos = GetWorldPos(growthIndex);
+        Vector3 worldPos = GetWorldPos(worldOffsetX, worldOffsetY);
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
-        this.floorObj = GameObject.Instantiate(floorPrefab, GetWorldPos(growthIndex), Quaternion.identity);
+        this.floorObj = GameObject.Instantiate(floorPrefab, GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
 
         if(this.gridType == GridType.REPLACEABLE)
         {
@@ -287,19 +294,19 @@ public class GridObj
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
         {
-            this.InstantiateWall(WallPos.FRONT, GetWallAt(WallPos.FRONT), growthIndex);
+            this.InstantiateWall(WallPos.FRONT, GetWallAt(WallPos.FRONT), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.BACK))
         {
-            this.InstantiateWall(WallPos.BACK, GetWallAt(WallPos.BACK), growthIndex);
+            this.InstantiateWall(WallPos.BACK, GetWallAt(WallPos.BACK), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.LEFT))
         {
-            this.InstantiateWall(WallPos.LEFT, GetWallAt(WallPos.LEFT), growthIndex);
+            this.InstantiateWall(WallPos.LEFT, GetWallAt(WallPos.LEFT), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.RIGHT))
         {
-            this.InstantiateWall(WallPos.RIGHT, GetWallAt(WallPos.RIGHT), growthIndex);
+            this.InstantiateWall(WallPos.RIGHT, GetWallAt(WallPos.RIGHT), worldOffsetX, worldOffsetY);
         }
 
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
@@ -323,8 +330,8 @@ public class GridObj
 
             if (gridType == GridType.REGULAR && UnityEngine.Random.value < spawnChance)
             {
-                EnergyCrystal.PrepareSpawn(this.GetWorldPos(growthIndex), maxCrystals);
-                GameObject.Instantiate(energyCrystalPrefab, this.GetWorldPos(growthIndex), Quaternion.identity);
+                EnergyCrystal.PrepareSpawn(this.GetWorldPos(worldOffsetX, worldOffsetY), maxCrystals);
+                GameObject.Instantiate(energyCrystalPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
             }
         }
     }
@@ -333,16 +340,16 @@ public class GridObj
     /// Overload to place WallType.REGULAR
     /// </summary>
     /// <param name="wallPos"></param>
-    public void PlaceWallAt(WallPos wallPos, int growthIndex)
+    public void PlaceWallAt(WallPos wallPos, int worldOffsetX, int worldOffsetY)
     {
-        this.PlaceWallAt(wallPos, WallType.REGULAR, growthIndex);
+        this.PlaceWallAt(wallPos, WallType.REGULAR, worldOffsetX, worldOffsetY);
     }
 
     /// <summary>
     /// Place a wall on a chosen side
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
-    public void PlaceWallAt(WallPos wallPos, WallType wallType, int growthIndex)
+    public void PlaceWallAt(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
     {
         if (HasWallAt(wallPos))
         {
@@ -358,7 +365,7 @@ public class GridObj
 
         if (!this.isPlaceable) return;
 
-        this.InstantiateWall(wallPos, wallType, growthIndex);
+        this.InstantiateWall(wallPos, wallType, worldOffsetX, worldOffsetY);
     }
 
     /// <summary>
@@ -394,16 +401,16 @@ public class GridObj
     /// Overloaded method to instantiate a WallType.REGULAR wall
     /// </summary>
     /// <param name="wallPos"></param>
-    public void InstantiateWall(WallPos wallPos, int growthIndex)
+    public void InstantiateWall(WallPos wallPos, int worldOffsetX, int worldOffsetY)
     {
-        this.InstantiateWall(wallPos, WallType.REGULAR, growthIndex);
+        this.InstantiateWall(wallPos, WallType.REGULAR, worldOffsetX, worldOffsetY);
     }
 
     /// <summary>
     /// Instantiate a wall and only change the data on the in-game object, helper method
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
-    private void InstantiateWall(WallPos wallPos, WallType wallType, int growthIndex)
+    private void InstantiateWall(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
         if (parentObj == null) return;
@@ -419,7 +426,7 @@ public class GridObj
             return;
         }
 
-        GameObject newWall = GameObject.Instantiate(GetWallPrefab(wallType), WallStatus.GetWallWorldPos(GetWorldPos(growthIndex), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
+        GameObject newWall = GameObject.Instantiate(GetWallPrefab(wallType), WallStatus.GetWallWorldPos(GetWorldPos(worldOffsetX, worldOffsetY), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
 
         if (wallType == WallType.DESTRUCTIBLE)
         {
