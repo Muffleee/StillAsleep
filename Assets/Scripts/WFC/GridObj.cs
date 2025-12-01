@@ -47,6 +47,14 @@ public class GridObj
         isPlaceable = true;
     }
 
+
+    public static GridObj CreateHole(Vector2Int pos)
+    {
+        GridObj hole = new GridObj(pos, new WallStatus());
+        hole.SetGridType(GridType.HOLE);
+        return hole;
+    }
+
     /// <summary>
     /// Create a GridObj given a Vector2Int (grid position) and a WallStatus
     /// </summary>
@@ -110,8 +118,21 @@ public class GridObj
                 interactable = new Replaceable();
                 gridType = GridType.REPLACEABLE;
                 break;
+            case GridType.HOLE:
+                interactable = null;  // Keine Interaktion
+                gridType = GridType.HOLE;
+                break;
         }
     }
+
+    public static GridObj CreateHoleTile(Vector2Int pos)
+    {
+        GridObj g = new GridObj(pos, new WallStatus());
+        g.SetGridType(GridType.HOLE);
+        g.InitType(GridType.HOLE);
+        return g;
+    }
+
 
     // TODO fixme
     public static Vector2Int WorldPosToGridPos(Vector3 pos, int growthIndex)
@@ -258,6 +279,7 @@ public class GridObj
     /// </summary>
     public void InstantiateObj(int growthIndex)
     {
+        if (gridType == GridType.HOLE){return;}
         if (!isPlaceable) throw new System.Exception("Attempted to call InstantiateObj() on non placeable GridObj");
         if (parentObj != null)
         {
@@ -659,5 +681,5 @@ public class GridObj
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE, TRAP, JUMPINGPAD
+    REGULAR, REPLACEABLE, TRAP, JUMPINGPAD, HOLE
 }

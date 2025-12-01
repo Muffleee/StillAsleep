@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 220377177}
   - component: {fileID: 220377176}
   - component: {fileID: 220377178}
+  - component: {fileID: 220377179}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -157,6 +158,7 @@ MonoBehaviour:
   width: 3
   height: 3
   gui: {fileID: 944478704}
+  collapseTimer: {fileID: 220377179}
   wallPrefab: {fileID: 2144594829894418979, guid: f70bbc641b70bd4499a0156471aac54f,
     type: 3}
   floorPrefab: {fileID: 5365367703789444965, guid: 03741992903a35148bbfca60e9108b1a,
@@ -193,6 +195,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 220377176}
+--- !u!114 &220377179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 220377175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2372c669aa597bb4ca3ee763e7a375f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
