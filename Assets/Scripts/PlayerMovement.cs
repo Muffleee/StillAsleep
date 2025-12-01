@@ -69,7 +69,8 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="wallPos">Movement direction to be checked.</param>
     /// <returns></returns>
     private bool IsValidMove(WallPos wallPos)
-    {
+    {   
+        //if(true) return true; // TODO fix this script lol
         Grid cGrid = gameManager.GetCurrentGrid();
         Vector2Int next = GetNextGridPos(wallPos);
         if (!cGrid.IsInsideGrid(next)) return false;

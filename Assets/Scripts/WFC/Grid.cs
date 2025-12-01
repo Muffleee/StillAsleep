@@ -600,7 +600,7 @@ public class Grid
         if (oldExit == null || newExit == null) return;
 
         Vector2Int oldExitPos = oldExit.GetGridPos();
-        this.grid[oldExitPos.x, oldExitPos.y].RemoveExitWalls();
+        if(this.IsInsideGrid(oldExitPos)) this.grid[oldExitPos.x, oldExitPos.y].RemoveExitWalls();
 
         this.exit.gridObj = newExit;
 

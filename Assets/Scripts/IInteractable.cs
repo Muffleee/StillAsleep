@@ -163,7 +163,7 @@ public class Replaceable : IInteractable
     }
     void IInteractable.OnUse(GridObj obj)
     {
-        throw new System.NotImplementedException();
+        // Should never be called
     }
 
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
