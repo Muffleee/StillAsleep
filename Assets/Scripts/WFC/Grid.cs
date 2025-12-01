@@ -649,7 +649,7 @@ public class Grid
     public bool IsInstantiated() { return this.worldOffsetX > 0 || this.worldOffsetY > 0; }
     public GridObj[,] GetGridArray() { return this.grid; }
     public int GetWorldOffsetX() {  return this.worldOffsetX; }
-    public int GetWorldOffsetY() {  return this.worldOffsetX; }
+    public int GetWorldOffsetY() {  return this.worldOffsetY; }
 
     /// <summary>
     /// Get the GridObj at the given grid position.
