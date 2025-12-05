@@ -569,7 +569,8 @@ public class Grid
 
             if (newExitGridObj == null || !newExitGridObj.HasExit()) return false;
 
-            GetGridObj(currentExitGridObj.GetGridPos()).RemoveExitWalls();
+            GridObj obj = GetGridObj(currentExitGridObj.GetGridPos());
+            if(obj != null) obj.RemoveExitWalls();
             this.exit.adjacent.first?.RemoveWall(this.exit.adjacent.second);
 
             WallPos exitPos = newExitGridObj.GetExitPos();
@@ -578,7 +579,7 @@ public class Grid
             
             if (adjacentGridObj != null && adjacentGridObj.GetGridType() != GridType.REPLACEABLE && adjacentGridObj.GetGridType() != GridType.MANUAL_REPLACEABLE && !adjacentGridObj.HasWallAt(exitOppositePos))
             {
-                adjacentGridObj.PlaceWallAt(exitOppositePos, this.growthIndex);
+                adjacentGridObj.PlaceWallAt(exitOppositePos, this.worldOffsetX, this.worldOffsetY);
                 this.exit.adjacent.first = adjacentGridObj;
                 this.exit.adjacent.second = exitOppositePos;
             }
