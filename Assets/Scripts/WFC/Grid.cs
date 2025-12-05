@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
-using UnityEngine.UIElements;
 
 /// <summary>
 /// Class handling the gane's grid and its procedual generation through Wave Function Collapse.
@@ -155,7 +152,7 @@ public class Grid
 
             if (candidates.Count == 0)
             {
-                Debug.LogWarning($"No candidates for ({x},{y}); leaving empty this pass.");
+                UnityEngine.Debug.LogWarning($"No candidates for ({x},{y}); leaving empty this pass.");
                 continue;
             }
 
@@ -462,67 +459,57 @@ public class Grid
     }
 
     /// <summary>
-    /// Place a new exit on an adjacent GridObj in the given direction. If no wall is free or no object exists it will try to place the exit in another direction.
+    /// Moves the exit away from the player.
     /// </summary>
-    /// <param name="direction">Direction in which the exit should be moved.</param>
-    public void RepositionExit(WallPos direction)
-    {   
-        // if(this.exit.growthIndex < this.growthIndex) return; // TODO Somehow this does not work properly, no idea why
-        if(this.growthIndex < 1) return; // TODO remove magic number once code above is fixed
-        GridObj exit = this.exit.gridObj;
-        GridObj newExit = this.GetAdjacentGridObj(exit, direction);
+    /// <param name="playerPosition"></param>
+    public void RepositionExit(Vector2Int playerGridPosition)
+    {
+        GridObj currentExitGridObj = this.exit.gridObj;
+        
+        Vector2Int optimalRepositionVector = playerGridPosition - currentExitGridObj.GetGridPos();
+        float optimalRepositionDirection = math.atan2(optimalRepositionVector.y, optimalRepositionVector.x) * 2 / math.PI + 2;
 
-        newExit = PlaceExit(newExit);
-
-        if(newExit != null)
+        WallPos[] optimalRepositionWallPos = new WallPos[3];
+        optimalRepositionWallPos[0] = WallStatus.IntToWallPos((int)Math.Round(optimalRepositionDirection, MidpointRounding.AwayFromZero));
+        if (optimalRepositionDirection % 1 < .5)
         {
-            this.MoveExit(exit, newExit);
-            return;
+            optimalRepositionWallPos[1] = WallStatus.IntToWallPos((int)Math.Ceiling(optimalRepositionDirection));
+            optimalRepositionWallPos[2] = WallStatus.IntToWallPos((int)Math.Round(optimalRepositionDirection, MidpointRounding.AwayFromZero) + 3);
         }
-
-        foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
+        else
         {
-            if(pos == direction) continue;
-            newExit = GetAdjacentGridObj(exit, pos);
-            newExit = PlaceExit(newExit);
-            if(newExit != null)
+            optimalRepositionWallPos[1] = WallStatus.IntToWallPos((int)Math.Floor(optimalRepositionDirection));
+            optimalRepositionWallPos[2] = WallStatus.IntToWallPos((int)Math.Round(optimalRepositionDirection, MidpointRounding.AwayFromZero) + 1);
+        }        
+
+        foreach (WallPos direction in optimalRepositionWallPos) if(TryMoveExit(direction)) return;
+
+
+        bool TryMoveExit(WallPos direction)
+        {
+            GridObj currentExitGridObj = this.exit.gridObj;
+            GridObj newExitGridObj = PlaceExit(this.GetAdjacentGridObj(currentExitGridObj, direction));
+
+            if (newExitGridObj == null || !newExitGridObj.HasExit()) return false;
+
+            GetGridObj(currentExitGridObj.GetGridPos()).RemoveExitWalls();
+            this.exit.adjacent.first?.RemoveWall(this.exit.adjacent.second);
+
+            WallPos exitPos = newExitGridObj.GetExitPos();
+            WallPos exitOppositePos = WallStatus.GetOppositePos(exitPos);
+            GridObj adjacentGridObj = this.GetAdjacentGridObj(newExitGridObj, exitPos);
+            
+            if (adjacentGridObj != null && adjacentGridObj.GetGridType() != GridType.REPLACEABLE && adjacentGridObj.GetGridType() != GridType.MANUAL_REPLACEABLE && !adjacentGridObj.HasWallAt(exitOppositePos))
             {
-                this.MoveExit(exit, newExit);
-                break;
+                adjacentGridObj.PlaceWallAt(exitOppositePos, this.growthIndex);
+                this.exit.adjacent.first = adjacentGridObj;
+                this.exit.adjacent.second = exitOppositePos;
             }
-        }
-    }
+            else this.exit.adjacent.first = null;
 
-    /// <summary>
-    /// This is a helper method and you should never use this except in RepositionExit()
-    /// Set newExit into grid and remove adjacent wall if it was placed to cover exit
-    /// </summary>
-    /// <param name="oldExit"></param>
-    /// <param name="newExit"></param>
-    private void MoveExit(GridObj oldExit, GridObj newExit)
-    {   
-        Vector2Int oldExitPos = oldExit.GetGridPos();
-        this.grid[oldExitPos.x, oldExitPos.y].RemoveExitWalls();
+            this.exit.gridObj = newExitGridObj;
 
-        this.exit.gridObj = newExit;
-
-        // remove adjacent wall
-        if(this.exit.adjacent.first != null) this.exit.adjacent.first.RemoveWall(this.exit.adjacent.second);
-
-        // place new adjacent wall
-        if(!newExit.HasExit()) return;
-        WallPos exitPos = newExit.GetExitPos();
-        WallPos opposite = WallStatus.GetOppositePos(exitPos);
-        GridObj adj = this.GetAdjacentGridObj(newExit, exitPos);
-
-        if(adj != null && adj.GetGridType() != GridType.REPLACEABLE && !adj.HasWallAt(opposite))
-        {   
-            adj.PlaceWallAt(opposite, this.growthIndex);
-            this.exit.adjacent.first = adj;
-            this.exit.adjacent.second = opposite;
-        } else
-        {
-            this.exit.adjacent.first = null;
+            return true;
         }
     }
 

@@ -50,6 +50,25 @@ public class WallStatus
     }
 
     /// <summary>
+    /// Convert an integer to the according WallPos value.
+    /// Any integers larger than 3 outside of will be adjusted via modulo. Negative integers not accepted.
+    /// </summary>
+    /// <param name="wallPosInt"></param>
+    /// <returns></returns>
+    /// <exception cref="System.IndexOutOfRangeException"></exception>()
+    public static WallPos IntToWallPos(int wallPosInt)
+    {
+        return (wallPosInt % 4) switch
+        {
+            0 => WallPos.FRONT,
+            1 => WallPos.BACK,
+            2 => WallPos.LEFT,
+            3 => WallPos.RIGHT,
+            _ => throw new System.IndexOutOfRangeException(),
+        };
+    }
+
+    /// <summary>
     /// Returns the rotation of a WallPos.
     /// </summary>
     /// <param name="wallPos"></param>
