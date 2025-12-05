@@ -244,11 +244,7 @@ public class PlayerMovement : MonoBehaviour
             if (winScreen != null)
             {
                 winScreen.ShowWinScreen();
-            } 
-
-        } else
-        {
-            Debug.LogWarning("Kein WinScreen gefunden");
+            } else Debug.LogWarning("Kein WinScreen gefunden");  
         }
     }
 }

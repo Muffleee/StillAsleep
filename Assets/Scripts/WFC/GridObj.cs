@@ -175,6 +175,18 @@ public class GridObj
     }
 
     /// <summary>
+    /// Static method to calculate world pos from grid pos
+    /// </summary>
+    /// <param name="gridPos"></param>
+    /// <param name="worldOffsetX"></param>
+    /// <param name="worldOffsetY"></param>
+    /// <returns></returns>
+    public static Vector3 GridPosToWorldPos(Vector2Int gridPos, int worldOffsetX, int worldOffsetY)
+    {
+        return new Vector3((gridPos.x - worldOffsetX) * GridObj.PLACEMENT_FACTOR, 0, (gridPos.y - worldOffsetY) * GridObj.PLACEMENT_FACTOR);
+    }
+
+    /// <summary>
     /// Check if another GridObj should be placed next to this one on the given WallPos side
     /// </summary>
     /// <param name="other"></param>

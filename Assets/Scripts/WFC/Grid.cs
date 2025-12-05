@@ -569,8 +569,7 @@ public class Grid
 
             if (newExitGridObj == null || !newExitGridObj.HasExit()) return false;
 
-            GridObj obj = GetGridObj(currentExitGridObj.GetGridPos());
-            if(obj != null) obj.RemoveExitWalls();
+            currentExitGridObj?.RemoveExitWalls();
             this.exit.adjacent.first?.RemoveWall(this.exit.adjacent.second);
 
             WallPos exitPos = newExitGridObj.GetExitPos();
@@ -636,19 +635,42 @@ public class Grid
     public WallPos GetNextGenPos()
     {
         if (PlayerMovement.currentGridPos == null) return WallPos.BACK;
+       
+        Dictionary<WallPos, int> distances = this.GetPlayerToEdgeDistances();
+        return GetClosestEdge(distances);
+    }
 
+    /// <summary>
+    /// Calculates the distance to each edge of the map
+    /// </summary>
+    /// <returns></returns>
+    public Dictionary<WallPos, int> GetPlayerToEdgeDistances()
+    {
         int playerX = PlayerMovement.currentGridPos.x;
         int playerY = PlayerMovement.currentGridPos.y;
-
+        
         // Distances from the player to each edge
-        Dictionary<WallPos, int> distances = new Dictionary<WallPos, int>
+        return new Dictionary<WallPos, int>
         {
             { WallPos.LEFT, playerX },
             { WallPos.RIGHT, width - 1 - playerX },
             { WallPos.FRONT, playerY },
             { WallPos.BACK, height - 1 - playerY }
         };
+    }
 
+    /// <summary>
+    /// Calculate the closest edge, use with GetPlayerToEdgeDistances()
+    /// </summary>
+    /// <param name="distances"></param>
+    /// <returns></returns>
+    public WallPos GetClosestEdge(Dictionary<WallPos, int> distances)
+    {
+        return this.GetClosestEdgeAndDistance(distances).first;
+    }
+
+    public Pair<WallPos, int> GetClosestEdgeAndDistance(Dictionary<WallPos, int> distances)
+    {
         // Find the direction with the smallest distance
         WallPos closestDir = WallPos.BACK;
         int minDist = int.MaxValue;
@@ -662,11 +684,22 @@ public class Grid
             }
         }
 
-        return closestDir;
+        return new Pair<WallPos, int>(closestDir, minDist);
     }
 
     public bool IsInsideGridArray(int x, int y)
     {
         return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
+    /// <summary>
+    /// Returns true if the smallest distance to an edge of the player is less than genRange
+    /// </summary>
+    /// <param name="maxDistance"></param>
+    /// <returns></returns>
+    public bool ShouldGenerate(int genRange)
+    {
+        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetPlayerToEdgeDistances());
+        return closestEdge.second < genRange;
     }
 }

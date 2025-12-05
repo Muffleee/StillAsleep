@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 /// <summary>
@@ -62,24 +63,22 @@ public class GameManager : MonoBehaviour
     /// <param name="step">Count of all movement steps taken by the player</param>
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {   
-        if (step % generateAfter != 0)
-        {
-            if(step % replaceExitAfter == 0)
-            {
-                grid.RepositionExit(to);
-            }
-            return;
-        }
-        grid.CollapseWorld();
-        grid.IncreaseGrid(this.grid.GetNextGenPos());
-        grid.InstantiateMissing();
-
         if(step % replaceExitAfter == 0)
         {
             grid.RepositionExit(to);
         }
 
-        gui.FillList();
+        this.generateAfter = math.max(grid.GetClosestEdgeAndDistance(grid.GetPlayerToEdgeDistances()).second, 2);
+        if (step % generateAfter == 0 && grid.ShouldGenerate(5))
+        {   
+            grid.CollapseWorld();
+            grid.IncreaseGrid(this.grid.GetNextGenPos());
+            grid.InstantiateMissing();
+            
+            gui.FillList();
+        }
+
+        
     }
 
     /// <summary>
