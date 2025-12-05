@@ -17,14 +17,14 @@ using UnityEngine.UIElements;
 public class GridObj
 {
     public static float PLACEMENT_FACTOR = 2f;
-    public static float WALL_OFFSET = 0.96f;
+    public static float WALL_OFFSET = 1f;
     private bool isPlaceable = true;
     private GameObject wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab;
     private Vector2Int gridPos;
     private WallStatus wallStatus;
     private GameObject parentObj = null;
     private GameObject floorObj = null;
-    private GameObject[] wallObjs = new GameObject[] { null, null, null, null };
+    private Dictionary<WallPos, GameObject> wallObjs = new Dictionary<WallPos, GameObject>() { { WallPos.FRONT, null }, { WallPos.BACK, null }, { WallPos.LEFT, null }, { WallPos.RIGHT, null } };
     private UnityEvent<GridObj, WallPos>[] destructibleWallCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
     private UnityEvent<GridObj, WallPos>[] exitCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
     private List<GridObj>[] compatibleObjs = null;
@@ -266,13 +266,13 @@ public class GridObj
     /// </summary>
     public void InstantiateObj()
     {
-        InstantiateObj(0, 0);
+        InstantiateObj(0, 0, new Dictionary<WallPos, GridObj>());
     }
 
     /// <summary>
     /// Instantiate the object in its current state into the game world
     /// </summary>
-    public void InstantiateObj(int worldOffsetX, int worldOffsetY)
+    public void InstantiateObj(int worldOffsetX, int worldOffsetY, Dictionary<WallPos, GridObj> neighbors)
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateObj() on non placeable GridObj");
         if (this.parentObj != null)
@@ -294,19 +294,19 @@ public class GridObj
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
         {
-            this.InstantiateWall(WallPos.FRONT, GetWallAt(WallPos.FRONT), worldOffsetX, worldOffsetY);
+            if (neighbors[WallPos.FRONT] == null || neighbors[WallPos.FRONT].GetWallObjs()[WallPos.BACK] == null) this.InstantiateWall(WallPos.FRONT, GetWallAt(WallPos.FRONT), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.BACK))
         {
-            this.InstantiateWall(WallPos.BACK, GetWallAt(WallPos.BACK), worldOffsetX, worldOffsetY);
+            if (neighbors[WallPos.BACK] == null || neighbors[WallPos.BACK].GetWallObjs()[WallPos.FRONT] == null) this.InstantiateWall(WallPos.BACK, GetWallAt(WallPos.BACK), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.LEFT))
         {
-            this.InstantiateWall(WallPos.LEFT, GetWallAt(WallPos.LEFT), worldOffsetX, worldOffsetY);
+            if (neighbors[WallPos.LEFT] == null || neighbors[WallPos.LEFT].GetWallObjs()[WallPos.RIGHT] == null) this.InstantiateWall(WallPos.LEFT, GetWallAt(WallPos.LEFT), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.RIGHT))
         {
-            this.InstantiateWall(WallPos.RIGHT, GetWallAt(WallPos.RIGHT), worldOffsetX, worldOffsetY);
+            if (neighbors[WallPos.RIGHT] == null || neighbors[WallPos.RIGHT].GetWallObjs()[WallPos.LEFT] == null) this.InstantiateWall(WallPos.RIGHT, GetWallAt(WallPos.RIGHT), worldOffsetX, worldOffsetY);
         }
 
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
@@ -415,9 +415,10 @@ public class GridObj
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
         if (parentObj == null) return;
         int index = WallStatus.WallPosToInt(wallPos);
-        if (wallObjs[index] != null)
+        if (wallObjs[wallPos] != null)
         {
-            GameObject.Destroy(wallObjs[index]);   
+            GameObject.Destroy(wallObjs[wallPos]);   
+            wallObjs[wallPos] = null;
         }
 
         if (wallType == WallType.NONE)
@@ -450,7 +451,7 @@ public class GridObj
         }
 
         newWall.transform.SetParent(parentObj.transform);
-        this.wallObjs[index] = newWall;
+        this.wallObjs[wallPos] = newWall;
     }
 
     /// <summary>
@@ -463,9 +464,9 @@ public class GridObj
         int index = WallStatus.WallPosToInt(wallPos);
         this.exitCallbacks[index] = null;
         this.destructibleWallCallbacks[index] = null;
-        GameObject obj = this.wallObjs[index];
+        GameObject obj = this.wallObjs[wallPos];
         if (obj == null) return;
-        this.wallObjs[index] = null;
+        this.wallObjs[wallPos] = null;
         GameObject.Destroy(obj);
     }
 
@@ -477,11 +478,10 @@ public class GridObj
         if (!this.isPlaceable) throw new System.Exception("Attempted to call DestroyObj() on non placeable GridObj");
         GameObject.Destroy(floorObj);
         this.floorObj = null;
-
-        for (int i = 0; i < wallObjs.Length; i++)
-        {
-            GameObject.Destroy(wallObjs[i]);
-            this.wallObjs[i] = null;
+        foreach(WallPos wallPos in Enum.GetValues(typeof(WallPos))){
+            if (wallObjs[wallPos] == null) continue;
+            GameObject.Destroy(wallObjs[wallPos]);
+            this.wallObjs[wallPos] = null;
         }
 
         GameObject.Destroy(parentObj);
@@ -507,7 +507,7 @@ public class GridObj
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call GetWallObjAt() on non placeable GridObj");
         if (!HasWallAt(wallPos)) return null;
-        return this.wallObjs[WallStatus.WallPosToInt(wallPos)];
+        return this.wallObjs[wallPos];
     }
 
     /// <summary>
@@ -688,7 +688,7 @@ public class GridObj
 
     public GameObject GetparentObj() { return this.parentObj; }
     public GameObject GetFloorObj() { return this.floorObj; }
-    public GameObject[] GetWallObjs() { return this.wallObjs; }
+    public Dictionary<WallPos, GameObject> GetWallObjs() { return this.wallObjs; }
     public UnityEvent<GridObj, WallPos>[] GetDestructibleWallCallbacks() { return this.destructibleWallCallbacks; }
     public UnityEvent<GridObj, WallPos>[] GetExitCallbacks() { return this.exitCallbacks; }
     public List<GridObj>[] GetCompatibleObjs() { return this.compatibleObjs; }
@@ -703,7 +703,7 @@ public class GridObj
 
     public void SetparentObj(GameObject parentObj) { this.parentObj = parentObj; }
     public void SetFloorObj(GameObject floorObj) { this.floorObj = floorObj; }
-    public void SetWallObjs(GameObject[] wallObjs) { this.wallObjs = wallObjs; }
+    public void SetWallObjs(Dictionary<WallPos, GameObject> wallObjs) { this.wallObjs = wallObjs; }
     public void SetDestructibleWallCallbacks(UnityEvent<GridObj, WallPos>[] destructibleWallCallbacks) { this.destructibleWallCallbacks = destructibleWallCallbacks; }
     public void SetExitCallbacks(UnityEvent<GridObj, WallPos>[] exitCallbacks) { this.exitCallbacks = exitCallbacks; }
     public void SetCompatibleObjs(List<GridObj>[] compatibleObjs) { this.compatibleObjs = compatibleObjs; }

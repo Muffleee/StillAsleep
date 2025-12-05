@@ -58,7 +58,12 @@ public class Grid
         {
             gridObj.SetGridType(GridType.REGULAR);
         }
-        this.grid[gridPos.x, gridPos.y].InstantiateObj(this.worldOffsetX, this.worldOffsetY);
+
+        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, GetAdjacentGridObj(gridObj, WallPos.FRONT) }, 
+                                                                                            { WallPos.BACK, GetAdjacentGridObj(gridObj, WallPos.BACK) }, 
+                                                                                            { WallPos.LEFT, GetAdjacentGridObj(gridObj, WallPos.LEFT) }, 
+                                                                                            { WallPos.RIGHT, GetAdjacentGridObj(gridObj, WallPos.RIGHT) } };
+        this.grid[gridPos.x, gridPos.y].InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
         InstantiateMissingWalls(gridObj);
         
     }
@@ -288,7 +293,11 @@ public class Grid
             {
                 GridObj obj = grid[w, h];
                 if (obj == null || obj.IsInstantiated()) continue;
-                obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY);
+                Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, GetAdjacentGridObj(obj, WallPos.FRONT) },
+                                                                                            { WallPos.BACK, GetAdjacentGridObj(obj, WallPos.BACK) },
+                                                                                            { WallPos.LEFT, GetAdjacentGridObj(obj, WallPos.LEFT) },
+                                                                                            { WallPos.RIGHT, GetAdjacentGridObj(obj, WallPos.RIGHT) } };
+                obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
             }
         }
     }
