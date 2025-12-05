@@ -15,7 +15,8 @@ public class Grid
     /// <summary>
     /// Count the times the grid has grown so far.
     /// </summary>
-    private int growthIndex = 0;
+    private int worldOffsetX = 0;
+    private int worldOffsetY = 0;
     private Exit exit;
 
     /// <summary>
@@ -34,7 +35,7 @@ public class Grid
     /// <param name="gridObj">GridObj to be placed</param>
     public void PlaceObj(GridObj gridObj)
     {
-        PlaceObj(gridObj, gridObj.GetWorldPos(growthIndex));
+        PlaceObj(gridObj, gridObj.GetWorldPos(this.worldOffsetX, this.worldOffsetY));
     }
 
     /// <summary>
@@ -44,7 +45,7 @@ public class Grid
     /// <param name="pos">World position at which the GridObj is to be placed</param>
     public void PlaceObj(GridObj gridObj, Vector3 pos)
     {
-        Vector2Int gridPos = GridObj.WorldPosToGridPos(pos, growthIndex);
+        Vector2Int gridPos = GridObj.WorldPosToGridPos(pos, this.worldOffsetX, this.worldOffsetY);
 
         if (grid[gridPos.x, gridPos.y] != null)
         {
@@ -57,7 +58,7 @@ public class Grid
         {
             gridObj.SetGridType(GridType.REGULAR);
         }
-        this.grid[gridPos.x, gridPos.y].InstantiateObj(growthIndex);
+        this.grid[gridPos.x, gridPos.y].InstantiateObj(this.worldOffsetX, this.worldOffsetY);
         InstantiateMissingWalls(gridObj);
         
     }
@@ -74,8 +75,8 @@ public class Grid
             GridObj neighbour = GetAdjacentGridObj(gridObj.GetGridPos(), wPos);
             if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE)
             {
-                neighbour.PlaceWallAt(WallStatus.GetOppositePos(wPos), growthIndex);
-                neighbour.InstantiateWall(WallStatus.GetOppositePos(wPos), growthIndex);
+                neighbour.PlaceWallAt(WallStatus.GetOppositePos(wPos), this.worldOffsetX, this.worldOffsetY);
+                neighbour.InstantiateWall(WallStatus.GetOppositePos(wPos), this.worldOffsetX, this.worldOffsetY);
             }
         }
     }
@@ -287,7 +288,7 @@ public class Grid
             {
                 GridObj obj = grid[w, h];
                 if (obj == null || obj.IsInstantiated()) continue;
-                obj.InstantiateObj(growthIndex);
+                obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY);
             }
         }
     }
@@ -295,6 +296,7 @@ public class Grid
     /// <summary>
     /// Increase the size of the grid by 1 in each direction.
     /// </summary>
+    /*
     public void IncreaseGrid()
     {
         int newW = width + 2;
@@ -339,6 +341,81 @@ public class Grid
 
         grid = newGrid;
     }
+    */
+
+    public void IncreaseGrid(WallPos direction)
+    {
+        int addLeft = 0, addRight = 0, addFront = 0, addBack = 0;
+
+        // Determine which side to expand
+        switch (direction)
+        {
+            case WallPos.FRONT:  addFront = 1; break;
+            case WallPos.BACK:   addBack = 1; break;
+            case WallPos.LEFT:   addLeft = 1; break;
+            case WallPos.RIGHT:  addRight = 1; break;
+        }
+
+        int newW = width + addLeft + addRight;
+        int newH = height + addFront + addBack;
+
+        GridObj[,] newGrid = new GridObj[newW, newH];
+
+        // Copy old tiles into shifted positions
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                GridObj old = grid[x, y];
+                if (old == null) continue;
+
+                int nx = x + addLeft;   // shift right if expanding on LEFT
+                int ny = y + addFront;  // shift up if expanding on FRONT
+
+                old.SetGridPos(new Vector2Int(nx, ny));
+                newGrid[nx, ny] = old;
+            }
+        }
+
+        // Create replaceables ONLY at the expanded edge
+        // FRONT
+        if (addFront == 1)
+        {
+            for (int x = 0; x < newW; x++)
+                newGrid[x, 0] = MakeReplaceable(new Vector2Int(x, 0));
+        }
+
+        // BACK
+        if (addBack == 1)
+        {
+            int y = newH - 1;
+            for (int x = 0; x < newW; x++)
+                newGrid[x, y] = MakeReplaceable(new Vector2Int(x, y));
+        }
+
+        // LEFT
+        if (addLeft == 1)
+        {
+            for (int y = 0; y < newH; y++)
+                newGrid[0, y] = MakeReplaceable(new Vector2Int(0, y));
+        }
+
+        // RIGHT
+        if (addRight == 1)
+        {
+            int x = newW - 1;
+            for (int y = 0; y < newH; y++)
+                newGrid[x, y] = MakeReplaceable(new Vector2Int(x, y));
+        }
+
+        // Update world offset
+        worldOffsetX += addLeft;
+        worldOffsetY += addFront;
+
+        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + addLeft, PlayerMovement.currentGridPos.y + addFront);
+
+        grid = newGrid;
+    }
 
     /// <summary>
     /// Creates a new replaceable GridObj at the given grid position.
@@ -369,7 +446,7 @@ public class Grid
     /// <returns>According GridObj if found, else null</returns>
     public GridObj GetGridObjFromGameObj(GameObject gameObj)
     {
-        Vector2Int gridPos = GridObj.WorldPosToGridPos(gameObj.transform.position, growthIndex);
+        Vector2Int gridPos = GridObj.WorldPosToGridPos(gameObj.transform.position, this.worldOffsetX, this.worldOffsetY);
         if (!IsInsideGrid(gridPos)) return null;
         return grid[gridPos.x, gridPos.y];
     }
@@ -452,9 +529,9 @@ public class Grid
     /// </summary>
     /// <param name="pos">Grid position at which the exit should be placed.</param>
     /// <param name="growthIndex">Growth index to be passed to the Exit</param>
-    public void CreateExit(Vector2Int pos, int growthIndex)
+    public void CreateExit(Vector2Int pos, int worldOffsetX, int worldOffsetY)
     {
-        exit = new Exit(new GridObj(pos, new WallStatus(WallType.EXIT, WallType.NONE, WallType.NONE, WallType.NONE)), new Pair<GridObj, WallPos>(null, WallPos.FRONT), growthIndex);
+        exit = new Exit(new GridObj(pos, new WallStatus(WallType.EXIT, WallType.NONE, WallType.NONE, WallType.NONE)), new Pair<GridObj, WallPos>(null, WallPos.FRONT), worldOffsetX, worldOffsetY);
         // this.exit.gridObj.InstantiateObj(growthIndex); // TODO fix this
     }
 
@@ -514,23 +591,28 @@ public class Grid
     }
 
     /// <summary>
-    /// Attempts to place an exit on a random free spot. If no spot is free, it returns null
+    /// Attempts to place an exit on a free wall of the given GridObj.
+    /// Returns the GridObj if successful, otherwise null.
     /// </summary>
     /// <param name="gridObj"></param>
-    /// <returns>The newly placed exit GridObj, or null if no space</returns>
+    /// <returns></returns>
     private GridObj PlaceExit(GridObj gridObj)
-    {   
-        if(gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE) return null;
-        List<WallPos> free = gridObj.GetFreeWalls();
-        if(free.Count == 0) return null;
+    {
+        if (gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE) return null;
 
-        gridObj.PlaceWallAt(free[UnityEngine.Random.Range(0, free.Count)], WallType.EXIT, growthIndex);
+        List<WallPos> free = gridObj.GetFreeWalls();
+        if (free.Count == 0) return null;
+
+        WallPos chosen = free[UnityEngine.Random.Range(0, free.Count)];
+        gridObj.PlaceWallAt(chosen, WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
+
         return gridObj;
     }
     
-    public bool IsInstantiated() { return growthIndex > 0; }
-    public GridObj[,] GetGridArray() { return grid; }
-    public int GetGrowthIndex() {  return growthIndex; }
+    public bool IsInstantiated() { return this.worldOffsetX > 0 || this.worldOffsetY > 0; }
+    public GridObj[,] GetGridArray() { return this.grid; }
+    public int GetWorldOffsetX() {  return this.worldOffsetX; }
+    public int GetWorldOffsetY() {  return this.worldOffsetY; }
 
     /// <summary>
     /// Get the GridObj at the given grid position.
@@ -544,5 +626,46 @@ public class Grid
             return grid[pos.x, pos.y];
         }
         return null;
+    }
+
+    /// <summary>
+    /// Returns the next direction of map generation
+    /// </summary>
+    /// <returns></returns>
+    public WallPos GetNextGenPos()
+    {
+        if (PlayerMovement.currentGridPos == null) return WallPos.BACK;
+
+        int playerX = PlayerMovement.currentGridPos.x;
+        int playerY = PlayerMovement.currentGridPos.y;
+
+        // Distances from the player to each edge
+        Dictionary<WallPos, int> distances = new Dictionary<WallPos, int>
+        {
+            { WallPos.LEFT, playerX },
+            { WallPos.RIGHT, width - 1 - playerX },
+            { WallPos.FRONT, playerY },
+            { WallPos.BACK, height - 1 - playerY }
+        };
+
+        // Find the direction with the smallest distance
+        WallPos closestDir = WallPos.BACK;
+        int minDist = int.MaxValue;
+
+        foreach (var kvp in distances)
+        {
+            if (kvp.Value < minDist)
+            {
+                minDist = kvp.Value;
+                closestDir = kvp.Key;
+            }
+        }
+
+        return closestDir;
+    }
+
+    public bool IsInsideGridArray(int x, int y)
+    {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 }

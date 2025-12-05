@@ -46,9 +46,9 @@ public class GameManager : MonoBehaviour
         grid = new Grid(width, height);
 
         grid.CollapseWorld();
-        grid.IncreaseGrid();
+        grid.IncreaseGrid(this.grid.GetNextGenPos());
 
-        grid.CreateExit(new Vector2Int(4, 4), 1);
+        grid.CreateExit(new Vector2Int(4, 4), 0, 1);
         grid.InstantiateMissing();
         gui.FillList();
     }
@@ -71,7 +71,7 @@ public class GameManager : MonoBehaviour
             return;
         }
         grid.CollapseWorld();
-        grid.IncreaseGrid();
+        grid.IncreaseGrid(this.grid.GetNextGenPos());
         grid.InstantiateMissing();
 
         if(step % replaceExitAfter == 0)

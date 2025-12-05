@@ -22,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, gameManager.GetCurrentGrid().GetGrowthIndex());
+        currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, gameManager.GetCurrentGrid().GetWorldOffsetX(), gameManager.GetCurrentGrid().GetWorldOffsetY());
         foreach(var wall in FindObjectsOfType< DestructibleWall >())
         {
             wall.onDestroy.AddListener(OnWallDestroyed);
@@ -69,7 +69,8 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="wallPos">Movement direction to be checked.</param>
     /// <returns></returns>
     private bool IsValidMove(WallPos wallPos)
-    {
+    {   
+        //if(true) return true; // TODO fix this script lol
         Grid cGrid = gameManager.GetCurrentGrid();
         Vector2Int next = GetNextGridPos(wallPos);
         if (!cGrid.IsInsideGrid(next)) return false;
