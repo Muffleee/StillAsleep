@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour
         {
             if(step % replaceExitAfter == 0)
             {
-                grid.RepositionExit(WallPos.BACK);
+                grid.RepositionExit(to);
             }
             return;
         }
@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour
 
         if(step % replaceExitAfter == 0)
         {
-            grid.RepositionExit(WallPos.BACK);
+            grid.RepositionExit(to);
         }
 
         gui.FillList();
