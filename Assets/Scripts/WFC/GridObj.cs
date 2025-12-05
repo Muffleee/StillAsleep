@@ -635,6 +635,25 @@ public class GridObj
         }
         return list;
     }
+    /// <summary>
+    /// Updates this gridObj and its neighbours wallStatus. 
+    /// If one WallStatus is none, it'll take the other one to set for both, else this gridObjs' wallstatus will be set for both
+    /// </summary>
+    /// <param name="neighbours"></param>
+    public void UpdateWallStatus(Dictionary<WallPos, GridObj> neighbours)
+    {
+        foreach(WallPos wPos in Enum.GetValues(typeof(WallPos)))
+        {
+            WallPos oppWPos = WallStatus.GetOppositePos(wPos);
+            if (neighbours[wPos] == null) continue;
+            if (this.wallStatus.GetWallAt(wPos) != neighbours[wPos].GetWallStatus().GetWallAt(oppWPos))
+            {
+                WallType newWallType = (this.wallStatus.GetWallAt(wPos) == WallType.NONE) ? neighbours[wPos].GetWallStatus().GetWallAt(oppWPos) : this.wallStatus.GetWallAt(wPos);
+                this.wallStatus.PlaceWallAt(wPos, newWallType);
+                neighbours[wPos].GetWallStatus().PlaceWallAt(oppWPos, newWallType);
+            }
+        }        
+    }
 
     /// <summary>
     /// Returns a makeshift name for this GridObj

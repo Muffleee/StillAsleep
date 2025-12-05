@@ -105,6 +105,11 @@ public class GameManager : MonoBehaviour
         pr.Spend(cost);
 
         GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
+        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, grid.GetAdjacentGridObj(toPlace, WallPos.FRONT) },
+                                                                                            { WallPos.BACK, grid.GetAdjacentGridObj(toPlace, WallPos.BACK) },
+                                                                                            { WallPos.LEFT, grid.GetAdjacentGridObj(toPlace, WallPos.LEFT) },
+                                                                                            { WallPos.RIGHT, grid.GetAdjacentGridObj(toPlace, WallPos.RIGHT) } };
+        toPlace.UpdateWallStatus(neighbors);
         grid.PlaceObj(toPlace);
 
         gui.RemoveSelected(false);
