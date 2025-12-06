@@ -7,30 +7,30 @@ public class PlayerResources : MonoBehaviour
 
     private int currentEnergy;
 
-    public int CurrentEnergy => currentEnergy;
-    public int MaxEnergy => maxEnergy;
+    public int CurrentEnergy => this.currentEnergy;
+    public int MaxEnergy => this.maxEnergy;
 
     void Start()
     {
-        currentEnergy = startEnergy;
+        this.currentEnergy = this.startEnergy;
     }
 
     public bool CanAfford(int cost)
     {
-        return currentEnergy >= cost;
+        return this.currentEnergy >= cost;
     }
 
     public bool Spend(int cost)
     {
-        if (!CanAfford(cost))
+        if (!this.CanAfford(cost))
             return false;
 
-        currentEnergy -= cost;
+        this.currentEnergy -= cost;
         return true;
     }
 
     public void AddEnergy(int amount)
     {
-        currentEnergy = Mathf.Min(currentEnergy + amount, maxEnergy);
+        this.currentEnergy = Mathf.Min(this.currentEnergy + amount, this.maxEnergy);
     }
 }

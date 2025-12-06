@@ -60,17 +60,17 @@ public class Trap : IInteractable
     }
     void IInteractable.OnUse(GridObj obj)
     {
-        if (activated)
+        if (this.activated)
         {
-            ActivateTrap();
+            this.ActivateTrap();
 
             // 1. Reset the visual indicator (change color back to default)
 
-            ResetTrapVisual(obj);
+            this.ResetTrapVisual(obj);
         }
 
         // 2. Mark the tile as no longer a trap in the data model
-        activated = false;
+        this.activated = false;
     }
 
     private void ActivateTrap()

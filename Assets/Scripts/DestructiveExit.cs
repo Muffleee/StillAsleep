@@ -20,18 +20,18 @@ public class DestructiveExit : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        startTime = time;
-        meshRenderer = GetComponent<MeshRenderer>();
+        this.startTime = this.time;
+        this.meshRenderer = this.GetComponent<MeshRenderer>();
 
         // event erstellen wird ausgelöst wenn Timer abläuft
         UnityEvent finishedEvent = new UnityEvent();
-        finishedEvent.AddListener(OnTimerFinished);
+        finishedEvent.AddListener(this.OnTimerFinished);
 
-        timer = gameObject.AddComponent<Timer>();
+        this.timer = this.gameObject.AddComponent<Timer>();
 
         // timer initialisieren & starten
-        timer.Init(time, finishedEvent);
-        timer.StartTimer();
+        this.timer.Init(this.time, finishedEvent);
+        this.timer.StartTimer();
     }
 
     /// <summary>
@@ -39,8 +39,8 @@ public class DestructiveExit : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        float timeLeft = timer.GetTimeRemaining();
-        ColorChange(timeLeft);
+        float timeLeft = this.timer.GetTimeRemaining();
+        this.ColorChange(timeLeft);
     }
 
     /// <summary>
@@ -49,20 +49,20 @@ public class DestructiveExit : MonoBehaviour
     /// <param name="timeRemaining">Time remaining in seconds.</param>
     private void ColorChange(float timeRemaining)
     {
-        float t = timeRemaining / startTime;
+        float t = timeRemaining / this.startTime;
         Color brightGreen = new Color(0.6f, 1f, 0.6f);
         Color darkGreen = new Color(0f, 0.3f, 0f);
 
         Color currentColor = Color.Lerp(darkGreen, brightGreen, t);
-        meshRenderer.material.color = currentColor;
+        this.meshRenderer.material.color = currentColor;
     }
 
     /// <summary>
     /// Once the timer is finished, invoke the onDestroy event and destroy this GameObject.
     /// </summary>
     private void OnTimerFinished()
-    {   
-        onDestroy.Invoke(this.gridObj, this.wallPos);
+    {
+        this.onDestroy.Invoke(this.gridObj, this.wallPos);
         Destroy(this.gameObject);
     }
 }

@@ -8,8 +8,8 @@ using UnityEngine;
 /// </summary>
 public class Grid
 {
-    public int width => grid.GetLength(0);
-    public int height => grid.GetLength(1);
+    public int width => this.grid.GetLength(0);
+    public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
 
     /// <summary>
@@ -26,7 +26,7 @@ public class Grid
     /// <param name="height">Initial grid height</param>
     public Grid(int width, int height)
     {
-        grid = new GridObj[width, height];
+        this.grid = new GridObj[width, height];
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ public class Grid
     /// <param name="gridObj">GridObj to be placed</param>
     public void PlaceObj(GridObj gridObj)
     {
-        PlaceObj(gridObj, gridObj.GetWorldPos(this.worldOffsetX, this.worldOffsetY));
+        this.PlaceObj(gridObj, gridObj.GetWorldPos(this.worldOffsetX, this.worldOffsetY));
     }
 
     /// <summary>
@@ -47,9 +47,9 @@ public class Grid
     {
         Vector2Int gridPos = GridObj.WorldPosToGridPos(pos, this.worldOffsetX, this.worldOffsetY);
 
-        if (grid[gridPos.x, gridPos.y] != null)
+        if (this.grid[gridPos.x, gridPos.y] != null)
         {
-            grid[gridPos.x, gridPos.y].DestroyObj();
+            this.grid[gridPos.x, gridPos.y].DestroyObj();
         }
         
         gridObj.SetGridPos(gridPos);
@@ -59,12 +59,12 @@ public class Grid
             gridObj.SetGridType(GridType.REGULAR);
         }
 
-        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, GetAdjacentGridObj(gridObj, WallPos.FRONT) }, 
-                                                                                            { WallPos.BACK, GetAdjacentGridObj(gridObj, WallPos.BACK) }, 
-                                                                                            { WallPos.LEFT, GetAdjacentGridObj(gridObj, WallPos.LEFT) }, 
-                                                                                            { WallPos.RIGHT, GetAdjacentGridObj(gridObj, WallPos.RIGHT) } };
+        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.GetAdjacentGridObj(gridObj, WallPos.FRONT) }, 
+                                                                                            { WallPos.BACK, this.GetAdjacentGridObj(gridObj, WallPos.BACK) }, 
+                                                                                            { WallPos.LEFT, this.GetAdjacentGridObj(gridObj, WallPos.LEFT) }, 
+                                                                                            { WallPos.RIGHT, this.GetAdjacentGridObj(gridObj, WallPos.RIGHT) } };
         this.grid[gridPos.x, gridPos.y].InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
-        InstantiateMissingWalls(gridObj);
+        this.InstantiateMissingWalls(gridObj);
         
     }
 
@@ -77,7 +77,7 @@ public class Grid
         WallPos[] wallPos = new WallPos[] { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
         foreach (WallPos wPos in wallPos)
         {
-            GridObj neighbour = GetAdjacentGridObj(gridObj.GetGridPos(), wPos);
+            GridObj neighbour = this.GetAdjacentGridObj(gridObj.GetGridPos(), wPos);
             if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE)
             {
                 neighbour.PlaceWallAt(WallStatus.GetOppositePos(wPos), this.worldOffsetX, this.worldOffsetY);
@@ -91,15 +91,15 @@ public class Grid
     /// </summary>
     public void CollapseWorld()
     {
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < this.width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < this.height; y++)
             {
-                var cell = grid[x, y];
+                var cell = this.grid[x, y];
                 if (cell == null) continue;
                 if (cell.GetGridType() != GridType.REPLACEABLE) continue;
                 cell.DestroyObj();
-                grid[x, y] = null;
+                this.grid[x, y] = null;
             }
         }
 
@@ -108,17 +108,17 @@ public class Grid
             obj.InitCompatibleList();
 
         Queue<Vector2Int> toProcess = new Queue<Vector2Int>();
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < this.width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < this.height; y++)
             {
                 Vector2Int pos = new Vector2Int(x, y);
-                if (grid[x, y] == null && HasAnyNonNullNeighbor(pos))
+                if (this.grid[x, y] == null && this.HasAnyNonNullNeighbor(pos))
                     toProcess.Enqueue(pos);
             }
         }
         if (toProcess.Count == 0)
-            toProcess.Enqueue(new Vector2Int(width / 2, height / 2));
+            toProcess.Enqueue(new Vector2Int(this.width / 2, this.height / 2));
 
         Vector2Int[] offsets = { new Vector2Int(0, -1), new Vector2Int(0, 1), new Vector2Int(-1, 0), new Vector2Int(1, 0) };
         WallPos[] sides = { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
@@ -130,16 +130,16 @@ public class Grid
             Vector2Int pos = toProcess.Dequeue();
             int x = pos.x, y = pos.y;
 
-            if (grid[x, y] != null) continue;
+            if (this.grid[x, y] != null) continue;
 
             List<GridObj> candidates = new List<GridObj>(allPlaceables);
 
             for (int i = 0; i < 4; i++)
             {
                 Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
-                if (!IsInsideGrid(nPos)) continue;
+                if (!this.IsInsideGrid(nPos)) continue;
 
-                GridObj neighbor = grid[nPos.x, nPos.y];
+                GridObj neighbor = this.grid[nPos.x, nPos.y];
                 if (neighbor == null) continue;
 
                 WallPos sideFromMe = sides[i];
@@ -150,7 +150,7 @@ public class Grid
                     if (cand.IsCompatible(neighbor, sideFromMe))
                         filtered.Add(cand.Clone());
                 }
-                IncreaseWeight(filtered, neighbor, sideFromMe);
+                this.IncreaseWeight(filtered, neighbor, sideFromMe);
                 candidates = filtered;
                 
                 if (candidates.Count == 0) break;
@@ -162,17 +162,17 @@ public class Grid
                 continue;
             }
 
-            GridObj chosenTemplate = PickWeightedRandom(candidates);
-            grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-            SetRandomGridType(grid[x,y]);
+            GridObj chosenTemplate = this.PickWeightedRandom(candidates);
+            this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+            this.SetRandomGridType(this.grid[x,y]);
 
-            if(grid[x,y].GetGridType() == GridType.MANUAL_REPLACEABLE) grid[x,y].RemoveAllWalls();
+            if(this.grid[x,y].GetGridType() == GridType.MANUAL_REPLACEABLE) this.grid[x,y].RemoveAllWalls();
             
             for (int i = 0; i < 4; i++)
             {
                 Vector2Int nPos = new Vector2Int(x + offsets[i].x, y + offsets[i].y);
-                if (!IsInsideGrid(nPos)) continue;
-                if (grid[nPos.x, nPos.y] != null) continue;
+                if (!this.IsInsideGrid(nPos)) continue;
+                if (this.grid[nPos.x, nPos.y] != null) continue;
                 if (enqueued.Add(nPos))
                     toProcess.Enqueue(nPos);
             }
@@ -248,8 +248,8 @@ public class Grid
         foreach (var o in offsets)
         {
             Vector2Int n = pos + o;
-            if (!IsInsideGrid(n)) continue;
-            if (grid[n.x, n.y] != null) return true;
+            if (!this.IsInsideGrid(n)) continue;
+            if (this.grid[n.x, n.y] != null) return true;
         }
         return false;
     }
@@ -287,16 +287,16 @@ public class Grid
     /// </summary>
     public void InstantiateMissing()
     {
-        for (int w = 0; w < width; w++)
+        for (int w = 0; w < this.width; w++)
         {
-            for (int h = 0; h < height; h++)
+            for (int h = 0; h < this.height; h++)
             {
-                GridObj obj = grid[w, h];
+                GridObj obj = this.grid[w, h];
                 if (obj == null || obj.IsInstantiated()) continue;
-                Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, GetAdjacentGridObj(obj, WallPos.FRONT) },
-                                                                                            { WallPos.BACK, GetAdjacentGridObj(obj, WallPos.BACK) },
-                                                                                            { WallPos.LEFT, GetAdjacentGridObj(obj, WallPos.LEFT) },
-                                                                                            { WallPos.RIGHT, GetAdjacentGridObj(obj, WallPos.RIGHT) } };
+                Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.GetAdjacentGridObj(obj, WallPos.FRONT) },
+                                                                                            { WallPos.BACK, this.GetAdjacentGridObj(obj, WallPos.BACK) },
+                                                                                            { WallPos.LEFT, this.GetAdjacentGridObj(obj, WallPos.LEFT) },
+                                                                                            { WallPos.RIGHT, this.GetAdjacentGridObj(obj, WallPos.RIGHT) } };
                 obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
             }
         }
@@ -365,17 +365,17 @@ public class Grid
             case WallPos.RIGHT:  addRight = 1; break;
         }
 
-        int newW = width + addLeft + addRight;
-        int newH = height + addFront + addBack;
+        int newW = this.width + addLeft + addRight;
+        int newH = this.height + addFront + addBack;
 
         GridObj[,] newGrid = new GridObj[newW, newH];
 
         // Copy old tiles into shifted positions
-        for (int x = 0; x < width; x++)
+        for (int x = 0; x < this.width; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < this.height; y++)
             {
-                GridObj old = grid[x, y];
+                GridObj old = this.grid[x, y];
                 if (old == null) continue;
 
                 int nx = x + addLeft;   // shift right if expanding on LEFT
@@ -391,7 +391,7 @@ public class Grid
         if (addFront == 1)
         {
             for (int x = 0; x < newW; x++)
-                newGrid[x, 0] = MakeReplaceable(new Vector2Int(x, 0));
+                newGrid[x, 0] = this.MakeReplaceable(new Vector2Int(x, 0));
         }
 
         // BACK
@@ -399,14 +399,14 @@ public class Grid
         {
             int y = newH - 1;
             for (int x = 0; x < newW; x++)
-                newGrid[x, y] = MakeReplaceable(new Vector2Int(x, y));
+                newGrid[x, y] = this.MakeReplaceable(new Vector2Int(x, y));
         }
 
         // LEFT
         if (addLeft == 1)
         {
             for (int y = 0; y < newH; y++)
-                newGrid[0, y] = MakeReplaceable(new Vector2Int(0, y));
+                newGrid[0, y] = this.MakeReplaceable(new Vector2Int(0, y));
         }
 
         // RIGHT
@@ -414,16 +414,16 @@ public class Grid
         {
             int x = newW - 1;
             for (int y = 0; y < newH; y++)
-                newGrid[x, y] = MakeReplaceable(new Vector2Int(x, y));
+                newGrid[x, y] = this.MakeReplaceable(new Vector2Int(x, y));
         }
 
         // Update world offset
-        worldOffsetX += addLeft;
-        worldOffsetY += addFront;
+        this.worldOffsetX += addLeft;
+        this.worldOffsetY += addFront;
 
         PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + addLeft, PlayerMovement.currentGridPos.y + addFront);
 
-        grid = newGrid;
+        this.grid = newGrid;
     }
 
     /// <summary>
@@ -445,7 +445,7 @@ public class Grid
     /// <returns></returns>
     public bool IsInsideGrid(Vector2Int v)
     {
-        return v.x >= 0 && v.x < width && v.y >= 0 && v.y < height;
+        return v.x >= 0 && v.x < this.width && v.y >= 0 && v.y < this.height;
     }
 
     /// <summary>
@@ -456,8 +456,8 @@ public class Grid
     public GridObj GetGridObjFromGameObj(GameObject gameObj)
     {
         Vector2Int gridPos = GridObj.WorldPosToGridPos(gameObj.transform.position, this.worldOffsetX, this.worldOffsetY);
-        if (!IsInsideGrid(gridPos)) return null;
-        return grid[gridPos.x, gridPos.y];
+        if (!this.IsInsideGrid(gridPos)) return null;
+        return this.grid[gridPos.x, gridPos.y];
     }
 
     /// <summary>
@@ -468,7 +468,7 @@ public class Grid
     /// <returns></returns>
     public GridObj GetAdjacentGridObj(GridObj gridObj, WallPos direction)
     {
-        return GetAdjacentGridObj(gridObj.GetGridPos(), direction);
+        return this.GetAdjacentGridObj(gridObj.GetGridPos(), direction);
     }
 
     /// <summary>
@@ -496,9 +496,9 @@ public class Grid
                 targetPos += new Vector2Int(0, 1);
                 break;
         }
-        if (IsInsideGrid(targetPos))
+        if (this.IsInsideGrid(targetPos))
         {
-            return grid[targetPos.x, targetPos.y];
+            return this.grid[targetPos.x, targetPos.y];
         }
         else
         {
@@ -517,16 +517,16 @@ public class Grid
         float minDist = Mathf.Infinity;
         GridObj nearest = null;
 
-        for (int w = 0; w < width; w++)
+        for (int w = 0; w < this.width; w++)
         {
-            for (int h = 0; h < height; h++)
+            for (int h = 0; h < this.height; h++)
             {
-                if (grid[w, h] == null) continue;
-                float dist = (pos - grid[w, h].GetWorldPos()).sqrMagnitude;
+                if (this.grid[w, h] == null) continue;
+                float dist = (pos - this.grid[w, h].GetWorldPos()).sqrMagnitude;
                 if (dist < minDist)
                 {
                     minDist = dist;
-                    nearest = grid[w, h];
+                    nearest = this.grid[w, h];
                 }
             }
         }
@@ -540,7 +540,7 @@ public class Grid
     /// <param name="growthIndex">Growth index to be passed to the Exit</param>
     public void CreateExit(Vector2Int pos, int worldOffsetX, int worldOffsetY)
     {
-        exit = new Exit(new GridObj(pos, new WallStatus(WallType.EXIT, WallType.NONE, WallType.NONE, WallType.NONE)), new Pair<GridObj, WallPos>(null, WallPos.FRONT), worldOffsetX, worldOffsetY);
+        this.exit = new Exit(new GridObj(pos, new WallStatus(WallType.EXIT, WallType.NONE, WallType.NONE, WallType.NONE)), new Pair<GridObj, WallPos>(null, WallPos.FRONT), worldOffsetX, worldOffsetY);
         // this.exit.gridObj.InstantiateObj(growthIndex); // TODO fix this
     }
 
@@ -574,7 +574,7 @@ public class Grid
         bool TryMoveExit(WallPos direction)
         {
             GridObj currentExitGridObj = this.exit.gridObj;
-            GridObj newExitGridObj = PlaceExit(this.GetAdjacentGridObj(currentExitGridObj, direction));
+            GridObj newExitGridObj = this.PlaceExit(this.GetAdjacentGridObj(currentExitGridObj, direction));
 
             if (newExitGridObj == null || !newExitGridObj.HasExit()) return false;
 
@@ -630,9 +630,9 @@ public class Grid
     /// <returns></returns>
     public GridObj GetGridObj(Vector2Int pos)
     {
-        if (IsInsideGrid(pos))
+        if (this.IsInsideGrid(pos))
         {
-            return grid[pos.x, pos.y];
+            return this.grid[pos.x, pos.y];
         }
         return null;
     }
@@ -646,7 +646,7 @@ public class Grid
         if (PlayerMovement.currentGridPos == null) return WallPos.BACK;
        
         Dictionary<WallPos, int> distances = this.GetPlayerToEdgeDistances();
-        return GetClosestEdge(distances);
+        return this.GetClosestEdge(distances);
     }
 
     /// <summary>
@@ -662,9 +662,9 @@ public class Grid
         return new Dictionary<WallPos, int>
         {
             { WallPos.LEFT, playerX },
-            { WallPos.RIGHT, width - 1 - playerX },
+            { WallPos.RIGHT, this.width - 1 - playerX },
             { WallPos.FRONT, playerY },
-            { WallPos.BACK, height - 1 - playerY }
+            { WallPos.BACK, this.height - 1 - playerY }
         };
     }
 

@@ -9,6 +9,6 @@ public class SimpleWindowController : MonoBehaviour
 
     // Called by the Button OnClick()
     public void ToggleWindow() {
-        if (windowPanel != null) windowPanel.SetActive(!windowPanel.activeSelf);
+        if (this.windowPanel != null) this.windowPanel.SetActive(!this.windowPanel.activeSelf);
     }
 }

@@ -35,7 +35,7 @@ public class GridObj
     [SerializeField] private GameObject energyCrystalPrefab;
 
     [SerializeField] private int placementCost = 1;
-    public int PlacementCost => placementCost;
+    public int PlacementCost => this.placementCost;
 
     /// <summary>
     /// Create a GridObj given a grid position and a WallStatus, as well as some prefabs
@@ -80,10 +80,10 @@ public class GridObj
             return;
         }
 
-        wallPrefab = builder.wallPrefab;
-        floorPrefab = builder.floorPrefab;
-        destructibleWallPrefab = builder.destructibleWallPrefab;
-        exitPrefab = builder.exitPrefab;
+        this.wallPrefab = builder.wallPrefab;
+        this.floorPrefab = builder.floorPrefab;
+        this.destructibleWallPrefab = builder.destructibleWallPrefab;
+        this.exitPrefab = builder.exitPrefab;
         this.energyCrystalPrefab = builder.energyCrystalPrefab;
         GameManager.AllGridObjs.Add(this);
     }
@@ -258,7 +258,7 @@ public class GridObj
     /// <returns> Vector3 </returns>
     public Vector3 GetWorldPos(int worldOffsetX, int worldOffsetY)
     {
-        if (!isPlaceable) throw new System.Exception("Attempted to call GetWorldPos() on non placeable GridObj");
+        if (!this.isPlaceable) throw new System.Exception("Attempted to call GetWorldPos() on non placeable GridObj");
 
         return new Vector3((this.gridPos.x - worldOffsetX) * GridObj.PLACEMENT_FACTOR, 0, (this.gridPos.y - worldOffsetY) * GridObj.PLACEMENT_FACTOR);
     }
@@ -278,7 +278,7 @@ public class GridObj
     /// </summary>
     public void InstantiateObj()
     {
-        InstantiateObj(0, 0, new Dictionary<WallPos, GridObj>());
+        this.InstantiateObj(0, 0, new Dictionary<WallPos, GridObj>());
     }
 
     /// <summary>
@@ -292,33 +292,33 @@ public class GridObj
             Debug.LogWarning("Attempted to instantiate already existing GridObj");
             return;
         }
-        Vector3 worldPos = GetWorldPos(worldOffsetX, worldOffsetY);
+        Vector3 worldPos = this.GetWorldPos(worldOffsetX, worldOffsetY);
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
-        this.floorObj = GameObject.Instantiate(floorPrefab, GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
+        this.floorObj = GameObject.Instantiate(this.floorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
 
         if(this.gridType == GridType.REPLACEABLE)
         {
             this.floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
         }
 
-        this.floorObj.transform.SetParent(parentObj.transform);
-        this.interactable.SetColor(floorObj);
+        this.floorObj.transform.SetParent(this.parentObj.transform);
+        this.interactable.SetColor(this.floorObj);
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
         {
-            if (neighbors[WallPos.FRONT] == null || neighbors[WallPos.FRONT].GetWallObjs()[WallPos.BACK] == null) this.InstantiateWall(WallPos.FRONT, GetWallAt(WallPos.FRONT), worldOffsetX, worldOffsetY);
+            if (neighbors[WallPos.FRONT] == null || neighbors[WallPos.FRONT].GetWallObjs()[WallPos.BACK] == null) this.InstantiateWall(WallPos.FRONT, this.GetWallAt(WallPos.FRONT), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.BACK))
         {
-            if (neighbors[WallPos.BACK] == null || neighbors[WallPos.BACK].GetWallObjs()[WallPos.FRONT] == null) this.InstantiateWall(WallPos.BACK, GetWallAt(WallPos.BACK), worldOffsetX, worldOffsetY);
+            if (neighbors[WallPos.BACK] == null || neighbors[WallPos.BACK].GetWallObjs()[WallPos.FRONT] == null) this.InstantiateWall(WallPos.BACK, this.GetWallAt(WallPos.BACK), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.LEFT))
         {
-            if (neighbors[WallPos.LEFT] == null || neighbors[WallPos.LEFT].GetWallObjs()[WallPos.RIGHT] == null) this.InstantiateWall(WallPos.LEFT, GetWallAt(WallPos.LEFT), worldOffsetX, worldOffsetY);
+            if (neighbors[WallPos.LEFT] == null || neighbors[WallPos.LEFT].GetWallObjs()[WallPos.RIGHT] == null) this.InstantiateWall(WallPos.LEFT, this.GetWallAt(WallPos.LEFT), worldOffsetX, worldOffsetY);
         }
         if (this.wallStatus.HasWallAt(WallPos.RIGHT))
         {
-            if (neighbors[WallPos.RIGHT] == null || neighbors[WallPos.RIGHT].GetWallObjs()[WallPos.LEFT] == null) this.InstantiateWall(WallPos.RIGHT, GetWallAt(WallPos.RIGHT), worldOffsetX, worldOffsetY);
+            if (neighbors[WallPos.RIGHT] == null || neighbors[WallPos.RIGHT].GetWallObjs()[WallPos.LEFT] == null) this.InstantiateWall(WallPos.RIGHT, this.GetWallAt(WallPos.RIGHT), worldOffsetX, worldOffsetY);
         }
 
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
@@ -340,10 +340,10 @@ public class GridObj
             //        → Obergrenze steigt bei wenig Energie (bis zu 16)
             //        → Obergrenze sinkt bei viel Energie (mindestens 6)
 
-            if (gridType == GridType.REGULAR && UnityEngine.Random.value < spawnChance)
+            if (this.gridType == GridType.REGULAR && UnityEngine.Random.value < spawnChance)
             {
                 EnergyCrystal.PrepareSpawn(this.GetWorldPos(worldOffsetX, worldOffsetY), maxCrystals);
-                GameObject.Instantiate(energyCrystalPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
+                GameObject.Instantiate(this.energyCrystalPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
             }
         }
     }
@@ -363,13 +363,13 @@ public class GridObj
     /// <param name="wallPos"> The side to place the wall at </param>
     public void PlaceWallAt(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
     {
-        if (HasWallAt(wallPos))
+        if (this.HasWallAt(wallPos))
         {
-            RemoveWall(wallPos);
+            this.RemoveWall(wallPos);
         }
-        wallStatus.PlaceWallAt(wallPos, wallType);
+        this.wallStatus.PlaceWallAt(wallPos, wallType);
 
-        if (parentObj == null)
+        if (this.parentObj == null)
         {
             Debug.LogWarning("Attempted to place wall on NULL GridObj");
             return;
@@ -425,12 +425,12 @@ public class GridObj
     private void InstantiateWall(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
-        if (parentObj == null) return;
+        if (this.parentObj == null) return;
         int index = WallStatus.WallPosToInt(wallPos);
-        if (wallObjs[wallPos] != null)
+        if (this.wallObjs[wallPos] != null)
         {
-            GameObject.Destroy(wallObjs[wallPos]);   
-            wallObjs[wallPos] = null;
+            GameObject.Destroy(this.wallObjs[wallPos]);
+            this.wallObjs[wallPos] = null;
         }
 
         if (wallType == WallType.NONE)
@@ -439,7 +439,7 @@ public class GridObj
             return;
         }
 
-        GameObject newWall = GameObject.Instantiate(GetWallPrefab(wallType), WallStatus.GetWallWorldPos(GetWorldPos(worldOffsetX, worldOffsetY), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
+        GameObject newWall = GameObject.Instantiate(this.GetWallPrefab(wallType), WallStatus.GetWallWorldPos(this.GetWorldPos(worldOffsetX, worldOffsetY), wallPos), Quaternion.Euler(WallStatus.GetWallRotation(wallPos)));
 
         if (wallType == WallType.DESTRUCTIBLE)
         {
@@ -462,7 +462,7 @@ public class GridObj
             */
         }
 
-        newWall.transform.SetParent(parentObj.transform);
+        newWall.transform.SetParent(this.parentObj.transform);
         this.wallObjs[wallPos] = newWall;
     }
 
@@ -472,7 +472,7 @@ public class GridObj
     /// <param name="wallPos"> The side the wall is at </param>
     public void RemoveWall(WallPos wallPos)
     {
-        wallStatus.RemoveWallAt(wallPos);
+        this.wallStatus.RemoveWallAt(wallPos);
         int index = WallStatus.WallPosToInt(wallPos);
         this.exitCallbacks[index] = null;
         this.destructibleWallCallbacks[index] = null;
@@ -488,15 +488,15 @@ public class GridObj
     public void DestroyObj()
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call DestroyObj() on non placeable GridObj");
-        GameObject.Destroy(floorObj);
+        GameObject.Destroy(this.floorObj);
         this.floorObj = null;
         foreach(WallPos wallPos in Enum.GetValues(typeof(WallPos))){
-            if (wallObjs[wallPos] == null) continue;
-            GameObject.Destroy(wallObjs[wallPos]);
+            if (this.wallObjs[wallPos] == null) continue;
+            GameObject.Destroy(this.wallObjs[wallPos]);
             this.wallObjs[wallPos] = null;
         }
 
-        GameObject.Destroy(parentObj);
+        GameObject.Destroy(this.parentObj);
         this.parentObj = null;
     }
 
@@ -518,7 +518,7 @@ public class GridObj
     public GameObject GetWallObjAt(WallPos wallPos)
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call GetWallObjAt() on non placeable GridObj");
-        if (!HasWallAt(wallPos)) return null;
+        if (!this.HasWallAt(wallPos)) return null;
         return this.wallObjs[wallPos];
     }
 
@@ -616,7 +616,7 @@ public class GridObj
     {
         foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
         {
-            if(GetWallAt(pos) != WallType.EXIT) continue;
+            if(this.GetWallAt(pos) != WallType.EXIT) continue;
             this.RemoveWall(pos);
         }
     }
@@ -674,10 +674,10 @@ public class GridObj
     public string GetName()
     {
         string s = "";
-        if (wallStatus.front != WallType.NONE) s += "F";
-        if (wallStatus.back != WallType.NONE) s += "B";
-        if (wallStatus.left != WallType.NONE) s += "L";
-        if (wallStatus.right != WallType.NONE) s += "R";
+        if (this.wallStatus.front != WallType.NONE) s += "F";
+        if (this.wallStatus.back != WallType.NONE) s += "B";
+        if (this.wallStatus.left != WallType.NONE) s += "L";
+        if (this.wallStatus.right != WallType.NONE) s += "R";
         if (s == "") s += "E";
 
         return s;
@@ -694,19 +694,19 @@ public class GridObj
         clone.SetIsPlaceable(this.isPlaceable);
         clone.SetGridType(this.gridType);
 
-        if (compatibleObjs != null)
+        if (this.compatibleObjs != null)
         {
             List<GridObj>[] newCompat = new List<GridObj>[4];
             for (int i = 0; i < 4; i++)
             {
-                if (compatibleObjs[i] == null)
+                if (this.compatibleObjs[i] == null)
                 {
                     newCompat[i] = null;
                     continue;
                 }
 
                 newCompat[i] = new List<GridObj>();
-                foreach (var obj in compatibleObjs[i])
+                foreach (var obj in this.compatibleObjs[i])
                     newCompat[i].Add(obj.Clone());
             }
             clone.SetCompatibleObjs(newCompat);

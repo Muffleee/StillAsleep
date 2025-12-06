@@ -27,21 +27,21 @@ public class DestructibleWall : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        rend = GetComponent<MeshRenderer>();
+        this.rend = this.GetComponent<MeshRenderer>();
 
-        if (rend != null)
-            rend.material.color = startColor;
+        if (this.rend != null)
+            this.rend.material.color = this.startColor;
 
         UnityEvent onFinish = new UnityEvent();
-        onFinish.AddListener(DestroyWall);
+        onFinish.AddListener(this.DestroyWall);
 
-        timer = gameObject.AddComponent<Timer>();
-        timer.Init(destroyTime, onFinish);
+        this.timer = this.gameObject.AddComponent<Timer>();
+        this.timer.Init(this.destroyTime, onFinish);
 
-        if (startDelay > 0f)
-            StartCoroutine(StartTimerWithDelay());
+        if (this.startDelay > 0f)
+            this.StartCoroutine(this.StartTimerWithDelay());
         else
-            timer.StartTimer();
+            this.timer.StartTimer();
     }
 
     /// <summary>
@@ -50,8 +50,8 @@ public class DestructibleWall : MonoBehaviour
     /// <returns></returns>
     private System.Collections.IEnumerator StartTimerWithDelay()
     {
-        yield return new WaitForSeconds(startDelay);
-        timer.StartTimer();
+        yield return new WaitForSeconds(this.startDelay);
+        this.timer.StartTimer();
     }
 
     /// <summary>
@@ -59,10 +59,10 @@ public class DestructibleWall : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (timer == null || !timer.IsRunning || rend == null) return;
+        if (this.timer == null || !this.timer.IsRunning || this.rend == null) return;
 
-        float progress = 1f - (timer.GetTimeRemaining() / destroyTime);
-        rend.material.color = Color.Lerp(startColor, endColor, progress);
+        float progress = 1f - (this.timer.GetTimeRemaining() / this.destroyTime);
+        this.rend.material.color = Color.Lerp(this.startColor, this.endColor, progress);
     }
 
     /// <summary>
@@ -70,8 +70,8 @@ public class DestructibleWall : MonoBehaviour
     /// </summary>
     private void DestroyWall()
     {
-        if (debug) Debug.Log($"{gameObject.name} destroyed after {destroyTime} seconds!");
-        onDestroy.Invoke(this.gridObj, this.wallPos);
+        if (this.debug) Debug.Log($"{this.gameObject.name} destroyed after {this.destroyTime} seconds!");
+        this.onDestroy.Invoke(this.gridObj, this.wallPos);
         Destroy(this.gameObject);
     }
 }

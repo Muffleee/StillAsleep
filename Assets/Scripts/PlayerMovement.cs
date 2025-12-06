@@ -22,10 +22,10 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, gameManager.GetCurrentGrid().GetWorldOffsetX(), gameManager.GetCurrentGrid().GetWorldOffsetY());
+        currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         foreach(var wall in FindObjectsOfType< DestructibleWall >())
         {
-            wall.onDestroy.AddListener(OnWallDestroyed);
+            wall.onDestroy.AddListener(this.OnWallDestroyed);
         }
     }
 
@@ -34,15 +34,15 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (isMoving)
+        if (this.isMoving)
         {
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.W)) { TryMove(WallPos.BACK); }
-        else if (Input.GetKeyDown(KeyCode.S)) { TryMove(WallPos.FRONT); }
-        else if (Input.GetKeyDown(KeyCode.A)) { TryMove(WallPos.LEFT); }
-        else if (Input.GetKeyDown(KeyCode.D)) { TryMove(WallPos.RIGHT); };
+        if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK); }
+        else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT); }
+        else if (Input.GetKeyDown(KeyCode.A)) { this.TryMove(WallPos.LEFT); }
+        else if (Input.GetKeyDown(KeyCode.D)) { this.TryMove(WallPos.RIGHT); };
     }
 
     /// <summary>
@@ -51,13 +51,13 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="wallPos">Direction in which the player wants to move.</param>
     private void TryMove(WallPos wallPos)
     {
-        if (IsValidMove(wallPos))
+        if (this.IsValidMove(wallPos))
         {
-            MovePlayer(wallPos);
+            this.MovePlayer(wallPos);
         }
         else
         {
-            if(DEBUG) Debug.Log("Movement was blocked by wall");
+            if(this.DEBUG) Debug.Log("Movement was blocked by wall");
         }
         return;
     }
@@ -71,8 +71,8 @@ public class PlayerMovement : MonoBehaviour
     private bool IsValidMove(WallPos wallPos)
     {   
         //if(true) return true; // TODO fix this script lol
-        Grid cGrid = gameManager.GetCurrentGrid();
-        Vector2Int next = GetNextGridPos(wallPos);
+        Grid cGrid = this.gameManager.GetCurrentGrid();
+        Vector2Int next = this.GetNextGridPos(wallPos);
         if (!cGrid.IsInsideGrid(next)) return false;
 
         GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
@@ -121,9 +121,9 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="wallPos"></param>
     private void MovePlayer(WallPos wallPos)
     {
-        if (!isMoving)
+        if (!this.isMoving)
         {
-            StartCoroutine(MovementCoroutine(wallPos));
+            this.StartCoroutine(this.MovementCoroutine(wallPos));
         }
 
     }
@@ -132,21 +132,21 @@ public class PlayerMovement : MonoBehaviour
     // Not used right now
     private void FindNearestGridObj()
     {
-        if (gameManager.GetCurrentGrid() == null || !gameManager.GetCurrentGrid().IsInstantiated())
+        if (this.gameManager.GetCurrentGrid() == null || !this.gameManager.GetCurrentGrid().IsInstantiated())
         {
-            if(DEBUG) Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
+            if(this.DEBUG) Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
             return;
         }
 
-        GridObj nearest = gameManager.GetCurrentGrid().GetNearestGridObj(transform.position);
+        GridObj nearest = this.gameManager.GetCurrentGrid().GetNearestGridObj(this.transform.position);
 
         if (nearest != null)
         {
             lastGridPos = currentGridPos;
             currentGridPos = nearest.GetGridPos();
             //gameManager.SetCurrentGridPos(currentGridPos);
-            if (stepCounter == 0)
-                if(DEBUG) Debug.Log($"Player steht auf GridObj {nearest.GetGridPos()}");
+            if (this.stepCounter == 0)
+                if(this.DEBUG) Debug.Log($"Player steht auf GridObj {nearest.GetGridPos()}");
         }
     }
 
@@ -157,12 +157,12 @@ public class PlayerMovement : MonoBehaviour
     /// <returns></returns>
     private Vector2Int GetNextGridPos(WallPos wallPos)
     {
-        if (gameManager.GetCurrentGrid() == null || !gameManager.GetCurrentGrid().IsInstantiated())
+        if (this.gameManager.GetCurrentGrid() == null || !this.gameManager.GetCurrentGrid().IsInstantiated())
         {
-            if (DEBUG) Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
+            if (this.DEBUG) Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
             return new Vector2Int(0,0);
         }
-        Vector2Int next = currentGridPos + GetMoveDirGrid(wallPos);
+        Vector2Int next = currentGridPos + this.GetMoveDirGrid(wallPos);
         return next;
     }
 
@@ -178,26 +178,26 @@ public class PlayerMovement : MonoBehaviour
     {
         float duration = 0.5f;
         float elapsed = 0f;
-        isMoving = true;
-        Vector3 startPos = transform.position;
-        Vector3 endPos = startPos + GetMoveDir(wallPos);
+        this.isMoving = true;
+        Vector3 startPos = this.transform.position;
+        Vector3 endPos = startPos + this.GetMoveDir(wallPos);
 
         while (elapsed < duration)
         {
             float time = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-            transform.position = Vector3.Lerp(startPos, endPos, time);
+            this.transform.position = Vector3.Lerp(startPos, endPos, time);
             elapsed += Time.deltaTime;
             yield return null;
         }
-        stepCounter++;
+        this.stepCounter++;
 
         lastGridPos = currentGridPos;
-        currentGridPos = GetNextGridPos(wallPos);
+        currentGridPos = this.GetNextGridPos(wallPos);
 
-        transform.position = endPos;
+        this.transform.position = endPos;
 
         //traps detection on movment 
-        Grid cGrid = gameManager.GetCurrentGrid();
+        Grid cGrid = this.gameManager.GetCurrentGrid();
     
         // Look up the GridObj using the array accessor method already used in IsValidMove
         GridObj destinationTile = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y];
@@ -209,14 +209,14 @@ public class PlayerMovement : MonoBehaviour
         //    InGameTrapManager.ExecuteTrapEffect(destinationTile); 
         //}
         ////end of trap detection
-        
-        CheckForExit(destinationTile);
 
-        onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, stepCounter);
-        gameManager.OnMove(lastGridPos, currentGridPos, wallPos, stepCounter);
-        if(DEBUG) Debug.Log("Event fired");
-        isMoving = false;
-        if(DEBUG) Debug.Log(stepCounter);
+        this.CheckForExit(destinationTile);
+
+        this.onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, this.stepCounter);
+        this.gameManager.OnMove(lastGridPos, currentGridPos, wallPos, this.stepCounter);
+        if(this.DEBUG) Debug.Log("Event fired");
+        this.isMoving = false;
+        if(this.DEBUG) Debug.Log(this.stepCounter);
     }
     
     /// <summary>
@@ -229,7 +229,7 @@ public class PlayerMovement : MonoBehaviour
         if (gridObj != null)
         {
             gridObj.RemoveWall(wallPos);
-            if(DEBUG) Debug.Log($"Wand an {wallPos} bei {gridObj} wurde entfernt — Movement-Check aktualisiert.");
+            if(this.DEBUG) Debug.Log($"Wand an {wallPos} bei {gridObj} wurde entfernt — Movement-Check aktualisiert.");
         }
     }
 
@@ -240,9 +240,9 @@ public class PlayerMovement : MonoBehaviour
 
         if(currentTile.GetWallAt(WallPos.FRONT) == WallType.EXIT || currentTile.GetWallAt(WallPos.BACK) == WallType.EXIT || currentTile.GetWallAt(WallPos.RIGHT) == WallType.EXIT || currentTile.GetWallAt(WallPos.LEFT) == WallType.EXIT)
         {
-            if (winScreen != null)
+            if (this.winScreen != null)
             {
-                winScreen.ShowWinScreen();
+                this.winScreen.ShowWinScreen();
             } else Debug.LogWarning("Kein WinScreen gefunden");  
         }
     }

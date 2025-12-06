@@ -18,7 +18,7 @@ public class ClickManager : MonoBehaviour
             {
                 GameObject hitObj = hit.collider.gameObject;
                 if (hitObj == null) return;
-                gameManager.OnClick(hitObj);
+                this.gameManager.OnClick(hitObj);
             }
         }
     }

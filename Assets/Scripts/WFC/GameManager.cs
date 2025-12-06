@@ -40,18 +40,18 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
-        corridorWeight = corridor;
-        cornerWeight = corner;
-        oneWallWeight = oneWall;
-        emptyWeight = empty;
-        grid = new Grid(width, height);
+        corridorWeight = this.corridor;
+        cornerWeight = this.corner;
+        oneWallWeight = this.oneWall;
+        emptyWeight = this.empty;
+        this.grid = new Grid(this.width, this.height);
 
-        grid.CollapseWorld();
-        grid.IncreaseGrid(this.grid.GetNextGenPos());
+        this.grid.CollapseWorld();
+        this.grid.IncreaseGrid(this.grid.GetNextGenPos());
 
-        grid.CreateExit(new Vector2Int(4, 4), 0, 1);
-        grid.InstantiateMissing();
-        gui.FillList();
+        this.grid.CreateExit(new Vector2Int(4, 4), 0, 1);
+        this.grid.InstantiateMissing();
+        this.gui.FillList();
     }
 
     /// <summary>
@@ -63,19 +63,19 @@ public class GameManager : MonoBehaviour
     /// <param name="step">Count of all movement steps taken by the player</param>
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {   
-        if(step % replaceExitAfter == 0)
+        if(step % this.replaceExitAfter == 0)
         {
-            grid.RepositionExit(to);
+            this.grid.RepositionExit(to);
         }
 
-        this.generateAfter = math.max(grid.GetClosestEdgeAndDistance(grid.GetPlayerToEdgeDistances()).second, 2);
-        if (step % generateAfter == 0 && grid.ShouldGenerate(5))
-        {   
-            grid.CollapseWorld();
-            grid.IncreaseGrid(this.grid.GetNextGenPos());
-            grid.InstantiateMissing();
-            
-            gui.FillList();
+        this.generateAfter = math.max(this.grid.GetClosestEdgeAndDistance(this.grid.GetPlayerToEdgeDistances()).second, 2);
+        if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5))
+        {
+            this.grid.CollapseWorld();
+            this.grid.IncreaseGrid(this.grid.GetNextGenPos());
+            this.grid.InstantiateMissing();
+
+            this.gui.FillList();
         }
 
         
@@ -91,9 +91,9 @@ public class GameManager : MonoBehaviour
         if (selected == null || (selected.GetGridType() != GridType.REPLACEABLE && selected.GetGridType() != GridType.MANUAL_REPLACEABLE)) return;
         if (!this.gui.HasSelectedObj()) return;
 
-        GridObj virtualObj = gui.GetSelected();
+        GridObj virtualObj = this.gui.GetSelected();
 
-        PlayerResources pr = player.GetComponent<PlayerResources>();
+        PlayerResources pr = this.player.GetComponent<PlayerResources>();
         int cost = virtualObj.PlacementCost;
 
         if (!pr.CanAfford(cost))
@@ -104,19 +104,19 @@ public class GameManager : MonoBehaviour
         pr.Spend(cost);
 
         GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
-        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, grid.GetAdjacentGridObj(toPlace, WallPos.FRONT) },
-                                                                                            { WallPos.BACK, grid.GetAdjacentGridObj(toPlace, WallPos.BACK) },
-                                                                                            { WallPos.LEFT, grid.GetAdjacentGridObj(toPlace, WallPos.LEFT) },
-                                                                                            { WallPos.RIGHT, grid.GetAdjacentGridObj(toPlace, WallPos.RIGHT) } };
+        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.grid.GetAdjacentGridObj(toPlace, WallPos.FRONT) },
+                                                                                            { WallPos.BACK, this.grid.GetAdjacentGridObj(toPlace, WallPos.BACK) },
+                                                                                            { WallPos.LEFT, this.grid.GetAdjacentGridObj(toPlace, WallPos.LEFT) },
+                                                                                            { WallPos.RIGHT, this.grid.GetAdjacentGridObj(toPlace, WallPos.RIGHT) } };
         toPlace.UpdateWallStatus(neighbors);
-        grid.PlaceObj(toPlace);
+        this.grid.PlaceObj(toPlace);
 
-        gui.RemoveSelected(false);
+        this.gui.RemoveSelected(false);
     }
     
     /// <summary>
     /// Gets the grid in its current state
     /// </summary>
     /// <returns>Grid</returns>
-    public Grid GetCurrentGrid() { return grid; }
+    public Grid GetCurrentGrid() { return this.grid; }
 }

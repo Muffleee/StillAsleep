@@ -11,6 +11,6 @@ public class CamFollow : MonoBehaviour
     [SerializeField] private Transform target;
     private void Update()
     {
-        transform.position = target.position + camOffset;
+        this.transform.position = this.target.position + this.camOffset;
     }
 }

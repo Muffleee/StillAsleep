@@ -20,8 +20,8 @@ public class IngameUI : MonoBehaviour
     /// <param name="obj">GridObj to be added.</param>
     public void AddGridObj(GridObj obj)
     {
-        gridObjs.Add(obj);
-        UpdateToggles();
+        this.gridObjs.Add(obj);
+        this.UpdateToggles();
     }
 
     /// <summary>
@@ -30,10 +30,10 @@ public class IngameUI : MonoBehaviour
     /// <param name="obj">GridObj to be removed.</param>
     public void RemoveGridObj(GridObj obj)
     {
-        if (gridObjs.Contains(obj))
+        if (this.gridObjs.Contains(obj))
         {
-            gridObjs.Remove(obj);
-            UpdateToggles();
+            this.gridObjs.Remove(obj);
+            this.UpdateToggles();
         }
     }
 
@@ -43,10 +43,10 @@ public class IngameUI : MonoBehaviour
     /// <param name="regenerate"></param>
     public void RemoveSelected(bool regenerate)
     {
-        if (selectedIndex >= 0 && selectedIndex < gridObjs.Count)
+        if (this.selectedIndex >= 0 && this.selectedIndex < this.gridObjs.Count)
         {
             // Remove selected
-            gridObjs.RemoveAt(selectedIndex);
+            this.gridObjs.RemoveAt(this.selectedIndex);
 
             if(regenerate)
             {
@@ -55,23 +55,23 @@ public class IngameUI : MonoBehaviour
                 if (all.Count > 0)
                 {
                     GridObj replacement = all[Random.Range(0, all.Count)];
-                    gridObjs.Insert(selectedIndex, replacement);
+                    this.gridObjs.Insert(this.selectedIndex, replacement);
                 }
             }
 
             // Clear selection
-            if (selectedIndex < toggles.Length)
-                toggles[selectedIndex].isOn = false;
+            if (this.selectedIndex < this.toggles.Length)
+                this.toggles[this.selectedIndex].isOn = false;
 
-            selectedObj = null;
-            selectedIndex = -1;
+            this.selectedObj = null;
+            this.selectedIndex = -1;
 
-            UpdateToggles();
-            if(DEBUG) Debug.Log("Removed and replaced selected GridObj.");
+            this.UpdateToggles();
+            if(this.DEBUG) Debug.Log("Removed and replaced selected GridObj.");
         }
         else
         {
-            if(DEBUG) Debug.Log("No valid selection to remove.");
+            if(this.DEBUG) Debug.Log("No valid selection to remove.");
         }
     }
 
@@ -82,13 +82,13 @@ public class IngameUI : MonoBehaviour
     {
         List<GridObj> all = GridObj.GetPossiblePlaceables();
 
-        while (gridObjs.Count < 3)
+        while (this.gridObjs.Count < 3)
         {
             GridObj randomObj = all[Random.Range(0, all.Count)];
-            gridObjs.Add(randomObj);
+            this.gridObjs.Add(randomObj);
         }
 
-        UpdateToggles();
+        this.UpdateToggles();
     }
 
     /// <summary>
@@ -96,16 +96,16 @@ public class IngameUI : MonoBehaviour
     /// </summary>
     private void UpdateToggles()
     {
-        for (int i = 0; i < toggles.Length; i++)
+        for (int i = 0; i < this.toggles.Length; i++)
         {
-            if (i < gridObjs.Count)
+            if (i < this.gridObjs.Count)
             {
-                toggles[i].GetComponentInChildren<Text>().text = gridObjs[i].GetName();
-                toggles[i].gameObject.SetActive(true);
+                this.toggles[i].GetComponentInChildren<Text>().text = this.gridObjs[i].GetName();
+                this.toggles[i].gameObject.SetActive(true);
             }
             else
             {
-                toggles[i].gameObject.SetActive(false);
+                this.toggles[i].gameObject.SetActive(false);
             }
         }
     }
@@ -119,18 +119,18 @@ public class IngameUI : MonoBehaviour
         if (changedToggle.isOn)
         {
             string name = changedToggle.GetComponentInChildren<Text>().text;
-            selectedIndex = gridObjs.FindIndex(obj => obj.GetName() == name);
-            selectedObj = selectedIndex >= 0 ? gridObjs[selectedIndex] : null;
-            if (DEBUG) Debug.Log("Selected: " + name);
+            this.selectedIndex = this.gridObjs.FindIndex(obj => obj.GetName() == name);
+            this.selectedObj = this.selectedIndex >= 0 ? this.gridObjs[this.selectedIndex] : null;
+            if (this.DEBUG) Debug.Log("Selected: " + name);
         }
         else
         {
             string name = changedToggle.GetComponentInChildren<Text>().text;
-            if (selectedObj != null && selectedObj.GetName() == name)
+            if (this.selectedObj != null && this.selectedObj.GetName() == name)
             {
-                selectedObj = null;
-                selectedIndex = -1;
-                if (DEBUG) Debug.Log("Selected cleared");
+                this.selectedObj = null;
+                this.selectedIndex = -1;
+                if (this.DEBUG) Debug.Log("Selected cleared");
             }
         }
     }
@@ -144,11 +144,11 @@ public class IngameUI : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        FillList();
+        this.FillList();
 
-        foreach (Toggle t in toggles)
+        foreach (Toggle t in this.toggles)
         {
-            t.onValueChanged.AddListener(delegate { OnToggleChanged(t); });
+            t.onValueChanged.AddListener(delegate { this.OnToggleChanged(t); });
         }
     }
 }

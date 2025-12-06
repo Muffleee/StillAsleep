@@ -13,7 +13,7 @@ public class Timer : MonoBehaviour
     private Coroutine timerRoutine;
     private bool isPaused = false;
 
-    public bool IsRunning => timerRoutine != null;
+    public bool IsRunning => this.timerRoutine != null;
 
     /// <summary>
     /// Initialise a timer with a given duration and an UnityEvent which shall be called once the timer ends.
@@ -31,10 +31,10 @@ public class Timer : MonoBehaviour
     /// </summary>
     public void StartTimer()
     {
-        if (timerRoutine != null)
-            StopCoroutine(timerRoutine);
+        if (this.timerRoutine != null)
+            this.StopCoroutine(this.timerRoutine);
 
-        timerRoutine = StartCoroutine(RunTimer());
+        this.timerRoutine = this.StartCoroutine(this.RunTimer());
     }
 
     /// <summary>
@@ -42,16 +42,16 @@ public class Timer : MonoBehaviour
     /// </summary>
     public void StopTimer()
     {
-        if (timerRoutine != null)
+        if (this.timerRoutine != null)
         {
-            StopCoroutine(timerRoutine);
-            timerRoutine = null;
+            this.StopCoroutine(this.timerRoutine);
+            this.timerRoutine = null;
         }
     }
 
-    public void Pause() => isPaused = true;
-    public void Resume() => isPaused = false;
-    public float GetTimeRemaining() => Mathf.Max(0f, timeRemaining);
+    public void Pause() => this.isPaused = true;
+    public void Resume() => this.isPaused = false;
+    public float GetTimeRemaining() => Mathf.Max(0f, this.timeRemaining);
 
     /// <summary>
     /// Run the timer
@@ -59,18 +59,18 @@ public class Timer : MonoBehaviour
     /// <returns>null</returns>
     private IEnumerator RunTimer()
     {
-        timeRemaining = duration;
+        this.timeRemaining = this.duration;
 
-        while (timeRemaining > 0f)
+        while (this.timeRemaining > 0f)
         {
-            if (!isPaused)
-                timeRemaining -= Time.deltaTime;
+            if (!this.isPaused)
+                this.timeRemaining -= Time.deltaTime;
 
             yield return null;
         }
 
-        timeRemaining = 0f;
-        onFinish?.Invoke();
-        timerRoutine = null;
+        this.timeRemaining = 0f;
+        this.onFinish?.Invoke();
+        this.timerRoutine = null;
     }
 }

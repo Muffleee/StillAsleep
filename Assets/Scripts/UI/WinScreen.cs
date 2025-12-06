@@ -15,24 +15,24 @@ public class WinScreen : MonoBehaviour
 
     void Start()
     {
-        if (winScreenPanel != null)
-            winScreenPanel.SetActive(false);
+        if (this.winScreenPanel != null)
+            this.winScreenPanel.SetActive(false);
 
-        if (restartButton != null)
-            restartButton.onClick.AddListener(RestartGame);
+        if (this.restartButton != null)
+            this.restartButton.onClick.AddListener(this.RestartGame);
 
-        if(quitButton != null)
-            quitButton.onClick.AddListener(QuitGame);
+        if(this.quitButton != null)
+            this.quitButton.onClick.AddListener(this.QuitGame);
     }
 
     public void ShowWinScreen(string message = "You Win!")
     {
-        if (winScreenPanel != null)
+        if (this.winScreenPanel != null)
         {
-            winScreenPanel.SetActive(true);
+            this.winScreenPanel.SetActive(true);
 
-            if (winText != null)
-                winText.text = message;
+            if (this.winText != null)
+                this.winText.text = message;
 
             //Pause Game
             Time.timeScale = 0f;
@@ -62,9 +62,9 @@ public class WinScreen : MonoBehaviour
 
     public void HideWinScreen()
     {
-        if(winScreenPanel != null)
+        if(this.winScreenPanel != null)
         {
-            winScreenPanel.SetActive(false);
+            this.winScreenPanel.SetActive(false);
             Time.timeScale = 1f;
         }
     }
