@@ -76,7 +76,6 @@ public class PlayerMovement : MonoBehaviour
         if (!cGrid.IsInsideGrid(next)) return false;
 
         GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
-        
         GridObj current = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y];
         return current.GetInteract().IsValidMove(current, nextObj, wallPos);
     }
