@@ -18,3 +18,4 @@ ProjectSettings/Layouts/
 *.pidb
 *.booproj
 *.svd
+.editorconfig
