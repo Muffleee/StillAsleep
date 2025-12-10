@@ -80,11 +80,11 @@ public class GridObj
             return;
         }
 
-        this.wallPrefab = builder.wallPrefab;
-        this.floorPrefab = builder.floorPrefab;
-        this.destructibleWallPrefab = builder.destructibleWallPrefab;
-        this.exitPrefab = builder.exitPrefab;
-        this.energyCrystalPrefab = builder.energyCrystalPrefab;
+        this.wallPrefab = builder.GetPrefabLibrary().prefabWall;
+        this.floorPrefab = builder.GetPrefabLibrary().prefabFloor;
+        this.destructibleWallPrefab = builder.GetPrefabLibrary().prefabDestructibleWall;
+        this.exitPrefab = builder.GetPrefabLibrary().prefabExit;
+        this.energyCrystalPrefab = builder.GetPrefabLibrary().prefabEnergyCrystal;
         GameManager.AllGridObjs.Add(this);
     }
 
@@ -419,6 +419,19 @@ public class GridObj
     }
 
     /// <summary>
+    /// Replace the floor prefab with GameObject prefab
+    /// </summary>
+    /// <param name="prefab"></param>
+    public void ReplaceFloorPrefab(GameObject prefab, int worldOffsetX, int worldOffsetY)
+    {
+        this.floorPrefab = prefab;
+        if (!this.IsInstantiated()) return;
+        GameObject.Destroy(this.floorObj);
+        this.floorObj = GameObject.Instantiate(this.floorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
+        this.floorObj.transform.SetParent(this.parentObj.transform);
+    }
+
+    /// <summary>
     /// Instantiate a wall and only change the data on the in-game object, helper method
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
@@ -741,7 +754,8 @@ public class GridObj
     public void SetIsPlaceable(bool isPlaceable) { this.isPlaceable = isPlaceable; }
     public void SetGridType(GridType gridType) { this.gridType = gridType; this.InitType(gridType); }
     public void SetGridPos(Vector2Int gridPos) { this.gridPos = gridPos; }
-    public void SetWeight(int weight) {  this.weight = weight; }
+    public void SetWeight(int weight) { this.weight = weight; }
+    public void SetFloorPrefab(GameObject prefab) { this.floorPrefab = prefab; }
 }
 
 public enum GridType

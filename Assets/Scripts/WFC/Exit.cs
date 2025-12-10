@@ -10,7 +10,6 @@ public class Exit
     public GridObj gridObj;
     public int worldOffsetX;
     public int worldOffsetY;
-    public Pair<GridObj, WallPos> adjacent;
 
     /// <summary>
     /// Create the Exit from a GridObj and a growthIndex
@@ -24,7 +23,6 @@ public class Exit
         this.gridObj = gridObj;
         this.worldOffsetX = worldOffsetX;
         this.worldOffsetY = worldOffsetX;
-        this.adjacent = adjacent;    
     }
 
     

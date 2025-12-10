@@ -25,6 +25,12 @@ public interface IInteractable
     /// <param name="wPos">Direction</param>
     /// <returns></returns>
     bool IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos);
+
+    /// <summary>
+    /// Returns the prefab or null
+    /// </summary>
+    /// <returns></returns>
+    GameObject GetPrefab();
 }
 
 /// <summary>
@@ -45,6 +51,11 @@ public class Regular : IInteractable
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
+    }
+
+    GameObject IInteractable.GetPrefab()
+    {
+        return null;
     }
 }
 
@@ -84,26 +95,7 @@ public class Trap : IInteractable
 
     private void ResetTrapVisual(GridObj tile)
     {
-        GameObject floorObj = tile.GetFloorObj();
-        if (floorObj != null)
-        {
-            MeshRenderer renderer = floorObj.GetComponentInChildren<MeshRenderer>();
-
-            if (renderer != null)
-            {
-                // ensures to get the specific instance of the material for this tile.
-                //in previous version because of using the same materials other floor tiles that were not 
-                //trap would also change color to white when walking over them
-                Material matInstance = renderer.material;
-
-                // Only reset the color if it is currently red (a trap for now)
-                //if (matInstance.color == Color.red)
-                //{
-                    //make it white(there used to be a trap here)  
-                    matInstance.color = Color.white;
-                //}
-            }
-        }
+        tile.ReplaceFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabFloor, GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
     }
 
     /// <summary>
@@ -116,6 +108,11 @@ public class Trap : IInteractable
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
+    }
+
+    GameObject IInteractable.GetPrefab()
+    {
+        return GameManager.INSTANCE.GetPrefabLibrary().prefabTrap;
     }
 }
 
@@ -143,12 +140,17 @@ public class JumpingPads : IInteractable
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
-        if (pr != null && pr.CurrentEnergy >0 && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE)&& curr.HasWallAt(wPos))
+        if (pr != null && pr.CurrentEnergy > 0 && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && curr.HasWallAt(wPos))
         {
             pr.Spend(1);   // 1 Energie abziehen
             return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
         }
         return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
+    }
+    
+    GameObject IInteractable.GetPrefab()
+    {
+        return GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad;
     }
 }
 
@@ -170,6 +172,11 @@ public class Replaceable : IInteractable
     {
         return false;
     }
+
+    GameObject IInteractable.GetPrefab()
+    {
+        return null;
+    }
 }
 
 public class ManualReplaceable : IInteractable
@@ -186,5 +193,10 @@ public class ManualReplaceable : IInteractable
     bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
+    }
+    
+    GameObject IInteractable.GetPrefab()
+    {
+        return null;
     }
 }

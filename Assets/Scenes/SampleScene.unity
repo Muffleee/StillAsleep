@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: dc4c87f70d9bbc940ad435aea2ae5fdb, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 220377177}
   - component: {fileID: 220377176}
   - component: {fileID: 220377178}
+  - component: {fileID: 220377179}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -161,17 +162,9 @@ MonoBehaviour:
   corner: 8
   oneWall: 6
   empty: 10
+  prefabLibrary: {fileID: 220377179}
+  playerMovement: {fileID: 6834562829543864870}
   player: {fileID: 6834562829543864865}
-  wallPrefab: {fileID: 2144594829894418979, guid: f70bbc641b70bd4499a0156471aac54f,
-    type: 3}
-  floorPrefab: {fileID: 5365367703789444965, guid: 03741992903a35148bbfca60e9108b1a,
-    type: 3}
-  destructibleWallPrefab: {fileID: 5852734629184053177, guid: 81a2fa19464c3d5469133302f759fea0,
-    type: 3}
-  exitPrefab: {fileID: 5393983432708434800, guid: 8bef5b077c3bfc146a4c2e4a1004f9b1,
-    type: 3}
-  energyCrystalPrefab: {fileID: 7996163849219857427, guid: aa5f36cdf6707b64aaa71f71f470c7c7,
-    type: 3}
 --- !u!4 &220377177
 Transform:
   m_ObjectHideFlags: 0
@@ -200,6 +193,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 220377176}
+--- !u!114 &220377179
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 220377175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63f4034f012cac74283b9c861dedac37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabEnergyCrystal: {fileID: 7996163849219857427, guid: aa5f36cdf6707b64aaa71f71f470c7c7,
+    type: 3}
+  prefabWall: {fileID: 2144594829894418979, guid: f70bbc641b70bd4499a0156471aac54f,
+    type: 3}
+  prefabDestructibleWall: {fileID: 5852734629184053177, guid: 81a2fa19464c3d5469133302f759fea0,
+    type: 3}
+  prefabExit: {fileID: 5393983432708434800, guid: 8bef5b077c3bfc146a4c2e4a1004f9b1,
+    type: 3}
+  prefabFloor: {fileID: 5365367703789444965, guid: 03741992903a35148bbfca60e9108b1a,
+    type: 3}
+  prefabTrap: {fileID: 7963245411701999052, guid: 9a4e1b7c5502d5b4c8c2cab355155f71,
+    type: 3}
+  prefabJumppad: {fileID: 5826230866194392711, guid: 0d7d4b8585540d241b6601c5b7e41bf4,
+    type: 3}
 --- !u!1 &231321110
 GameObject:
   m_ObjectHideFlags: 0
@@ -453,7 +472,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3fb5ac0b397d89448be906566ffb747, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camOffset: {x: 0, y: 13, z: -8.5}
+  camOffsetFurthest: {x: 0, y: 13, z: -8.5}
+  camOffsetClosest: {x: 0, y: 5, z: -4}
   target: {fileID: 6834562829543864866}
 --- !u!1 &410087039
 GameObject:

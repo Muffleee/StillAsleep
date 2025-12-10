@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
 /// Main game manager class, handles game initialization, world generation, and move and click events
 /// </summary>
 public class GameManager : MonoBehaviour
-{
+{   
     [SerializeField] int generateAfter = 4;
     [SerializeField] int replaceExitAfter = 2;
     [SerializeField] private int width;
@@ -16,22 +17,27 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int corner = 0;
     [SerializeField] private int oneWall = 0;
     [SerializeField] private int empty = 0;
+    [SerializeField] private PrefabLibrary prefabLibrary;
+    [SerializeField] private PlayerMovement playerMovement;
 
     public static int emptyWeight;
     public static int corridorWeight;
     public static int cornerWeight;
     public static int oneWallWeight;
+    public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
 
+    /*
     public GameObject wallPrefab;
     public GameObject floorPrefab;
     public GameObject destructibleWallPrefab;
     public GameObject exitPrefab;
 
     public GameObject energyCrystalPrefab;
+    */
 
     Grid grid;
 
@@ -40,6 +46,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
+        INSTANCE = this;
         corridorWeight = this.corridor;
         cornerWeight = this.corner;
         oneWallWeight = this.oneWall;
@@ -113,10 +120,12 @@ public class GameManager : MonoBehaviour
 
         this.gui.RemoveSelected(false);
     }
-    
+
     /// <summary>
     /// Gets the grid in its current state
     /// </summary>
     /// <returns>Grid</returns>
     public Grid GetCurrentGrid() { return this.grid; }
+    public PrefabLibrary GetPrefabLibrary() { return this.prefabLibrary; }
+    public PlayerMovement GetPlayerMovement() { return this.playerMovement; }
 }

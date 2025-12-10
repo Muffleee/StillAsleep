@@ -7,10 +7,42 @@ using UnityEngine;
 /// </summary>
 public class CamFollow : MonoBehaviour
 {
-    [SerializeField] private Vector3 camOffset = new Vector3(0f, 7f, -4.5f);
+    [SerializeField] private Vector3 camOffsetFurthest = new Vector3(0f, 13f, -8.5f);
+    [SerializeField] private Vector3 camOffsetClosest = new Vector3(0f, 5f, -4f);
     [SerializeField] private Transform target;
+    private Vector3 currentPos;
+
+    private void Start()
+    {
+        this.currentPos = this.camOffsetFurthest;
+    }
+
     private void Update()
     {
-        this.transform.position = this.target.position + this.camOffset;
+        HandleScroll();
+        transform.position = target.position + currentPos;
+    }
+
+    private void HandleScroll()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if(scroll == 0f) return;
+        this.currentPos = this.MoveAlongLineByFraction(camOffsetClosest, camOffsetFurthest, currentPos, scroll);
+    }
+
+    /// <summary>
+    /// Move point P along the line AB by a fraction x of the AB length
+    /// </summary>
+    private Vector3 MoveAlongLineByFraction(Vector3 A, Vector3 B, Vector3 P, float x)
+    {
+        Vector3 AB = A - B;
+        float abSqr = Vector3.Dot(AB, AB);
+        if (abSqr == 0f) return P;
+
+        float t = Vector3.Dot(P - B, AB) / abSqr;
+
+        float tNew = Mathf.Clamp01(t + x);
+
+        return B + tNew * AB;
     }
 }

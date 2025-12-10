@@ -222,10 +222,12 @@ public class Grid
         if(rand <= Trapchance)
         {
             gridObj.SetGridType(GridType.TRAP);
+            gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabTrap);
         }
         else if(rand > Trapchance && rand < (JumpingBadChance +Trapchance  ))
         {
             gridObj.SetGridType(GridType.JUMPINGPAD);
+            gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad);
         }
          else if(rand > (JumpingBadChance + Trapchance) && rand < (PlaceHolderChance + JumpingBadChance + Trapchance))
         {
@@ -579,19 +581,10 @@ public class Grid
             if (newExitGridObj == null || !newExitGridObj.HasExit()) return false;
 
             currentExitGridObj?.RemoveExitWalls();
-            this.exit.adjacent.first?.RemoveWall(this.exit.adjacent.second);
 
             WallPos exitPos = newExitGridObj.GetExitPos();
             WallPos exitOppositePos = WallStatus.GetOppositePos(exitPos);
             GridObj adjacentGridObj = this.GetAdjacentGridObj(newExitGridObj, exitPos);
-            
-            if (adjacentGridObj != null && adjacentGridObj.GetGridType() != GridType.REPLACEABLE && adjacentGridObj.GetGridType() != GridType.MANUAL_REPLACEABLE && !adjacentGridObj.HasWallAt(exitOppositePos))
-            {
-                adjacentGridObj.PlaceWallAt(exitOppositePos, this.worldOffsetX, this.worldOffsetY);
-                this.exit.adjacent.first = adjacentGridObj;
-                this.exit.adjacent.second = exitOppositePos;
-            }
-            else this.exit.adjacent.first = null;
 
             this.exit.gridObj = newExitGridObj;
 
