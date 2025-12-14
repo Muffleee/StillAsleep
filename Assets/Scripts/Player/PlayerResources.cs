@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 
 public class PlayerResources : MonoBehaviour
@@ -27,6 +28,11 @@ public class PlayerResources : MonoBehaviour
 
         this.currentEnergy -= cost;
         return true;
+    }
+
+    public void RemoveEnergy(int amount)
+    {
+        this.currentEnergy = Mathf.Max(0, this.currentEnergy - amount);
     }
 
     public void AddEnergy(int amount)
