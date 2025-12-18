@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] public static Vector2Int currentGridPos, lastGridPos;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private WinScreen winScreen;
+    [SerializeField] private GameObject playerModel;
 
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private bool DEBUG = false;
@@ -27,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
         {
             wall.onDestroy.AddListener(this.OnWallDestroyed);
         }
+        RotateModel(WallPos.FRONT);
     }
 
     /// <summary>
@@ -175,12 +177,14 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="wallPos">Direction of movement</param>
     /// <returns></returns>
     private IEnumerator MovementCoroutine(WallPos wallPos)
-    {
+    {   
         float duration = 0.5f;
         float elapsed = 0f;
         this.isMoving = true;
         Vector3 startPos = this.transform.position;
         Vector3 endPos = startPos + this.GetMoveDir(wallPos);
+
+        RotateModel(wallPos);
 
         while (elapsed < duration)
         {
@@ -245,5 +249,26 @@ public class PlayerMovement : MonoBehaviour
                 this.winScreen.ShowWinScreen();
             } else Debug.LogWarning("Kein WinScreen gefunden");  
         }
+    }
+
+    private void RotateModel(WallPos dir)
+    {
+        int rotation;
+        switch (dir)
+        {
+            case WallPos.FRONT:
+                rotation = 180;
+                break;
+            case WallPos.LEFT:
+                rotation = -90;
+                break;
+            case WallPos.RIGHT:
+                rotation = 90;
+                break;
+            default:
+                rotation = 0;
+                break;
+        }
+        this.playerModel.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
     }
 }

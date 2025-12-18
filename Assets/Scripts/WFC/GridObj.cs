@@ -80,8 +80,8 @@ public class GridObj
             return;
         }
 
-        this.wallPrefab = builder.GetPrefabLibrary().prefabWall;
-        this.floorPrefab = builder.GetPrefabLibrary().prefabFloor;
+        this.wallPrefab = builder.GetPrefabLibrary().GetRandomWallPrefab();
+        this.floorPrefab = builder.GetPrefabLibrary().GetRandomFloorPrefab();
         this.destructibleWallPrefab = builder.GetPrefabLibrary().prefabDestructibleWall;
         this.exitPrefab = builder.GetPrefabLibrary().prefabExit;
         this.energyCrystalPrefab = builder.GetPrefabLibrary().prefabEnergyCrystal;
@@ -292,14 +292,15 @@ public class GridObj
             Debug.LogWarning("Attempted to instantiate already existing GridObj");
             return;
         }
+
+        if(this.gridType == GridType.REPLACEABLE || this.gridType == GridType.MANUAL_REPLACEABLE)
+        {
+            this.floorPrefab = GameManager.INSTANCE.GetPrefabLibrary().prefabReplaceable;
+        }
+
         Vector3 worldPos = this.GetWorldPos(worldOffsetX, worldOffsetY);
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
         this.floorObj = GameObject.Instantiate(this.floorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
-
-        if(this.gridType == GridType.REPLACEABLE)
-        {
-            this.floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
-        }
 
         this.floorObj.transform.SetParent(this.parentObj.transform);
         this.interactable.SetColor(this.floorObj);

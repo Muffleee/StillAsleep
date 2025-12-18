@@ -89,13 +89,13 @@ public class Trap : IInteractable
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
         if (pr != null)
         {
-            pr.Spend(3);   // 1 Energie abziehen
+            pr.RemoveEnergy(3);   // 1 Energie abziehen
         }
     }
 
     private void ResetTrapVisual(GridObj tile)
     {
-        tile.ReplaceFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabFloor, GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
+        tile.ReplaceFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().GetRandomFloorPrefab(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
     }
 
     /// <summary>
@@ -161,7 +161,6 @@ public class Replaceable : IInteractable
 {
     void IInteractable.SetColor(GameObject obj)
     {
-        obj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
     }
     void IInteractable.OnUse(GridObj obj)
     {
@@ -183,7 +182,6 @@ public class ManualReplaceable : IInteractable
 {
     void IInteractable.SetColor(GameObject obj)
     {
-        obj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
     }
     void IInteractable.OnUse(GridObj obj)
     {
