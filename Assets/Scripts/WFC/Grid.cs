@@ -177,6 +177,8 @@ public class Grid
                     toProcess.Enqueue(nPos);
             }
         }
+
+        Debug.Log(this.CheckSolvability());
     }
     private void IncreaseWeight(List<GridObj> filtered, GridObj neighbor, WallPos side)
     {
@@ -703,5 +705,79 @@ public class Grid
     {
         Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetPlayerToEdgeDistances());
         return closestEdge.second < genRange;
+    }
+
+    private bool CheckSolvability()
+    {
+        if (this.width == 0 || this.height == 0) return true;
+        Grid incGrid = new Grid(this.width + 2, this.height + 2);
+        GridObj[,] incGridArray = incGrid.GetGridArray();
+        for(int x = 0; x < incGrid.width; x++)
+        {
+            for(int y = 0; y < incGrid.height; y++)
+            {
+                if (x == 0 || y == 0 || x == incGrid.width - 1 || y == incGrid.height - 1) incGridArray[x, y] = new GridObj(new WallStatus(), GameManager.emptyWeight);
+                else incGridArray[x, y] = this.grid[x - 1, y - 1];
+            }
+        }
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+        Stack<Vector2Int> stack = new Stack<Vector2Int>();
+
+        Vector2Int start = new Vector2Int(0, 0);
+
+        stack.Push(start);
+
+        while (stack.Count > 0)
+        {
+            Vector2Int pos = stack.Pop();
+            if (!visited.Add(pos)) continue;
+            GridObj current = this.GetGridObj(pos);
+
+            if (current == null) continue;
+            if (!current.HasWallAt(WallPos.BACK))
+            {
+                GridObj neighbour = this.GetAdjacentGridObj(current, WallPos.BACK);
+                if(neighbour!=null && !neighbour.HasWallAt(WallPos.FRONT))
+                {
+                    stack.Push(neighbour.GetGridPos());
+                }
+            }
+            if (!current.HasWallAt(WallPos.FRONT))
+            {
+                GridObj neighbour = this.GetAdjacentGridObj(current, WallPos.FRONT);
+                if (neighbour != null && !neighbour.HasWallAt(WallPos.BACK))
+                {
+                    stack.Push(neighbour.GetGridPos());
+                }
+            }
+            if (!current.HasWallAt(WallPos.LEFT))
+            {
+                GridObj neighbour = this.GetAdjacentGridObj(current, WallPos.LEFT);
+                if (neighbour != null && !neighbour.HasWallAt(WallPos.RIGHT))
+                {
+                    stack.Push(neighbour.GetGridPos());
+                }
+            }
+            if (!current.HasWallAt(WallPos.RIGHT))
+            {
+                GridObj neighbour = this.GetAdjacentGridObj(current, WallPos.RIGHT);
+                if (neighbour != null && !neighbour.HasWallAt(WallPos.LEFT))
+                {
+                    stack.Push(neighbour.GetGridPos());
+                }
+            }
+        }
+
+        for(int x = 0; x < width; x++)
+        {
+            for(int y = 0; y < height;y++)
+            {
+                if(!visited.Contains(new Vector2Int(x, y)))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
