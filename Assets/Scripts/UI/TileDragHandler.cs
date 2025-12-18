@@ -4,65 +4,56 @@ using UnityEngine.UI;
 
 public class TileDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    private GameObject dragIcon;
-    private Canvas parentCanvas;
+    private GameObject ghostObject; // This is now a 3D object, not UI
     private Toggle myToggle;
+    private IngameUI uiController;
 
     void Start()
     {
-        parentCanvas = GetComponentInParent<Canvas>();
         myToggle = GetComponent<Toggle>();
+        uiController = Object.FindAnyObjectByType<IngameUI>();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // 1. Create the visual "Ghost" icon
-        dragIcon = Instantiate(gameObject, parentCanvas.transform);
-        dragIcon.name = "DragIcon";
+        // 1. Get the name of the tile from the UI text
+        string tileName = GetComponentInChildren<Text>().text;
 
-        // 2. Clean up the Ghost (Remove logic so it's just a picture)
-        Destroy(dragIcon.GetComponent<TileDragHandler>()); // Don't let the ghost drag itself!
-        
-        Toggle ghostToggle = dragIcon.GetComponent<Toggle>();
-        if (ghostToggle != null)
+        // 2. Get the 3D Prefab from the UI Controller
+        GameObject prefab = uiController.GetPrefabByName(tileName);
+
+        if (prefab != null)
         {
-            ghostToggle.group = null; // Detach from group just in case
-            Destroy(ghostToggle);     // Remove the component
+            // 3. Spawn the 3D Prefab into the world
+            ghostObject = Instantiate(prefab);
+            
+            // 4. Disable collisions on the ghost so it doesn't bump things
+            if (ghostObject.TryGetComponent<Collider>(out Collider col)) col.enabled = false;
         }
 
-        // 3. Visual adjustments (Transparency & Click-through)
-        CanvasGroup cg = dragIcon.GetComponent<CanvasGroup>();
-        if (cg == null) cg = dragIcon.AddComponent<CanvasGroup>();
-        
-        cg.alpha = 0.6f;
-        cg.blocksRaycasts = false; // CRITICAL: Allows the mouse to "see" the 3D world behind the icon
-
-        // 4. CRITICAL FIX: Re-select the original toggle
-        // Creating the clone above confused the ToggleGroup and turned this button OFF.
-        // We force it back ON here so the Game Logic knows we have a building selected.
-        if (myToggle != null)
-        {
-            myToggle.isOn = true;
-        }
+        if (myToggle != null) myToggle.isOn = true;
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (dragIcon != null)
+        if (ghostObject != null)
         {
-            dragIcon.transform.position = Input.mousePosition;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                ghostObject.transform.position = hit.point;
+            }
         }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (dragIcon != null) Destroy(dragIcon);
+        if (ghostObject != null) Destroy(ghostObject);
 
-        // Raycast into the 3D world
+        // Place the real object via GameManager
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            // Now that we fixed the selection in OnBeginDrag, this should work!
             if (GameManager.INSTANCE != null)
             {
                 GameManager.INSTANCE.OnClick(hit.collider.gameObject);

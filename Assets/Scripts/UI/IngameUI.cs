@@ -14,6 +14,32 @@ public class IngameUI : MonoBehaviour
     private int selectedIndex = -1;
     private bool DEBUG = false;
 
+    [Header("Sprite Configuration")]
+    public Sprite imgF; 
+    public Sprite imgB;
+    public Sprite imgL;
+    public Sprite imgR;
+    public Sprite imgE;
+    public Sprite imgFB;
+    public Sprite imgFL;
+    public Sprite imgFR;
+    public Sprite imgBL;
+    public Sprite imgBR;
+    public Sprite imgLR;
+    public Sprite imgDefault; 
+[Header("3D Prefab Configuration")]
+public GameObject prefabF;
+public GameObject prefabB;
+public GameObject prefabL;
+public GameObject prefabR;
+public GameObject prefabE;
+public GameObject prefabFB;
+public GameObject prefabFL;
+public GameObject prefabFR;
+public GameObject prefabBL;
+public GameObject prefabBR;
+public GameObject prefabLR;
+
     /// <summary>
     /// Add a GridObj to the list of selectable GridObjs.
     /// </summary>
@@ -92,6 +118,46 @@ public class IngameUI : MonoBehaviour
     }
 
     /// <summary>
+    /// Helper function to switch images based on Name
+    /// </summary>
+    private Sprite GetSpriteByName(string nameCode)
+    {
+        switch (nameCode)
+        {
+            case "F":  return imgF;
+            case "B":  return imgB;
+            case "L":  return imgL;
+            case "R":  return imgR;
+            case "E":  return imgE;
+            case "FB": return imgFB;
+            case "FL": return imgFL;
+            case "FR": return imgFR;
+            case "BL": return imgBL;
+            case "BR": return imgBR;
+            case "LR": return imgLR;
+            default:   return imgDefault;
+        }
+    }
+
+public GameObject GetPrefabByName(string nameCode)
+{
+    switch (nameCode)
+    {
+        case "F":  return prefabF;
+        case "B":  return prefabB;
+        case "L":  return prefabL;
+        case "R":  return prefabR;
+        case "E":  return prefabE;
+        case "FB": return prefabFB;
+        case "FL": return prefabFL;
+        case "FR": return prefabFR;
+        case "BL": return prefabBL;
+        case "BR": return prefabBR;
+        case "LR": return prefabLR;
+        default:   return null;
+    }
+}
+    /// <summary>
     /// Update the toggle buttons on the user interface to reflect any changes in selectable GridObjs.
     /// </summary>
     private void UpdateToggles()
@@ -100,7 +166,18 @@ public class IngameUI : MonoBehaviour
         {
             if (i < this.gridObjs.Count)
             {
-                this.toggles[i].GetComponentInChildren<Text>().text = this.gridObjs[i].GetName();
+                string objName = this.gridObjs[i].GetName();
+                this.toggles[i].GetComponentInChildren<Text>().text = objName;
+
+                if (this.toggles[i].targetGraphic != null)
+                {
+                    Image bg = this.toggles[i].targetGraphic.GetComponent<Image>();
+                    if (bg != null)
+                    {
+                        bg.sprite = GetSpriteByName(objName);
+                    }
+                }
+
                 this.toggles[i].gameObject.SetActive(true);
             }
             else
