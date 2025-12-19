@@ -576,15 +576,18 @@ public class Grid
         bool TryMoveExit(WallPos direction)
         {
             GridObj currentExitGridObj = this.exit.gridObj;
+            WallPos? exitPos = currentExitGridObj.GetExitPos();
+
+            GridObj currentAdjExitGridObj = null;
+
+            if(exitPos != null) currentAdjExitGridObj = this.GetAdjacentGridObj(currentExitGridObj, (WallPos)exitPos);
+            
+            currentExitGridObj?.RemoveExitWalls();
+            currentAdjExitGridObj?.RemoveExitWalls();
+
             GridObj newExitGridObj = this.PlaceExit(this.GetAdjacentGridObj(currentExitGridObj, direction));
 
             if (newExitGridObj == null || !newExitGridObj.HasExit()) return false;
-
-            currentExitGridObj?.RemoveExitWalls();
-
-            WallPos exitPos = newExitGridObj.GetExitPos();
-            WallPos exitOppositePos = WallStatus.GetOppositePos(exitPos);
-            GridObj adjacentGridObj = this.GetAdjacentGridObj(newExitGridObj, exitPos);
 
             this.exit.gridObj = newExitGridObj;
 
@@ -607,6 +610,9 @@ public class Grid
 
         WallPos chosen = free[UnityEngine.Random.Range(0, free.Count)];
         gridObj.PlaceWallAt(chosen, WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
+
+        GridObj adjacentGridObj = this.GetAdjacentGridObj(gridObj, chosen);
+        adjacentGridObj?.PlaceWallAt(WallStatus.GetOppositePos(chosen), WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
 
         return gridObj;
     }

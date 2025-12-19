@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -396,18 +397,18 @@ public class GridObj
     }
 
     /// <summary>
-    /// Returns the first found exit pos, throws an exception if GridObj does not have any exits ! CHECK WITH gridObj.HasExit() bEFORE CALLING THIS METHOD !
+    /// Returns the first found exit pos, null if there is no exit on this GridObj.
     /// </summary>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public WallPos GetExitPos()
+    public WallPos? GetExitPos()
     {
         foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
         {
             if(this.GetWallAt(pos) != WallType.EXIT) continue;
             return pos;
         }
-        throw new Exception("Attempted to call GetExitPos on a GridObj that has not exit");
+        return null;
     }
 
     /// <summary>
@@ -624,7 +625,7 @@ public class GridObj
     }
 
     /// <summary>
-    /// Removes all exit walls from this GameObj and replaces them with normal ones
+    /// Removes all exit walls from this GridObj and replaces them with normal ones
     /// </summary>
     public void RemoveExitWalls()
     {
