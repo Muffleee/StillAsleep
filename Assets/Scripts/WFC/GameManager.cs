@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
+    private PlayerResources playerResources;
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
 
@@ -52,6 +53,8 @@ public class GameManager : MonoBehaviour
         oneWallWeight = this.oneWall;
         emptyWeight = this.empty;
         this.grid = new Grid(this.width, this.height);
+
+        this.playerResources = this.player.GetComponent<PlayerResources>();
 
         this.grid.CollapseWorld();
         this.grid.IncreaseGrid(this.grid.GetNextGenPos());
@@ -100,22 +103,17 @@ public class GameManager : MonoBehaviour
 
         GridObj virtualObj = this.gui.GetSelected();
 
-        PlayerResources pr = this.player.GetComponent<PlayerResources>();
         int cost = virtualObj.PlacementCost;
 
-        if (!pr.CanAfford(cost))
+        if (!this.playerResources.CanAfford(cost))
         {
             Debug.Log("Nicht genug Energie!");
             return;
         }
-        pr.Spend(cost);
+        this.playerResources.Spend(cost);
 
         GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
-        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.grid.GetAdjacentGridObj(toPlace, WallPos.FRONT) },
-                                                                                            { WallPos.BACK, this.grid.GetAdjacentGridObj(toPlace, WallPos.BACK) },
-                                                                                            { WallPos.LEFT, this.grid.GetAdjacentGridObj(toPlace, WallPos.LEFT) },
-                                                                                            { WallPos.RIGHT, this.grid.GetAdjacentGridObj(toPlace, WallPos.RIGHT) } };
-        toPlace.UpdateWallStatus(neighbors);
+        toPlace.UpdateWallStatus(this.grid.GetNeighbors(toPlace));
         this.grid.PlaceObj(toPlace);
 
         this.gui.RemoveSelected(false);

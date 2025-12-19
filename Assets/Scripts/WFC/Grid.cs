@@ -30,6 +30,22 @@ public class Grid
     }
 
     /// <summary>
+    /// Gets all GridObjs adjacent to the given one.
+    /// </summary>
+    /// <param name="gridObj"></param>
+    /// <returns></returns>
+    public Dictionary<WallPos, GridObj> GetNeighbors(GridObj gridObj)
+    {
+        return new Dictionary<WallPos, GridObj>()
+        {
+            { WallPos.FRONT, this.GetAdjacentGridObj(gridObj, WallPos.FRONT) }, 
+            { WallPos.BACK, this.GetAdjacentGridObj(gridObj, WallPos.BACK) }, 
+            { WallPos.LEFT, this.GetAdjacentGridObj(gridObj, WallPos.LEFT) }, 
+            { WallPos.RIGHT, this.GetAdjacentGridObj(gridObj, WallPos.RIGHT) }
+        };
+    }
+    
+    /// <summary>
     /// Place a GridObj in the grid at the GridObj's current world position. Will destroy any existing GridObj at this position.
     /// </summary>
     /// <param name="gridObj">GridObj to be placed</param>
@@ -59,10 +75,7 @@ public class Grid
             gridObj.SetGridType(GridType.REGULAR);
         }
 
-        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.GetAdjacentGridObj(gridObj, WallPos.FRONT) }, 
-                                                                                            { WallPos.BACK, this.GetAdjacentGridObj(gridObj, WallPos.BACK) }, 
-                                                                                            { WallPos.LEFT, this.GetAdjacentGridObj(gridObj, WallPos.LEFT) }, 
-                                                                                            { WallPos.RIGHT, this.GetAdjacentGridObj(gridObj, WallPos.RIGHT) } };
+        Dictionary<WallPos, GridObj> neighbors = this.GetNeighbors(gridObj);
         this.grid[gridPos.x, gridPos.y].InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
         this.InstantiateMissingWalls(gridObj);
         
@@ -74,14 +87,15 @@ public class Grid
     /// <param name="gridObj"></param>
     private void InstantiateMissingWalls(GridObj gridObj)
     {
-        WallPos[] wallPos = new WallPos[] { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
-        foreach (WallPos wPos in wallPos)
+        foreach (WallPos wPos in Enum.GetValues(typeof(WallPos)))
         {
             GridObj neighbour = this.GetAdjacentGridObj(gridObj.GetGridPos(), wPos);
             if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE)
             {
-                neighbour.PlaceWallAt(WallStatus.GetOppositePos(wPos), this.worldOffsetX, this.worldOffsetY);
-                neighbour.InstantiateWall(WallStatus.GetOppositePos(wPos), this.worldOffsetX, this.worldOffsetY);
+                WallPos oppWPos = WallStatus.GetOppositePos(wPos);
+                WallType wType = gridObj.GetWallAt(wPos);
+                neighbour.PlaceWallAt(oppWPos, wType, this.worldOffsetX, this.worldOffsetY);
+                neighbour.InstantiateWall(oppWPos, wType, this.worldOffsetX, this.worldOffsetY);
             }
         }
     }
@@ -295,10 +309,7 @@ public class Grid
             {
                 GridObj obj = this.grid[w, h];
                 if (obj == null || obj.IsInstantiated()) continue;
-                Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.GetAdjacentGridObj(obj, WallPos.FRONT) },
-                                                                                            { WallPos.BACK, this.GetAdjacentGridObj(obj, WallPos.BACK) },
-                                                                                            { WallPos.LEFT, this.GetAdjacentGridObj(obj, WallPos.LEFT) },
-                                                                                            { WallPos.RIGHT, this.GetAdjacentGridObj(obj, WallPos.RIGHT) } };
+                Dictionary<WallPos, GridObj> neighbors = this.GetNeighbors(obj);
                 obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
             }
         }
