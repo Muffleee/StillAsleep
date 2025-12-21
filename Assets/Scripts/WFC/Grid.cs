@@ -163,7 +163,21 @@ public class Grid
             }
 
             GridObj chosenTemplate = this.PickWeightedRandom(candidates);
+            candidates.Remove(chosenTemplate);
             this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+            while (!this.CheckSolvability())
+            {
+                if (candidates.Count == 0)
+                {
+                    chosenTemplate = new GridObj(new WallStatus(), GameManager.emptyWeight);
+                    this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+                    break;
+                }
+                chosenTemplate = this.PickWeightedRandom(candidates);
+                candidates.Remove(chosenTemplate);
+                this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+            }
+            
             this.SetRandomGridType(this.grid[x,y]);
 
             if(this.grid[x,y].GetGridType() == GridType.MANUAL_REPLACEABLE) this.grid[x,y].RemoveAllWalls();
@@ -177,8 +191,7 @@ public class Grid
                     toProcess.Enqueue(nPos);
             }
         }
-
-        Debug.Log(this.CheckSolvability());
+        
     }
     private void IncreaseWeight(List<GridObj> filtered, GridObj neighbor, WallPos side)
     {
@@ -707,6 +720,10 @@ public class Grid
         return closestEdge.second < genRange;
     }
 
+    /// <summary>
+    /// Returns true if the grid has no completely closed of rooms
+    /// </summary>
+    /// <returns></returns>
     private bool CheckSolvability()
     {
         if (this.width == 0 || this.height == 0) return true;
@@ -716,8 +733,18 @@ public class Grid
         {
             for(int y = 0; y < incGrid.height; y++)
             {
-                if (x == 0 || y == 0 || x == incGrid.width - 1 || y == incGrid.height - 1) incGridArray[x, y] = new GridObj(new WallStatus(), GameManager.emptyWeight);
-                else incGridArray[x, y] = this.grid[x - 1, y - 1];
+                if (x == 0 || y == 0 || x == incGrid.width - 1 || y == incGrid.height - 1|| this.grid[x-1,y-1] == null)
+                {
+                    GridObj tile = new GridObj(new WallStatus(), GameManager.emptyWeight);
+                    tile.SetGridPos(new Vector2Int(x, y));
+                    incGridArray[x, y] = tile;
+                }
+                else
+                {
+                    GridObj tile = this.grid[x - 1, y - 1].Clone();
+                    tile.SetGridPos(new Vector2Int(x, y));
+                    incGridArray[x, y] = tile;
+                }
             }
         }
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
@@ -730,13 +757,15 @@ public class Grid
         while (stack.Count > 0)
         {
             Vector2Int pos = stack.Pop();
-            if (!visited.Add(pos)) continue;
-            GridObj current = this.GetGridObj(pos);
+            if (visited.Contains(pos)) continue;
+            visited.Add(pos);
+            GridObj current = incGrid.GetGridObj(pos);
 
             if (current == null) continue;
+            
             if (!current.HasWallAt(WallPos.BACK))
             {
-                GridObj neighbour = this.GetAdjacentGridObj(current, WallPos.BACK);
+                GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.BACK);
                 if(neighbour!=null && !neighbour.HasWallAt(WallPos.FRONT))
                 {
                     stack.Push(neighbour.GetGridPos());
@@ -744,7 +773,7 @@ public class Grid
             }
             if (!current.HasWallAt(WallPos.FRONT))
             {
-                GridObj neighbour = this.GetAdjacentGridObj(current, WallPos.FRONT);
+                GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.FRONT);
                 if (neighbour != null && !neighbour.HasWallAt(WallPos.BACK))
                 {
                     stack.Push(neighbour.GetGridPos());
@@ -752,7 +781,7 @@ public class Grid
             }
             if (!current.HasWallAt(WallPos.LEFT))
             {
-                GridObj neighbour = this.GetAdjacentGridObj(current, WallPos.LEFT);
+                GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.LEFT);
                 if (neighbour != null && !neighbour.HasWallAt(WallPos.RIGHT))
                 {
                     stack.Push(neighbour.GetGridPos());
@@ -760,19 +789,21 @@ public class Grid
             }
             if (!current.HasWallAt(WallPos.RIGHT))
             {
-                GridObj neighbour = this.GetAdjacentGridObj(current, WallPos.RIGHT);
+                GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.RIGHT);
                 if (neighbour != null && !neighbour.HasWallAt(WallPos.LEFT))
                 {
                     stack.Push(neighbour.GetGridPos());
                 }
             }
         }
-
-        for(int x = 0; x < width; x++)
+        
+        for(int x = 0; x < incGrid.width; x++)
         {
-            for(int y = 0; y < height;y++)
+            for(int y = 0; y < incGrid.height;y++)
             {
-                if(!visited.Contains(new Vector2Int(x, y)))
+                // Only returns false if the problem tile is on the edge, which indicates that it's a newly generated tile we are checking
+                // and not a closed off room the player created itself by placing his tiles
+                if(!visited.Contains(new Vector2Int(x, y)) && (x == 1 || x == width-2|| y == 1 || y == height-2))
                 {
                     return false;
                 }
