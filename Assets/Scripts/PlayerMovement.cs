@@ -16,7 +16,9 @@ public class PlayerMovement : MonoBehaviour
     private bool DEBUG = false;
     private int stepCounter = 0;
     private bool isMoving = false;
-    
+
+    private PlayerInventory inventory;
+
     /// <summary>
     /// Move the player to an initial position and add listeners for any destructible walls.
     /// </summary>
@@ -27,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
         {
             wall.onDestroy.AddListener(this.OnWallDestroyed);
         }
+        this.inventory = this.GetComponent<PlayerInventory>();
     }
 
     /// <summary>
@@ -34,6 +37,11 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            this.TryPlaceMobileJumpPadUnderPlayer();
+        }
+
         if (this.isMoving)
         {
             return;
@@ -57,10 +65,11 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            if(this.DEBUG) Debug.Log("Movement was blocked by wall");
+            if (this.DEBUG) Debug.Log("Movement was blocked by wall");
         }
         return;
     }
+
 
     /// <summary>
     /// Check if a movement in a given direction is valid.
@@ -69,8 +78,7 @@ public class PlayerMovement : MonoBehaviour
     /// <param name="wallPos">Movement direction to be checked.</param>
     /// <returns></returns>
     private bool IsValidMove(WallPos wallPos)
-    {   
-        //if(true) return true; // TODO fix this script lol
+    {
         Grid cGrid = this.gameManager.GetCurrentGrid();
         Vector2Int next = this.GetNextGridPos(wallPos);
         if (!cGrid.IsInsideGrid(next)) return false;
@@ -166,7 +174,96 @@ public class PlayerMovement : MonoBehaviour
         return next;
     }
 
-    
+
+
+    private void TryPlaceMobileJumpPadUnderPlayer()
+    {
+        if (this.isMoving)
+        {
+            return;
+        }
+
+        if (this.inventory == null)
+        {
+            if (this.DEBUG) Debug.Log("Kein PlayerInventory am Player gefunden.");
+            return;
+        }
+
+        if (!this.inventory.CanPlaceMobileJumpPad())
+        {
+            if (this.DEBUG) Debug.Log("Mobiles JumpPad ist noch im Cooldown (Schritte): " +
+                                      this.inventory.GetMobileJumpPadCooldownRemainingSteps().ToString());
+            return;
+        }
+
+        PlayerResources pr = this.GetComponent<PlayerResources>();
+        if (pr == null)
+        {
+            if (this.DEBUG) Debug.Log("Kein PlayerResources am Player gefunden.");
+            return;
+        }
+
+        if (!pr.CanAfford(this.inventory.MobileJumpPadCost))
+        {
+            if (this.DEBUG) Debug.Log("Nicht genug Energie für mobiles JumpPad. Benötigt: " +
+                                      this.inventory.MobileJumpPadCost.ToString());
+            return;
+        }
+
+        Grid grid = this.gameManager.GetCurrentGrid();
+        if (grid == null || !grid.IsInstantiated())
+        {
+            if (this.DEBUG) Debug.Log("Grid ist nicht bereit.");
+            return;
+        }
+
+        GridObj currentTile = grid.GetGridArray()[currentGridPos.x, currentGridPos.y];
+        if (currentTile == null)
+        {
+            return;
+        }
+
+        // Optional: blocke Placeholder-Tiles
+        GridType t = currentTile.GetGridType();
+        if (t == GridType.REPLACEABLE || t == GridType.MANUAL_REPLACEABLE)
+        {
+            if (this.DEBUG) Debug.Log("Mobiles JumpPad kann nicht auf REPLACEABLE/MANUAL_REPLACEABLE platziert werden.");
+            return;
+        }
+
+        if (t == GridType.JUMPINGPAD)
+        {
+            if (this.DEBUG) Debug.Log("Dieses Tile ist bereits ein JumpPad.");
+            return;
+        }
+
+        // Kosten und Cooldown
+        pr.Spend(this.inventory.MobileJumpPadCost);
+        this.inventory.TriggerMobileJumpPadCooldown();
+
+        // Prefab holen
+        GameObject jumpPadPrefab = GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad;
+        if (jumpPadPrefab == null)
+        {
+            if (this.DEBUG) Debug.Log("prefabJumppad ist nicht gesetzt in der PrefabLibrary.");
+            return;
+        }
+
+        // Tile zu JumpPad machen (muss in GridObj existieren)
+        currentTile.SetGridType(GridType.JUMPINGPAD);
+        currentTile.ReplaceFloorPrefab(jumpPadPrefab, grid.GetWorldOffsetX(), grid.GetWorldOffsetY());
+
+        if (this.DEBUG)
+        {
+            Debug.Log("Mobiles JumpPad platziert. Kosten: " +
+                      this.inventory.MobileJumpPadCost.ToString() +
+                      ", Cooldown gestartet: " +
+                      this.inventory.MobileJumpPadCooldownSteps.ToString() + " Schritte.");
+        }
+    }
+
+
+
 
     /// <summary>
     /// Move the player in a given direction. Set the new currentGridPos and the lastGridPos.
@@ -190,6 +287,11 @@ public class PlayerMovement : MonoBehaviour
             yield return null;
         }
         this.stepCounter++;
+
+        if (this.inventory != null)
+        {
+            this.inventory.OnPlayerStep();
+        }
 
         lastGridPos = currentGridPos;
         currentGridPos = this.GetNextGridPos(wallPos);
