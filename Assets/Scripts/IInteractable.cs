@@ -24,7 +24,7 @@ public interface IInteractable
     /// <param name="nextObj">Destination GridObj</param>
     /// <param name="wPos">Direction</param>
     /// <returns></returns>
-    bool IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos);
+    MoveType IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos);
 
     /// <summary>
     /// Returns the prefab or null
@@ -48,9 +48,10 @@ public class Regular : IInteractable
     /// <param name="nextObj">Destination GridObj</param>
     /// <param name="wPos">Direction</param>
     /// <returns></returns>
-    bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
+        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
+        return MoveType.INVALID;
     }
 
     GameObject IInteractable.GetPrefab()
@@ -105,9 +106,10 @@ public class Trap : IInteractable
     /// <param name="nextObj">Destination GridObj</param>
     /// <param name="wPos">Direction</param>
     /// <returns></returns>
-    bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
+        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
+        return MoveType.INVALID;
     }
 
     GameObject IInteractable.GetPrefab()
@@ -137,15 +139,21 @@ public class JumpingPads : IInteractable
     /// <param name="nextObj">Destination GridObj</param>
     /// <param name="wPos">Direction</param>
     /// <returns></returns>
-    bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
         if (pr != null && pr.CurrentEnergy > 0 && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && curr.HasWallAt(wPos))
         {
-            pr.Spend(1);   // 1 Energie abziehen
-            return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE);
+            
+            if(nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE))
+            {
+                pr.Spend(1);   // 1 Energie abziehen
+                return MoveType.JUMP;
+            }
+            return MoveType.INVALID;
         }
-        return !curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
+        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
+        return MoveType.INVALID;
     }
     
     GameObject IInteractable.GetPrefab()
@@ -167,9 +175,9 @@ public class Replaceable : IInteractable
         // Should never be called
     }
 
-    bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return false;
+        return MoveType.INVALID;
     }
 
     GameObject IInteractable.GetPrefab()
@@ -188,9 +196,10 @@ public class ManualReplaceable : IInteractable
         return;
     }
 
-    bool IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        return nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE);
+        if(nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
+        return MoveType.INVALID;
     }
     
     GameObject IInteractable.GetPrefab()

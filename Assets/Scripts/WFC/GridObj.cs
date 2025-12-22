@@ -437,7 +437,7 @@ public class GridObj
     /// Instantiate a wall and only change the data on the in-game object, helper method
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
-    private void InstantiateWall(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
+    public void InstantiateWall(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
         if (this.parentObj == null) return;
