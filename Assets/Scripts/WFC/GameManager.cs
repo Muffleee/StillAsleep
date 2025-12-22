@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int empty = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
-    [SerializeField] private float generationDelay = 0.3f;
+    [SerializeField] private float generationDelay = 0.6f;
 
 
     private int stepCounter = 0;
@@ -97,6 +97,7 @@ public class GameManager : MonoBehaviour
         {
             stepCounter = 0;
             StartCoroutine(GenerateWorldWithDelay());
+            
             this.gui.FillList();
         }
 

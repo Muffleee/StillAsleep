@@ -95,7 +95,8 @@ public class Grid
                 WallPos oppWPos = WallStatus.GetOppositePos(wPos);
                 WallType wType = gridObj.GetWallAt(wPos);
                 neighbour.PlaceWallAt(oppWPos, wType, this.worldOffsetX, this.worldOffsetY);
-                neighbour.InstantiateWall(oppWPos, wType, this.worldOffsetX, this.worldOffsetY);
+                //neighbour.InstantiateWall(oppWPos, wType, this.worldOffsetX, this.worldOffsetY);
+                neighbour.InstantiateWall(oppWPos, this.worldOffsetX, this.worldOffsetY);
             }
         }
     }

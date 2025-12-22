@@ -14,6 +14,9 @@ public class IngameUI : MonoBehaviour
     private int selectedIndex = -1;
     private bool DEBUG = false;
 
+    [Header("Countdown")]
+    [SerializeField] public TMPro.TextMeshProUGUI generationCounterText;
+
     [Header("Sprite Configuration")]
     public Sprite imgF; 
     public Sprite imgB;
@@ -39,12 +42,15 @@ public GameObject prefabFR;
 public GameObject prefabBL;
 public GameObject prefabBR;
 public GameObject prefabLR;
-[SerializeField] private TMPro.TextMeshProUGUI generationCounterText;
 
     public void UpdateGenerationCounter(int stepsLeft)
     {
-        generationCounterText.text = $"World update in: {stepsLeft}";
+        if (this.generationCounterText == null)
+            return;
+
+        this.generationCounterText.text = $"World update in: {stepsLeft}";
     }
+
 
     /// <summary>
     /// Add a GridObj to the list of selectable GridObjs.
@@ -217,6 +223,8 @@ public GameObject GetPrefabByName(string nameCode)
             }
         }
     }
+
+    
 
     public bool HasSelectedObj() {return this.selectedObj != null;}
 
