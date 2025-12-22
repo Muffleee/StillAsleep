@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,11 +13,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private WinScreen winScreen;
     [SerializeField] private GameObject playerModel;
-
+    [SerializeField] private PlayerAnim anim;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private bool DEBUG = false;
     private int stepCounter = 0;
     private bool isMoving = false;
+    private WallPos? bufferedMove = null;
     
     /// <summary>
     /// Move the player to an initial position and add listeners for any destructible walls.
@@ -36,11 +38,6 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (this.isMoving)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK); }
         else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT); }
         else if (Input.GetKeyDown(KeyCode.A)) { this.TryMove(WallPos.LEFT); }
@@ -52,16 +49,22 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     /// <param name="wallPos">Direction in which the player wants to move.</param>
     private void TryMove(WallPos wallPos)
-    {
-        if (this.IsValidMove(wallPos))
+    {   
+        if(!this.isMoving)
+        {   
+            MoveType mt = this.IsValidMove(wallPos);
+            if (mt != MoveType.INVALID)
+            {   
+                this.MovePlayer(wallPos, mt);
+            }
+            else
+            {
+                if(this.DEBUG) Debug.Log("Movement was blocked by wall");
+            }
+        } else
         {
-            this.MovePlayer(wallPos);
+            this.bufferedMove = wallPos;
         }
-        else
-        {
-            if(this.DEBUG) Debug.Log("Movement was blocked by wall");
-        }
-        return;
     }
 
     /// <summary>
@@ -70,12 +73,12 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     /// <param name="wallPos">Movement direction to be checked.</param>
     /// <returns></returns>
-    private bool IsValidMove(WallPos wallPos)
+    private MoveType IsValidMove(WallPos wallPos)
     {   
         //if(true) return true; // TODO fix this script lol
         Grid cGrid = this.gameManager.GetCurrentGrid();
         Vector2Int next = this.GetNextGridPos(wallPos);
-        if (!cGrid.IsInsideGrid(next)) return false;
+        if (!cGrid.IsInsideGrid(next)) return MoveType.INVALID;
 
         GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
         GridObj current = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y];
@@ -121,13 +124,9 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     /// <param name="direction"></param>
     /// <param name="wallPos"></param>
-    private void MovePlayer(WallPos wallPos)
+    private void MovePlayer(WallPos wallPos, MoveType mt)
     {
-        if (!this.isMoving)
-        {
-            this.StartCoroutine(this.MovementCoroutine(wallPos));
-        }
-
+        this.StartCoroutine(this.MovementCoroutine(wallPos, mt));
     }
 
     // rewrite code so that this returns nearest object and set it when calling this method
@@ -176,21 +175,32 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     /// <param name="wallPos">Direction of movement</param>
     /// <returns></returns>
-    private IEnumerator MovementCoroutine(WallPos wallPos)
+    private IEnumerator MovementCoroutine(WallPos wallPos, MoveType mt)
     {   
-        float duration = 0.5f;
+        float totalDuration = 0.5f;
+        float chargeDuration = mt == MoveType.JUMP ? 0.1f : 0f;
+        float moveDuration = totalDuration - chargeDuration;
         float elapsed = 0f;
         this.isMoving = true;
         Vector3 startPos = this.transform.position;
         Vector3 endPos = startPos + this.GetMoveDir(wallPos);
 
         RotateModel(wallPos);
+        anim.TriggerMoveAnim(mt);
 
-        while (elapsed < duration)
-        {
-            float time = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-            this.transform.position = Vector3.Lerp(startPos, endPos, time);
+        yield return null; // use this to get less sliding with the animations
+
+        while (elapsed < totalDuration)
+        {   
             elapsed += Time.deltaTime;
+            if(elapsed < chargeDuration)
+            {
+                yield return null;
+                continue;
+            }
+            float time = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / moveDuration));
+            this.transform.position = Vector3.Lerp(startPos, endPos, time);
+            
             yield return null;
         }
         this.stepCounter++;
@@ -221,6 +231,16 @@ public class PlayerMovement : MonoBehaviour
         if(this.DEBUG) Debug.Log("Event fired");
         this.isMoving = false;
         if(this.DEBUG) Debug.Log(this.stepCounter);
+        
+        if (bufferedMove.HasValue) 
+        {   
+            MoveType mtb = this.IsValidMove(bufferedMove.Value);
+            if(mtb != MoveType.INVALID) StartCoroutine(MovementCoroutine(bufferedMove.Value, mtb));
+            bufferedMove = null;
+        } else 
+        {
+            anim.TriggerMoveAnim(MoveType.INVALID);
+        }
     }
     
     /// <summary>
@@ -271,4 +291,9 @@ public class PlayerMovement : MonoBehaviour
         }
         this.playerModel.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
     }
+}
+
+public enum MoveType
+{
+    INVALID, WALK, JUMP
 }
