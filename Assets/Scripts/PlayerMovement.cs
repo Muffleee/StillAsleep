@@ -34,7 +34,7 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (this.isMoving)
+        if (this.isMoving || gameManager.IsTutorialOpen())
         {
             return;
         }

@@ -17,6 +17,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int corner = 0;
     [SerializeField] private int oneWall = 0;
     [SerializeField] private int empty = 0;
+    [SerializeField] private int jumping = 0;
+    [SerializeField] private int replacable = 0;
+    [SerializeField] private int trap = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
 
@@ -24,12 +27,16 @@ public class GameManager : MonoBehaviour
     public static int corridorWeight;
     public static int cornerWeight;
     public static int oneWallWeight;
+    public static int jumpingWeight;
+    public static int replacableWeight;
+    public static int trapWeight;
     public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
-
+    private Queue<string> tutorials = new Queue<string>();
+    bool tutorialOpen = false;
     /*
     public GameObject wallPrefab;
     public GameObject floorPrefab;
@@ -46,21 +53,65 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
+        
         INSTANCE = this;
-        corridorWeight = this.corridor;
-        cornerWeight = this.corner;
-        oneWallWeight = this.oneWall;
-        emptyWeight = this.empty;
+        this.SetStartingWeights();
         this.grid = new Grid(this.width, this.height);
-
+        grid.tutorialUpdate.AddListener(UpdateTutorialText);
         this.grid.CollapseWorld();
+        this.SetWeights();
         this.grid.IncreaseGrid(this.grid.GetNextGenPos());
 
         this.grid.CreateExit(new Vector2Int(4, 4), 0, 1);
         this.grid.InstantiateMissing();
         this.gui.FillList();
     }
-
+    /// <summary>
+    /// Sets starting weights so the initial grid is very open and no special tiles
+    /// </summary>
+    private void SetStartingWeights()
+    {
+        emptyWeight = 20;
+        corridorWeight = 5;
+        cornerWeight = 2;
+        oneWallWeight = 1;
+        jumpingWeight = 0;
+        replacableWeight = 0;
+        trapWeight = 0;
+    }
+    /// <summary>
+    /// sets the static weights
+    /// </summary>
+    private void SetWeights()
+    {
+        corridorWeight = this.corridor;
+        cornerWeight = this.corner;
+        oneWallWeight = this.oneWall;
+        emptyWeight = this.empty;
+        jumpingWeight = this.jumping;
+        replacableWeight = this.replacable;
+        trapWeight = this.trap;
+    }
+    /// <summary>
+    /// if the player clicks the left mouse button, the tutorial text closes and opens the next one if one is in line
+    /// </summary>
+    private void Update()
+    {
+        if (tutorialOpen)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                gui.CloseTutorialText();
+                tutorialOpen = false;
+                if (tutorials.Count > 0)
+                {
+                    tutorialOpen = true;
+                    gui.OpenTutorialText(tutorials.Dequeue());
+                }
+            }
+        }
+        
+    }
     /// <summary>
     /// Function to be called on player movement, handles dynamic map generation and movement of the exit
     /// </summary>
@@ -120,7 +171,18 @@ public class GameManager : MonoBehaviour
 
         this.gui.RemoveSelected(false);
     }
-
+    /// <summary>
+    /// Calls a function in gui to set the tutorial text if one is not already open
+    /// enqeues the tutorial to the line
+    /// </summary>
+    /// <param name="text"></param>
+    private void UpdateTutorialText(string text)
+    {
+        tutorials.Enqueue(text);
+        if (tutorialOpen) return;
+        gui.OpenTutorialText(tutorials.Dequeue());
+        tutorialOpen = true;
+    }
     /// <summary>
     /// Gets the grid in its current state
     /// </summary>
@@ -128,4 +190,5 @@ public class GameManager : MonoBehaviour
     public Grid GetCurrentGrid() { return this.grid; }
     public PrefabLibrary GetPrefabLibrary() { return this.prefabLibrary; }
     public PlayerMovement GetPlayerMovement() { return this.playerMovement; }
+    public bool IsTutorialOpen() { return this.tutorialOpen; }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Class handling the gane's grid and its procedual generation through Wave Function Collapse.
@@ -11,14 +12,22 @@ public class Grid
     public int width => this.grid.GetLength(0);
     public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
-
+    public UnityEvent<string> tutorialUpdate = new UnityEvent<string> ();
     /// <summary>
     /// Count the times the grid has grown so far.
     /// </summary>
     private int worldOffsetX = 0;
     private int worldOffsetY = 0;
     private Exit exit;
-
+    /// <summary>
+    /// The tutorial booleans so that everything is only introduced once
+    /// </summary>
+    private bool tutorial = true;
+    private bool jumpingIntro = false;
+    private bool exitIntro = false;
+    private bool trapIntro = false;
+    private bool replaceableIntro = false;
+    private bool manReplaceableIntro = false;
     /// <summary>
     /// Create a new grid given an initial size.
     /// </summary>
@@ -230,23 +239,22 @@ public class Grid
     /// <param name="gridObj">GridObj to be randomised.</param>
     public void SetRandomGridType(GridObj gridObj)
     {   
-        int Trapchance = 5;
-        int JumpingBadChance = 7;
-        int PlaceHolderChance = 15;
+        int Trapchance = GameManager.trapWeight;
+        int JumpingBadChance = GameManager.jumpingWeight;
+        int PlaceHolderChance = GameManager.replacableWeight;
         int rand = UnityEngine.Random.Range(0, 100);
-        if(rand <= Trapchance)
+        if(rand < Trapchance)
         {
             gridObj.SetGridType(GridType.TRAP);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabTrap);
         }
-        else if(rand > Trapchance && rand < (JumpingBadChance +Trapchance  ))
+        else if(rand > Trapchance && rand < (JumpingBadChance + Trapchance  ))
         {
             gridObj.SetGridType(GridType.JUMPINGPAD);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad);
         }
          else if(rand > (JumpingBadChance + Trapchance) && rand < (PlaceHolderChance + JumpingBadChance + Trapchance))
         {
-            //Regular should be changed later for place Holder whatever that is (maybe teleport)
             gridObj.SetGridType(GridType.MANUAL_REPLACEABLE);
         } else
         {
@@ -315,10 +323,38 @@ public class Grid
                                                                                             { WallPos.LEFT, this.GetAdjacentGridObj(obj, WallPos.LEFT) },
                                                                                             { WallPos.RIGHT, this.GetAdjacentGridObj(obj, WallPos.RIGHT) } };
                 obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
+                if (tutorial) StartTutorial(obj.GetGridType());
             }
         }
     }
-
+    /// <summary>
+    /// Setting the tutorialText to introduce the player
+    /// </summary>
+    /// <param name="type"> what type of grid is going to be introduced</param>
+    private void StartTutorial(GridType type)
+    {
+        switch (type)
+        {
+            case GridType.JUMPINGPAD: 
+                if (!jumpingIntro) tutorialUpdate.Invoke("This is a jumping pad. \n With it you can jump over adjacent walls but it costs 1 energy.");
+                jumpingIntro = true;
+                break;
+            case GridType.REPLACEABLE: 
+                if (!replaceableIntro) tutorialUpdate.Invoke("This is a replaceable tile.\n You can place a tile from your inventory there. The playfield will expand in direction of the replacable tiles.");
+                replaceableIntro = true;
+                break;
+            case GridType.MANUAL_REPLACEABLE: 
+                if (!manReplaceableIntro) tutorialUpdate.Invoke("This is a manually replaceable tile. \n This is also a replacable tile, but it will not be filled unless you place one of your tiles.");
+                manReplaceableIntro = true; 
+                break;
+            case GridType.TRAP: 
+                if (!trapIntro) tutorialUpdate.Invoke("This is a trap. \n Standing on it will cost you 3 energy.");
+                trapIntro = true;
+                break;
+            case GridType.REGULAR: break;
+        }
+        if (jumpingIntro && replaceableIntro && manReplaceableIntro && trapIntro && exitIntro) tutorial = false;
+    }
     /// <summary>
     /// Increase the size of the grid by 1 in each direction.
     /// </summary>
@@ -622,7 +658,8 @@ public class Grid
 
         WallPos chosen = free[UnityEngine.Random.Range(0, free.Count)];
         gridObj.PlaceWallAt(chosen, WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
-
+        if(!exitIntro) tutorialUpdate.Invoke("This is the exit. \n Your goal is to reach it. It moves away from you, but only between tiles with no walls! \n Maybe you can make use of this feature...");
+        exitIntro = true;
         return gridObj;
     }
     
