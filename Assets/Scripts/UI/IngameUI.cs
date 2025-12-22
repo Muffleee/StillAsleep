@@ -39,6 +39,12 @@ public GameObject prefabFR;
 public GameObject prefabBL;
 public GameObject prefabBR;
 public GameObject prefabLR;
+[SerializeField] private TMPro.TextMeshProUGUI generationCounterText;
+
+    public void UpdateGenerationCounter(int stepsLeft)
+    {
+        generationCounterText.text = $"World update in: {stepsLeft}";
+    }
 
     /// <summary>
     /// Add a GridObj to the list of selectable GridObjs.

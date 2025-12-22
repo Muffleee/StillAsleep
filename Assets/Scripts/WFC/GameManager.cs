@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -19,7 +20,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int empty = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private float generationDelay = 0.3f;
 
+
+    private int stepCounter = 0;
     public static int emptyWeight;
     public static int corridorWeight;
     public static int cornerWeight;
@@ -79,14 +83,23 @@ public class GameManager : MonoBehaviour
         }
 
         this.generateAfter = math.max(this.grid.GetClosestEdgeAndDistance(this.grid.GetPlayerToEdgeDistances()).second, 2);
-        if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5))
-        {
-            this.grid.CollapseWorld();
-            this.grid.IncreaseGrid(this.grid.GetNextGenPos());
-            this.grid.InstantiateMissing();
+        //if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5))
+        //{
+        //    StartCoroutine(GenerateWorldWithDelay());
+        //    this.gui.FillList();
+        //}
 
+        stepCounter++;
+
+        gui.UpdateGenerationCounter(generateAfter - stepCounter);
+
+        if (stepCounter >= generateAfter)
+        {
+            stepCounter = 0;
+            StartCoroutine(GenerateWorldWithDelay());
             this.gui.FillList();
         }
+
 
         
     }
@@ -118,6 +131,16 @@ public class GameManager : MonoBehaviour
 
         this.gui.RemoveSelected(false);
     }
+
+    private IEnumerator GenerateWorldWithDelay()
+    {
+        yield return new WaitForSeconds(generationDelay);
+
+        this.grid.CollapseWorld();
+        this.grid.IncreaseGrid(this.grid.GetNextGenPos());
+        this.grid.InstantiateMissing();
+    }
+
 
     /// <summary>
     /// Gets the grid in its current state
