@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject player;
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
-    private Queue<string> tutorials = new Queue<string>();
+    private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
     bool tutorialOpen = false;
     /*
     public GameObject wallPrefab;
@@ -106,7 +106,8 @@ public class GameManager : MonoBehaviour
                 if (tutorials.Count > 0)
                 {
                     tutorialOpen = true;
-                    gui.OpenTutorialText(tutorials.Dequeue());
+                    (GridObj, string) next= tutorials.Dequeue();
+                    gui.OpenTutorialText(next.Item1.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY()), next.Item2);
                 }
             }
         }
@@ -176,11 +177,12 @@ public class GameManager : MonoBehaviour
     /// enqeues the tutorial to the line
     /// </summary>
     /// <param name="text"></param>
-    private void UpdateTutorialText(string text)
+    private void UpdateTutorialText(GridObj obj, string text)
     {
-        tutorials.Enqueue(text);
+        tutorials.Enqueue((obj,text));
         if (tutorialOpen) return;
-        gui.OpenTutorialText(tutorials.Dequeue());
+        (GridObj, string) next = tutorials.Dequeue();
+        gui.OpenTutorialText(next.Item1.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY()), next.Item2);
         tutorialOpen = true;
     }
     /// <summary>

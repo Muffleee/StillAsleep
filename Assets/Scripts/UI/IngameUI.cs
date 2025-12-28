@@ -1,9 +1,10 @@
-using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Dynamic;
-using Unity.VisualScripting;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// Class handling the game's user interface, including providing the player with placeable tiles and handling placing selected tiles.
@@ -15,8 +16,7 @@ public class IngameUI : MonoBehaviour
     private GridObj selectedObj;
     private int selectedIndex = -1;
     private bool DEBUG = false;
-    [SerializeField] Canvas tutorial;
-    private TMP_Text tutorialText;
+    [SerializeField] private TMP_Text tutorialText;
 
     /// <summary>
     /// Add a GridObj to the list of selectable GridObjs.
@@ -148,8 +148,7 @@ public class IngameUI : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        tutorialText = tutorial.GetComponentInChildren<TMP_Text>();
-        tutorial.enabled = false;
+        tutorialText.enabled = false;
     }
     /// <summary>
     /// At game start, fill the list of selectable GridObjs and add listeners to all toggles.
@@ -168,16 +167,16 @@ public class IngameUI : MonoBehaviour
     /// Open the tutorial by setting the text and enabling it. Freezes the game
     /// </summary>
     /// <param name="text"> The text it should be set to</param>
-    public void OpenTutorialText(string text)
+    /// <param name="objPosition"> The object worldPos it should be positioned at</param>
+    public void OpenTutorialText (Vector3 objPosition, string text)
     {
-        if(tutorial != null)
+        if(tutorialText != null)
         {
-            tutorial.enabled = true;
+            Vector2 textPos = Camera.main.WorldToScreenPoint(objPosition);
+            textPos.y += 50f;
+            tutorialText.rectTransform.position = textPos;
+            tutorialText.enabled = true;
             Time.timeScale = 0;
-        }
-        if (tutorialText != null)
-        {
-            
             tutorialText.text = text;
         } else Debug.Log("no tutorial text");
 
@@ -187,9 +186,9 @@ public class IngameUI : MonoBehaviour
     /// </summary>
     public void CloseTutorialText()
     {
-        if (tutorial != null)
+        if (tutorialText != null)
         {
-            tutorial.enabled = false;
+            tutorialText.enabled = false;
             Time.timeScale = 1f;
         }
     }

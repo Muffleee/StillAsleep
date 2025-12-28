@@ -12,7 +12,7 @@ public class Grid
     public int width => this.grid.GetLength(0);
     public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
-    public UnityEvent<string> tutorialUpdate = new UnityEvent<string> ();
+    public UnityEvent<GridObj, string> tutorialUpdate = new UnityEvent<GridObj, string> ();
     /// <summary>
     /// Count the times the grid has grown so far.
     /// </summary>
@@ -323,7 +323,7 @@ public class Grid
                                                                                             { WallPos.LEFT, this.GetAdjacentGridObj(obj, WallPos.LEFT) },
                                                                                             { WallPos.RIGHT, this.GetAdjacentGridObj(obj, WallPos.RIGHT) } };
                 obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
-                if (tutorial) StartTutorial(obj.GetGridType());
+                if (tutorial) StartTutorial(obj);
             }
         }
     }
@@ -331,24 +331,25 @@ public class Grid
     /// Setting the tutorialText to introduce the player
     /// </summary>
     /// <param name="type"> what type of grid is going to be introduced</param>
-    private void StartTutorial(GridType type)
+    private void StartTutorial(GridObj obj)
     {
+        GridType type = obj.GetGridType();
         switch (type)
         {
             case GridType.JUMPINGPAD: 
-                if (!jumpingIntro) tutorialUpdate.Invoke("This is a jumping pad. \n With it you can jump over adjacent walls but it costs 1 energy.");
+                if (!jumpingIntro) tutorialUpdate.Invoke(obj, "This is a jumping pad. \n With it you can jump over adjacent walls.");
                 jumpingIntro = true;
                 break;
             case GridType.REPLACEABLE: 
-                if (!replaceableIntro) tutorialUpdate.Invoke("This is a replaceable tile.\n You can place a tile from your inventory there. The playfield will expand in direction of the replacable tiles.");
+                if (!replaceableIntro) tutorialUpdate.Invoke(obj, "This is a replaceable tile.\n You can place a tile from your inventory there. The playfield will expand in direction of the replacable tiles.");
                 replaceableIntro = true;
                 break;
             case GridType.MANUAL_REPLACEABLE: 
-                if (!manReplaceableIntro) tutorialUpdate.Invoke("This is a manually replaceable tile. \n This is also a replacable tile, but it will not be filled unless you place one of your tiles.");
+                if (!manReplaceableIntro) tutorialUpdate.Invoke(obj, "This is a manually replaceable tile. \n This is also a replacable tile, but it will not be filled unless you place one of your tiles.");
                 manReplaceableIntro = true; 
                 break;
             case GridType.TRAP: 
-                if (!trapIntro) tutorialUpdate.Invoke("This is a trap. \n Standing on it will cost you 3 energy.");
+                if (!trapIntro) tutorialUpdate.Invoke(obj, "This is a trap. \n Standing on it will cost you energy.");
                 trapIntro = true;
                 break;
             case GridType.REGULAR: break;
@@ -658,7 +659,7 @@ public class Grid
 
         WallPos chosen = free[UnityEngine.Random.Range(0, free.Count)];
         gridObj.PlaceWallAt(chosen, WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
-        if(!exitIntro) tutorialUpdate.Invoke("This is the exit. \n Your goal is to reach it. It moves away from you, but only between tiles with no walls! \n Maybe you can make use of this feature...");
+        if(!exitIntro) tutorialUpdate.Invoke(gridObj, "This is the exit. \n Your goal is to reach it. It moves away from you, but only between tiles with no walls! \n Maybe you can make use of this feature...");
         exitIntro = true;
         return gridObj;
     }
