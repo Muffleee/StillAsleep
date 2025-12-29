@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour
             this.grid.RepositionExit(to);
         }
 
-        this.generateAfter = math.max(this.grid.GetClosestEdgeAndDistance(this.grid.GetPlayerToEdgeDistances()).second, 2);
+        this.generateAfter = math.max(this.grid.GetClosestEdgeAndDistance(this.grid.GetEdgeDistances(PlayerMovement.currentGridPos.x, PlayerMovement.currentGridPos.y)).second, 2);
         if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5))
         {
             this.grid.CollapseWorld();

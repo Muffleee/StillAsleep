@@ -655,7 +655,7 @@ public class Grid
     {
         if (PlayerMovement.currentGridPos == null) return WallPos.BACK;
        
-        Dictionary<WallPos, int> distances = this.GetPlayerToEdgeDistances();
+        Dictionary<WallPos, int> distances = this.GetEdgeDistances(PlayerMovement.currentGridPos.x, PlayerMovement.currentGridPos.y);
         return this.GetClosestEdge(distances);
     }
 
@@ -663,18 +663,15 @@ public class Grid
     /// Calculates the distance to each edge of the map
     /// </summary>
     /// <returns></returns>
-    public Dictionary<WallPos, int> GetPlayerToEdgeDistances()
+    public Dictionary<WallPos, int> GetEdgeDistances(int x, int y)
     {
-        int playerX = PlayerMovement.currentGridPos.x;
-        int playerY = PlayerMovement.currentGridPos.y;
-        
         // Distances from the player to each edge
         return new Dictionary<WallPos, int>
         {
-            { WallPos.LEFT, playerX },
-            { WallPos.RIGHT, this.width - 1 - playerX },
-            { WallPos.FRONT, playerY },
-            { WallPos.BACK, this.height - 1 - playerY }
+            { WallPos.LEFT, x },
+            { WallPos.RIGHT, this.width - 1 - x },
+            { WallPos.FRONT, y },
+            { WallPos.BACK, this.height - 1 - y }
         };
     }
 
@@ -718,7 +715,7 @@ public class Grid
     /// <returns></returns>
     public bool ShouldGenerate(int genRange)
     {
-        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetPlayerToEdgeDistances());
+        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetEdgeDistances(PlayerMovement.currentGridPos.x, PlayerMovement.currentGridPos.y));
         return closestEdge.second < genRange;
     }
 }
