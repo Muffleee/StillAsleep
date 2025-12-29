@@ -210,7 +210,8 @@ MonoBehaviour:
   prefabWalls:
   - {fileID: 2144594829894418979, guid: eef91b874a904944db0a7edec2db821b, type: 3}
   - {fileID: 2144594829894418979, guid: 994206736d4403e418f02cbce0cf1a80, type: 3}
-  - {fileID: 2144594829894418979, guid: 86f445df42b72fc499857fc3ef304e40, type: 3}
+  - {fileID: 2144594829894418979, guid: b55d322bbf6e8be47a6938ce657e1c11, type: 3}
+  - {fileID: 2144594829894418979, guid: c1be69274dfae8a42af22c227f385bb7, type: 3}
   prefabDestructibleWall: {fileID: 5852734629184053177, guid: 81a2fa19464c3d5469133302f759fea0,
     type: 3}
   prefabExit: {fileID: 5393983432708434800, guid: 8bef5b077c3bfc146a4c2e4a1004f9b1,
@@ -1927,12 +1928,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0abdb9dc7a523f142b6871034135d0f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1203533455 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7077665866940339887, guid: 220c7dec9ee469541a1aa4ec393fa355,
-    type: 3}
-  m_PrefabInstance: {fileID: 6834562829543864864}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1247056570 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5293686660751645073, guid: eac25753f9874c54eaf889dd858015a2,
@@ -2422,11 +2417,6 @@ PrefabInstance:
       propertyPath: gameManager
       value: 
       objectReference: {fileID: 220377176}
-    - target: {fileID: 659966142386881826, guid: 220c7dec9ee469541a1aa4ec393fa355,
-        type: 3}
-      propertyPath: playerModel
-      value: 
-      objectReference: {fileID: 1203533455}
     - target: {fileID: 2402761781821180947, guid: 220c7dec9ee469541a1aa4ec393fa355,
         type: 3}
       propertyPath: m_LocalPosition.x
