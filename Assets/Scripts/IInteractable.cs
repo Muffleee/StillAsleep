@@ -145,7 +145,7 @@ public class JumpingPads : IInteractable
         if (pr != null && pr.CurrentEnergy > 0 && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && curr.HasWallAt(wPos))
         {
             
-            if(nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE))
+            if(nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
             {
                 pr.Spend(1);   // 1 Energie abziehen
                 return MoveType.JUMP;
