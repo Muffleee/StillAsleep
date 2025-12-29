@@ -679,7 +679,7 @@ PrefabInstance:
     - target: {fileID: 2402761781821180947, guid: 220c7dec9ee469541a1aa4ec393fa355,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.54
+      value: 1.63
       objectReference: {fileID: 0}
     - target: {fileID: 2402761781821180947, guid: 220c7dec9ee469541a1aa4ec393fa355,
         type: 3}
@@ -689,7 +689,7 @@ PrefabInstance:
     - target: {fileID: 2402761781821180947, guid: 220c7dec9ee469541a1aa4ec393fa355,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.5
+      value: -5.45
       objectReference: {fileID: 0}
     - target: {fileID: 2402761781821180947, guid: 220c7dec9ee469541a1aa4ec393fa355,
         type: 3}
@@ -791,6 +791,7 @@ MonoBehaviour:
   gameTitleText: {fileID: 0}
   startButton: {fileID: 1747959160}
   quitButton: {fileID: 1542198145}
+  playerAnimator: {fileID: 1103344143}
   gameSceneName: SampleScene
 --- !u!1001 &922805851
 PrefabInstance:
@@ -922,6 +923,12 @@ PrefabInstance:
 --- !u!1 &1103344142 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7077665866940339887, guid: 220c7dec9ee469541a1aa4ec393fa355,
+    type: 3}
+  m_PrefabInstance: {fileID: 608209281}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1103344143 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5263665028551326636, guid: 220c7dec9ee469541a1aa4ec393fa355,
     type: 3}
   m_PrefabInstance: {fileID: 608209281}
   m_PrefabAsset: {fileID: 0}

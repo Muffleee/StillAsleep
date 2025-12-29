@@ -16,6 +16,7 @@ namespace MainMenu
         [SerializeField] private TMP_Text gameTitleText;
         [SerializeField] private Button startButton;
         [SerializeField] private Button quitButton;
+        [SerializeField] private Animator playerAnimator;
 
         [SerializeField] private string gameSceneName;
         void Start()
@@ -27,6 +28,10 @@ namespace MainMenu
 
             if (this.quitButton != null)
                 quitButton.onClick.AddListener(QuitGame);
+
+            this.playerAnimator.SetTrigger("TriggerMenu");
+
+
         }
 
         public void ShowMainMenu()
@@ -35,6 +40,8 @@ namespace MainMenu
             {
                 MainMenuPanel.SetActive(true);
             }
+
+
         }
 
         private void StartGame()
