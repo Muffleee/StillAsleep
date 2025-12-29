@@ -211,6 +211,7 @@ MonoBehaviour:
   - {fileID: 2144594829894418979, guid: eef91b874a904944db0a7edec2db821b, type: 3}
   - {fileID: 2144594829894418979, guid: 994206736d4403e418f02cbce0cf1a80, type: 3}
   - {fileID: 2144594829894418979, guid: 86f445df42b72fc499857fc3ef304e40, type: 3}
+  - {fileID: 8456269380383024187, guid: f0c850c83fef16e47b4dc4f7949be63e, type: 3}
   prefabDestructibleWall: {fileID: 5852734629184053177, guid: 81a2fa19464c3d5469133302f759fea0,
     type: 3}
   prefabExit: {fileID: 5393983432708434800, guid: 8bef5b077c3bfc146a4c2e4a1004f9b1,
@@ -2412,6 +2413,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 626556405170474836, guid: 220c7dec9ee469541a1aa4ec393fa355,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 626556405170474836, guid: 220c7dec9ee469541a1aa4ec393fa355,
+        type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 626556405170474836, guid: 220c7dec9ee469541a1aa4ec393fa355,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 626556405170474836, guid: 220c7dec9ee469541a1aa4ec393fa355,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 659966142386881826, guid: 220c7dec9ee469541a1aa4ec393fa355,
         type: 3}
       propertyPath: winScreen
@@ -2483,7 +2504,9 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 7931101007937568146, guid: 220c7dec9ee469541a1aa4ec393fa355, type: 3}
+    - {fileID: 7618033210465236227, guid: 220c7dec9ee469541a1aa4ec393fa355, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 220c7dec9ee469541a1aa4ec393fa355, type: 3}
