@@ -174,7 +174,7 @@ public class Grid
             GridObj chosenTemplate = this.PickWeightedRandom(candidates);
             candidates.Remove(chosenTemplate);
             this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-            while (!this.CheckSolvability())
+            while (!this.CheckSolvability(new Vector2Int(x,y)))
             {
                 if (candidates.Count == 0)
                 {
@@ -762,7 +762,9 @@ public class Grid
     /// Returns true if the grid has no completely closed of rooms
     /// </summary>
     /// <returns></returns>
-    private bool CheckSolvability()
+    /// 
+    //TODO: Return false if there is no way from now to the goal (not even by using crystals to place tiles)
+    private bool CheckSolvability(Vector2Int startingPosition)
     {
         if (this.width == 0 || this.height == 0) return true;
         Grid incGrid = new Grid(this.width + 2, this.height + 2);
@@ -788,9 +790,7 @@ public class Grid
         HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
         Stack<Vector2Int> stack = new Stack<Vector2Int>();
 
-        Vector2Int start = new Vector2Int(0, 0);
-
-        stack.Push(start);
+        stack.Push(startingPosition);
 
         while (stack.Count > 0)
         {
@@ -800,7 +800,7 @@ public class Grid
             GridObj current = incGrid.GetGridObj(pos);
 
             if (current == null) continue;
-            
+            //TODO: Add adjacent Tiles if current is a jumping pad and energy is not zero -> should find shortest path to goal and check if its reachable with energy crystals?
             if (!current.HasWallAt(WallPos.BACK))
             {
                 GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.BACK);
@@ -843,6 +843,7 @@ public class Grid
                 // and not a closed off room the player created itself by placing his tiles
                 if(!visited.Contains(new Vector2Int(x, y)) && (x == 1 || x == width-2|| y == 1 || y == height-2))
                 {
+                    // TODO: if energy is zero and no crystals are in reach
                     return false;
                 }
             }
