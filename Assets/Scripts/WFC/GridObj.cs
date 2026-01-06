@@ -119,6 +119,9 @@ public class GridObj
             case GridType.MANUAL_REPLACEABLE:
                 this.interactable = new ManualReplaceable();
                 break;
+            case GridType.HIDDENTRAP: 
+                this.interactable = new HiddenTrap(); 
+                break;
         }
     }
 
@@ -762,5 +765,5 @@ public class GridObj
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD
+    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP
 }
