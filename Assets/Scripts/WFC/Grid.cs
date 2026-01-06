@@ -703,6 +703,12 @@ public class Grid
         return new Pair<WallPos, int>(closestDir, minDist);
     }
 
+    public GridObj GetExit()
+    {
+        return AllGridObjs.FirstOrDefault(o => o.GetGridType() == GridType.EXIT);
+    }
+
+
     public bool IsInsideGridArray(int x, int y)
     {
         return x >= 0 && x < this.width && y >= 0 && y < this.height;

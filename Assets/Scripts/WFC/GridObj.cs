@@ -253,6 +253,12 @@ public class GridObj
         return this.GetWorldPos(0, 0);
     }
 
+    public Vector3 GetWorldPos1()
+    {
+        return gameObject != null ? gameObject.transform.position : GridPosToWorldPos();
+    }
+
+
     /// <summary>
     /// Get the world position of this object
     /// </summary>
