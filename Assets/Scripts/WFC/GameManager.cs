@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int empty = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private Pathfinding pathfinding;
 
     public static int emptyWeight;
     public static int corridorWeight;
@@ -126,4 +127,5 @@ public class GameManager : MonoBehaviour
     public Grid GetCurrentGrid() { return this.grid; }
     public PrefabLibrary GetPrefabLibrary() { return this.prefabLibrary; }
     public PlayerMovement GetPlayerMovement() { return this.playerMovement; }
+    public Pathfinding GetPathfinding() { return this.pathfinding; }
 }

@@ -100,6 +100,16 @@ public class GridObj
         this.isPlaceable = false;
     }
 
+    public bool IsMovementAllowed()
+    {
+        return IsMovementAllowed(this);
+    }
+
+    public static bool IsMovementAllowed(GridObj gridObj)
+    {
+        return gridObj != null && gridObj.gridType != GridType.REPLACEABLE && gridObj.gridType != GridType.MANUAL_REPLACEABLE;
+    }
+    
     private void InitType(GridType type)
     {
         switch (type)

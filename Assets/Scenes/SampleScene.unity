@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 220377176}
   - component: {fileID: 220377178}
   - component: {fileID: 220377179}
+  - component: {fileID: 220377180}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -164,6 +165,7 @@ MonoBehaviour:
   empty: 10
   prefabLibrary: {fileID: 220377179}
   playerMovement: {fileID: 6834562829543864870}
+  pathfinding: {fileID: 220377180}
   player: {fileID: 6834562829543864865}
 --- !u!4 &220377177
 Transform:
@@ -226,6 +228,20 @@ MonoBehaviour:
     type: 3}
   prefabJumppad: {fileID: 5826230866194392711, guid: 0d7d4b8585540d241b6601c5b7e41bf4,
     type: 3}
+--- !u!114 &220377180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 220377175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe1cbdfc3bf1c84b88a7cc1d506a218, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weight: 15
+  gameManager: {fileID: 220377176}
 --- !u!1 &231321110
 GameObject:
   m_ObjectHideFlags: 0
