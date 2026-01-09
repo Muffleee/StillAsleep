@@ -229,9 +229,9 @@ public class Grid
     /// <param name="gridObj">GridObj to be randomised.</param>
     public void SetRandomGridType(GridObj gridObj)
     {   
-        int Trapchance = 5;
-        int JumpingBadChance = 7;
-        int PlaceHolderChance = 15;
+        int Trapchance = 2;
+        int JumpingBadChance = 4;
+        int PlaceHolderChance = 5;
         int rand = UnityEngine.Random.Range(0, 100);
         if(rand <= Trapchance)
         {
@@ -433,9 +433,10 @@ public class Grid
         // Update world offset
         this.worldOffsetX += addLeft;
         this.worldOffsetY += addFront;
-
-        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + addLeft, PlayerMovement.currentGridPos.y + addFront);
-
+        Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(currentGridPos.x + addLeft, currentGridPos.y + addFront));
+        Vector2Int enemyGridPos = EnemyMovement.INSTANCE.GetEnemyGridPos();
+        EnemyMovement.INSTANCE.SetEnemyGridPos(new Vector2Int(enemyGridPos.x + addLeft, enemyGridPos.y + addFront));
         this.grid = newGrid;
     }
 
@@ -651,11 +652,11 @@ public class Grid
     /// Returns the next direction of map generation
     /// </summary>
     /// <returns></returns>
-    public WallPos GetNextGenPos()
+    public WallPos GetNextGenPos(Vector2Int gridPos)
     {
-        if (PlayerMovement.currentGridPos == null) return WallPos.BACK;
+        if (gridPos == null) return WallPos.BACK;
        
-        Dictionary<WallPos, int> distances = this.GetEdgeDistances(PlayerMovement.currentGridPos.x, PlayerMovement.currentGridPos.y);
+        Dictionary<WallPos, int> distances = this.GetEdgeDistances(gridPos.x, gridPos.y);
         return this.GetClosestEdge(distances);
     }
 
@@ -713,9 +714,10 @@ public class Grid
     /// </summary>
     /// <param name="maxDistance"></param>
     /// <returns></returns>
-    public bool ShouldGenerate(int genRange)
+    public bool ShouldGenerate(int genRange, Vector2Int pos)
     {
-        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetEdgeDistances(PlayerMovement.currentGridPos.x, PlayerMovement.currentGridPos.y));
+        
+        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetEdgeDistances(pos.x, pos.y));
         return closestEdge.second < genRange;
     }
 }
