@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     private int stepCounter = 0;
     private bool isMoving = false;
     private WallPos? bufferedMove = null;
+    private bool isLocked = false;
     
     /// <summary>
     /// Move the player to an initial position and add listeners for any destructible walls.
@@ -291,9 +292,20 @@ public class PlayerMovement : MonoBehaviour
         }
         this.playerModel.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
     }
+
+    public void LockMovement(float timeSecs)
+    {
+        this.isLocked = true;
+        Invoke(nameof(UnlockMovement), timeSecs);
+    }
+
+    public void UnlockMovement()
+    {
+        this.isLocked = false;
+    }
 }
 
 public enum MoveType
 {
-    INVALID, WALK, JUMP
+    INVALID, WALK, JUMP, TRAP
 }

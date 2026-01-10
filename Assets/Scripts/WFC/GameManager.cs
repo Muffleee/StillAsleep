@@ -73,6 +73,13 @@ public class GameManager : MonoBehaviour
     /// <param name="step">Count of all movement steps taken by the player</param>
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {   
+
+        GridObj toObj = this.grid.GetGridObj(to);
+        if(toObj != null && toObj.GetGridType() == GridType.TRAP)
+        {
+            this.playerMovement.LockMovement(2f);
+        }
+
         if(step % this.replaceExitAfter == 0)
         {
             this.grid.RepositionExit(to);
