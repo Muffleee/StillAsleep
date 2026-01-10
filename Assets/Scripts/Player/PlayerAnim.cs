@@ -23,6 +23,9 @@ public class PlayerAnim : MonoBehaviour
             case MoveType.JUMP:
                 trigger = "TriggerJump";
                 break;
+            case MoveType.TRAP:
+                trigger = "TriggerTrap";
+                break;
             default:
                 trigger = "TriggerIdle";
                 break;

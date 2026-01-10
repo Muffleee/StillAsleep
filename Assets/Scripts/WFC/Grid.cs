@@ -90,7 +90,7 @@ public class Grid
         foreach (WallPos wPos in Enum.GetValues(typeof(WallPos)))
         {
             GridObj neighbour = this.GetAdjacentGridObj(gridObj.GetGridPos(), wPos);
-            if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE)
+            if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE && neighbour.GetGridType() != GridType.MANUAL_REPLACEABLE)
             {
                 WallPos oppWPos = WallStatus.GetOppositePos(wPos);
                 WallType wType = gridObj.GetWallAt(wPos);
@@ -229,9 +229,9 @@ public class Grid
     /// <param name="gridObj">GridObj to be randomised.</param>
     public void SetRandomGridType(GridObj gridObj)
     {   
-        int Trapchance = 5;
-        int JumpingBadChance = 7;
-        int PlaceHolderChance = 15;
+        int Trapchance = 2;
+        int JumpingBadChance = 4;
+        int PlaceHolderChance = 5;
         int rand = UnityEngine.Random.Range(0, 100);
         if(rand <= Trapchance)
         {
@@ -433,9 +433,10 @@ public class Grid
         // Update world offset
         this.worldOffsetX += addLeft;
         this.worldOffsetY += addFront;
-
-        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + addLeft, PlayerMovement.currentGridPos.y + addFront);
-
+        Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(currentGridPos.x + addLeft, currentGridPos.y + addFront));
+        Vector2Int enemyGridPos = EnemyMovement.INSTANCE.GetEnemyGridPos();
+        EnemyMovement.INSTANCE.SetEnemyGridPos(new Vector2Int(enemyGridPos.x + addLeft, enemyGridPos.y + addFront));
         this.grid = newGrid;
     }
 
@@ -614,7 +615,7 @@ public class Grid
     /// <returns></returns>
     private GridObj PlaceExit(GridObj gridObj)
     {
-        if (gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE) return null;
+        if (gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE || gridObj.GetGridType() == GridType.MANUAL_REPLACEABLE) return null;
 
         List<WallPos> free = gridObj.GetFreeWalls();
         if (free.Count == 0) return null;
@@ -651,11 +652,11 @@ public class Grid
     /// Returns the next direction of map generation
     /// </summary>
     /// <returns></returns>
-    public WallPos GetNextGenPos()
+    public WallPos GetNextGenPos(Vector2Int gridPos)
     {
-        if (PlayerMovement.currentGridPos == null) return WallPos.BACK;
+        if (gridPos == null) return WallPos.BACK;
        
-        Dictionary<WallPos, int> distances = this.GetPlayerToEdgeDistances();
+        Dictionary<WallPos, int> distances = this.GetEdgeDistances(gridPos.x, gridPos.y);
         return this.GetClosestEdge(distances);
     }
 
@@ -663,18 +664,15 @@ public class Grid
     /// Calculates the distance to each edge of the map
     /// </summary>
     /// <returns></returns>
-    public Dictionary<WallPos, int> GetPlayerToEdgeDistances()
+    public Dictionary<WallPos, int> GetEdgeDistances(int x, int y)
     {
-        int playerX = PlayerMovement.currentGridPos.x;
-        int playerY = PlayerMovement.currentGridPos.y;
-        
         // Distances from the player to each edge
         return new Dictionary<WallPos, int>
         {
-            { WallPos.LEFT, playerX },
-            { WallPos.RIGHT, this.width - 1 - playerX },
-            { WallPos.FRONT, playerY },
-            { WallPos.BACK, this.height - 1 - playerY }
+            { WallPos.LEFT, x },
+            { WallPos.RIGHT, this.width - 1 - x },
+            { WallPos.FRONT, y },
+            { WallPos.BACK, this.height - 1 - y }
         };
     }
 
@@ -716,9 +714,10 @@ public class Grid
     /// </summary>
     /// <param name="maxDistance"></param>
     /// <returns></returns>
-    public bool ShouldGenerate(int genRange)
+    public bool ShouldGenerate(int genRange, Vector2Int pos)
     {
-        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetPlayerToEdgeDistances());
+        
+        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetEdgeDistances(pos.x, pos.y));
         return closestEdge.second < genRange;
     }
 }

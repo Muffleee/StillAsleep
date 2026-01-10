@@ -7,10 +7,8 @@ using UnityEngine.Events;
 /// <summary>
 /// Attached to the player, this class handles the player's movement throughout the game.
 /// </summary>
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : Movement
 {
-    [SerializeField] public static Vector2Int currentGridPos, lastGridPos;
-    [SerializeField] private GameManager gameManager;
     [SerializeField] private WinScreen winScreen;
     [SerializeField] private GameObject playerModel;
     [SerializeField] private PlayerAnim anim;
@@ -19,13 +17,19 @@ public class PlayerMovement : MonoBehaviour
     private int stepCounter = 0;
     private bool isMoving = false;
     private WallPos? bufferedMove = null;
-    
+    private bool isLocked = false;
+    public static PlayerMovement INSTANCE;
+
+    private void Awake()
+    {
+        INSTANCE = this;
+    }
     /// <summary>
     /// Move the player to an initial position and add listeners for any destructible walls.
     /// </summary>
     private void Start()
     {
-        currentGridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+        this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         foreach(var wall in FindObjectsOfType< DestructibleWall >())
         {
             wall.onDestroy.AddListener(this.OnWallDestroyed);
@@ -55,7 +59,7 @@ public class PlayerMovement : MonoBehaviour
             MoveType mt = this.IsValidMove(wallPos);
             if (mt != MoveType.INVALID)
             {   
-                this.MovePlayer(wallPos, mt);
+                this.StartMovement(wallPos, mt);
             }
             else
             {
@@ -66,68 +70,7 @@ public class PlayerMovement : MonoBehaviour
             this.bufferedMove = wallPos;
         }
     }
-
-    /// <summary>
-    /// Check if a movement in a given direction is valid.
-    /// Validity is based on the tile type.
-    /// </summary>
-    /// <param name="wallPos">Movement direction to be checked.</param>
-    /// <returns></returns>
-    private MoveType IsValidMove(WallPos wallPos)
-    {   
-        //if(true) return true; // TODO fix this script lol
-        Grid cGrid = this.gameManager.GetCurrentGrid();
-        Vector2Int next = this.GetNextGridPos(wallPos);
-        if (!cGrid.IsInsideGrid(next)) return MoveType.INVALID;
-
-        GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
-        GridObj current = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y];
-        return current.GetInteract().IsValidMove(current, nextObj, wallPos);
-    }
-
-    /// <summary>
-    /// Get the movement vector in world space for a given direction.
-    /// </summary>
-    /// <param name="wallPos">Direction for which the vector shall be calculated.</param>
-    /// <returns></returns>
-    private Vector3 GetMoveDir(WallPos wallPos)
-    {
-        return wallPos switch
-        {
-            WallPos.BACK => new Vector3(0, 0, GridObj.PLACEMENT_FACTOR),
-            WallPos.FRONT => new Vector3(0, 0, -GridObj.PLACEMENT_FACTOR),
-            WallPos.LEFT => new Vector3(-GridObj.PLACEMENT_FACTOR, 0, 0),
-            WallPos.RIGHT => new Vector3(GridObj.PLACEMENT_FACTOR, 0, 0),
-            _ => Vector3.zero
-        };
-    }
-
-    /// <summary>
-    /// Get the movement vector in grid space for a given direction.
-    /// </summary>
-    /// <param name="wallPos">Direction for which the vector shall be calculated.</param>
-    /// <returns></returns>
-    private Vector2Int GetMoveDirGrid(WallPos wallPos)
-    {
-        return wallPos switch
-        {
-            WallPos.BACK => new Vector2Int(0, 1),
-            WallPos.FRONT => new Vector2Int(0, -1),
-            WallPos.LEFT => new Vector2Int(-1, 0),
-            WallPos.RIGHT => new Vector2Int(1, 0),
-            _ => Vector2Int.zero
-        };
-    }
-
-    /// <summary>
-    /// Move the player in a given direction if they aren't already in motion.
-    /// </summary>
-    /// <param name="direction"></param>
-    /// <param name="wallPos"></param>
-    private void MovePlayer(WallPos wallPos, MoveType mt)
-    {
-        this.StartCoroutine(this.MovementCoroutine(wallPos, mt));
-    }
+    
 
     // rewrite code so that this returns nearest object and set it when calling this method
     // Not used right now
@@ -143,8 +86,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (nearest != null)
         {
-            lastGridPos = currentGridPos;
-            currentGridPos = nearest.GetGridPos();
+            lastGridPos = this.gridPos;
+            this.gridPos = nearest.GetGridPos();
             //gameManager.SetCurrentGridPos(currentGridPos);
             if (this.stepCounter == 0)
                 if(this.DEBUG) Debug.Log($"Player steht auf GridObj {nearest.GetGridPos()}");
@@ -152,30 +95,12 @@ public class PlayerMovement : MonoBehaviour
     }
 
     /// <summary>
-    /// Get the grid position after a move in a given direction.
-    /// </summary>
-    /// <param name="wallPos">Direction to be checked.</param>
-    /// <returns></returns>
-    private Vector2Int GetNextGridPos(WallPos wallPos)
-    {
-        if (this.gameManager.GetCurrentGrid() == null || !this.gameManager.GetCurrentGrid().IsInstantiated())
-        {
-            if (this.DEBUG) Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
-            return new Vector2Int(0,0);
-        }
-        Vector2Int next = currentGridPos + this.GetMoveDirGrid(wallPos);
-        return next;
-    }
-
-    
-
-    /// <summary>
     /// Move the player in a given direction. Set the new currentGridPos and the lastGridPos.
     /// Invoke UnityEvent onPlayerMoved
     /// </summary>
     /// <param name="wallPos">Direction of movement</param>
     /// <returns></returns>
-    private IEnumerator MovementCoroutine(WallPos wallPos, MoveType mt)
+    protected override IEnumerator MovementCoroutine(WallPos wallPos, MoveType mt)
     {   
         float totalDuration = 0.5f;
         float chargeDuration = mt == MoveType.JUMP ? 0.1f : 0f;
@@ -205,16 +130,15 @@ public class PlayerMovement : MonoBehaviour
         }
         this.stepCounter++;
 
-        lastGridPos = currentGridPos;
-        currentGridPos = this.GetNextGridPos(wallPos);
-
+        lastGridPos = this.gridPos;
+        this.gridPos = this.GetNextGridPos(wallPos);
+        
         this.transform.position = endPos;
-
         //traps detection on movment 
         Grid cGrid = this.gameManager.GetCurrentGrid();
     
         // Look up the GridObj using the array accessor method already used in IsValidMove
-        GridObj destinationTile = cGrid.GetGridArray()[currentGridPos.x, currentGridPos.y];
+        GridObj destinationTile = cGrid.GetGridArray()[this.gridPos.x, this.gridPos.y];
 
         destinationTile.GetInteract().OnUse(destinationTile);
         //if (destinationTile != null && destinationTile.IsTrap()) 
@@ -224,10 +148,10 @@ public class PlayerMovement : MonoBehaviour
         //}
         ////end of trap detection
 
-        this.CheckForExit(destinationTile);
+        //this.CheckForExit(destinationTile);
 
-        this.onPlayerMoved?.Invoke(lastGridPos, currentGridPos, wallPos, this.stepCounter);
-        this.gameManager.OnMove(lastGridPos, currentGridPos, wallPos, this.stepCounter);
+        this.onPlayerMoved?.Invoke(lastGridPos, this.gridPos, wallPos, this.stepCounter);
+        this.gameManager.OnMove(lastGridPos, this.gridPos, wallPos, this.stepCounter);
         if(this.DEBUG) Debug.Log("Event fired");
         this.isMoving = false;
         if(this.DEBUG) Debug.Log(this.stepCounter);
@@ -291,9 +215,41 @@ public class PlayerMovement : MonoBehaviour
         }
         this.playerModel.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
     }
+    
+    public void LockMovement(float timeSecs)
+    {
+        this.isLocked = true;
+        Invoke(nameof(UnlockMovement), timeSecs);
+    }
+
+    public void UnlockMovement()
+    {
+        this.isLocked = false;
+    }
+    public Vector2Int GetCurrentGridPos()
+    {
+        if (this.gridPos == null)
+            this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+        return this.gridPos;
+    }
+    public void SetCurrentGridPos(Vector2Int newGridPos)
+    {
+        this.gridPos = newGridPos;
+    }
+    public Vector2Int GetLastGridPos()
+    {
+        if (lastGridPos == null)
+            lastGridPos = GetCurrentGridPos();
+        return lastGridPos;
+    }
+    public void SetLastGridPos(Vector2Int newLastGridPos)
+    {
+        lastGridPos = newLastGridPos;
+    }
 }
+
 
 public enum MoveType
 {
-    INVALID, WALK, JUMP
+    INVALID, WALK, JUMP, TRAP   
 }
