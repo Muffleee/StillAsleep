@@ -78,6 +78,11 @@ public class GameManager : MonoBehaviour
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {
         enemyMovement.MoveEnemy();
+        GridObj toObj = this.grid.GetGridObj(to);
+        if(toObj != null && toObj.GetGridType() == GridType.TRAP)
+        {
+            this.playerMovement.LockMovement(2f);
+        }
         if(step % this.replaceExitAfter == 0)
         {
             //this.grid.RepositionExit(to);

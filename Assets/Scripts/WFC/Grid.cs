@@ -90,7 +90,7 @@ public class Grid
         foreach (WallPos wPos in Enum.GetValues(typeof(WallPos)))
         {
             GridObj neighbour = this.GetAdjacentGridObj(gridObj.GetGridPos(), wPos);
-            if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE)
+            if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE && neighbour.GetGridType() != GridType.MANUAL_REPLACEABLE)
             {
                 WallPos oppWPos = WallStatus.GetOppositePos(wPos);
                 WallType wType = gridObj.GetWallAt(wPos);
@@ -615,7 +615,7 @@ public class Grid
     /// <returns></returns>
     private GridObj PlaceExit(GridObj gridObj)
     {
-        if (gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE) return null;
+        if (gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE || gridObj.GetGridType() == GridType.MANUAL_REPLACEABLE) return null;
 
         List<WallPos> free = gridObj.GetFreeWalls();
         if (free.Count == 0) return null;

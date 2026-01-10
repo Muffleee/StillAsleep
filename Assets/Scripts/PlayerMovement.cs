@@ -17,6 +17,7 @@ public class PlayerMovement : Movement
     private int stepCounter = 0;
     private bool isMoving = false;
     private WallPos? bufferedMove = null;
+    private bool isLocked = false;
     public static PlayerMovement INSTANCE;
 
     private void Awake()
@@ -28,8 +29,7 @@ public class PlayerMovement : Movement
     /// </summary>
     private void Start()
     {
-        Debug.Log("Player: Grid: " + gameManager.GetCurrentGrid());
-        if (gameManager.GetCurrentGrid() != null) this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+        this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         foreach(var wall in FindObjectsOfType< DestructibleWall >())
         {
             wall.onDestroy.AddListener(this.OnWallDestroyed);
@@ -132,7 +132,7 @@ public class PlayerMovement : Movement
 
         lastGridPos = this.gridPos;
         this.gridPos = this.GetNextGridPos(wallPos);
-        Debug.Log("Player: " + this.gridPos.x + ", " + this.gridPos.y);
+        
         this.transform.position = endPos;
         //traps detection on movment 
         Grid cGrid = this.gameManager.GetCurrentGrid();
@@ -215,7 +215,17 @@ public class PlayerMovement : Movement
         }
         this.playerModel.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
     }
+    
+    public void LockMovement(float timeSecs)
+    {
+        this.isLocked = true;
+        Invoke(nameof(UnlockMovement), timeSecs);
+    }
 
+    public void UnlockMovement()
+    {
+        this.isLocked = false;
+    }
     public Vector2Int GetCurrentGridPos()
     {
         if (this.gridPos == null)
@@ -241,5 +251,5 @@ public class PlayerMovement : Movement
 
 public enum MoveType
 {
-    INVALID, WALK, JUMP
+    INVALID, WALK, JUMP, TRAP   
 }
