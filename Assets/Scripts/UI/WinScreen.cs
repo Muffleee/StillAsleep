@@ -43,8 +43,8 @@ public class WinScreen : MonoBehaviour
     {
         //Unpause Game
         Time.timeScale = 1f;
-        PlayerMovement.currentGridPos = new Vector2Int(0, 0);
-        PlayerMovement.lastGridPos = new Vector2Int(0, 0);
+        PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(0, 0));
+        PlayerMovement.INSTANCE.SetLastGridPos(new Vector2Int(0, 0));
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

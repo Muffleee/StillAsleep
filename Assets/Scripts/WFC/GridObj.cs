@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -441,7 +441,6 @@ public class GridObj
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
         if (this.parentObj == null) return;
-        int index = WallStatus.WallPosToInt(wallPos);
         if (this.wallObjs[wallPos] != null)
         {
             GameObject.Destroy(this.wallObjs[wallPos]);
@@ -673,6 +672,9 @@ public class GridObj
         {
             WallPos oppWPos = WallStatus.GetOppositePos(wPos);
             if (neighbours[wPos] == null) continue;
+            // Uncomment if placed walls shouldn't overwrite exits
+            // if (neighbours[wPos].GetWallAt(oppWPos) == WallType.EXIT) this.wallStatus.PlaceWallAt(wPos, WallType.EXIT);
+            // if (this.wallStatus.GetWallAt(wPos) == WallType.EXIT) neighbours[wPos].wallStatus.PlaceWallAt(oppWPos, WallType.EXIT);
             if (this.wallStatus.GetWallAt(wPos) != neighbours[wPos].GetWallStatus().GetWallAt(oppWPos))
             {
                 WallType newWallType = (this.wallStatus.GetWallAt(wPos) == WallType.NONE) ? neighbours[wPos].GetWallStatus().GetWallAt(oppWPos) : this.wallStatus.GetWallAt(wPos);

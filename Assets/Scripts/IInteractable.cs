@@ -1,3 +1,6 @@
+using System;
+using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -50,7 +53,11 @@ public class Regular : IInteractable
     /// <returns></returns>
     MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
+        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
+        {
+            if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
+            return MoveType.WALK;
+        }
         return MoveType.INVALID;
     }
 
@@ -75,14 +82,10 @@ public class Trap : IInteractable
         if (this.activated)
         {
             this.ActivateTrap();
+            // Reset the visual indicator and grid type after the animation delay
 
-            // 1. Reset the visual indicator (change color back to default)
-
-            this.ResetTrapVisual(obj);
-        }
-
-        // 2. Mark the tile as no longer a trap in the data model
-        this.activated = false;
+            _ = this.ResetTrap(obj);
+        }   
     }
 
     private void ActivateTrap()
@@ -94,9 +97,15 @@ public class Trap : IInteractable
         }
     }
 
-    private void ResetTrapVisual(GridObj tile)
+    async Task ResetTrap(GridObj tile)
     {
+
+        await Task.Delay(1500); // Wait for trap animation
+            
+        if(tile == null) return;
+        tile.SetGridType(GridType.REGULAR);
         tile.ReplaceFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().GetRandomFloorPrefab(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
+        this.activated = false;
     }
 
     /// <summary>
@@ -108,7 +117,11 @@ public class Trap : IInteractable
     /// <returns></returns>
     MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
+        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
+        {
+            if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
+            return MoveType.WALK;
+        }
         return MoveType.INVALID;
     }
 
@@ -150,7 +163,8 @@ public class JumpingPads : IInteractable
                 pr.Spend(1);   // 1 Energie abziehen
                 return MoveType.JUMP;
             }
-            return MoveType.INVALID;
+            if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
+            return MoveType.WALK;
         }
         if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
         return MoveType.INVALID;
@@ -198,7 +212,11 @@ public class ManualReplaceable : IInteractable
 
     MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
-        if(nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
+        if(nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
+        {
+            if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
+            return MoveType.WALK;
+        }
         return MoveType.INVALID;
     }
     
