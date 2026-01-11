@@ -75,8 +75,13 @@ public class Trap : IInteractable
         if (this.activated)
         {
             this.ActivateTrap();
+
+            // 1. Reset the visual indicator (change color back to default)
+
             this.ResetTrapVisual(obj);
         }
+
+        // 2. Mark the tile as no longer a trap in the data model
         this.activated = false;
     }
 
@@ -85,7 +90,7 @@ public class Trap : IInteractable
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
         if (pr != null)
         {
-            pr.RemoveEnergy(3);  
+            pr.RemoveEnergy(3);   // 1 Energie abziehen
         }
     }
 
@@ -200,58 +205,5 @@ public class ManualReplaceable : IInteractable
     GameObject IInteractable.GetPrefab()
     {
         return null;
-    }
-}
-
-/// <summary>
-/// Class describing a trap. No functionality at the moment except being red and turning back to white once stepped on.
-/// </summary>
-public class HiddenTrap : IInteractable
-{
-    private bool activated = true;
-    void IInteractable.SetColor(GameObject obj)
-    {
-        obj.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
-    }
-    void IInteractable.OnUse(GridObj obj)
-    {
-        if (this.activated)
-        {
-            this.ActivateHiddenTrap();
-            this.ResetTrapVisual(obj);
-        }
-        this.activated = false;
-    }
-
-    private void ActivateHiddenTrap()
-    {
-        PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
-        if (pr != null)
-        {
-            pr.RemoveEnergy(1);   // 1 Energie abziehen
-        }
-    }
-
-    private void ResetTrapVisual(GridObj tile)
-    {
-        tile.ReplaceFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().GetRandomFloorPrefab(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
-    }
-
-    /// <summary>
-    /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.
-    /// </summary>
-    /// <param name="curr">Origin GridObj</param>
-    /// <param name="nextObj">Destination GridObj</param>
-    /// <param name="wPos">Direction</param>
-    /// <returns></returns>
-    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
-    {
-        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
-        return MoveType.INVALID;
-    }
-
-    GameObject IInteractable.GetPrefab()
-    {
-        return GameManager.INSTANCE.GetPrefabLibrary().prefabTrap;
     }
 }

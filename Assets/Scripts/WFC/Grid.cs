@@ -231,8 +231,7 @@ public class Grid
     {   
         int Trapchance = 5;
         int JumpingBadChance = 7;
-        int ManualReplaceableChance = 15;
-        int HiddenTrapchance = 3;
+        int PlaceHolderChance = 15;
         int rand = UnityEngine.Random.Range(0, 100);
         if(rand <= Trapchance)
         {
@@ -244,13 +243,10 @@ public class Grid
             gridObj.SetGridType(GridType.JUMPINGPAD);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad);
         }
-         else if(rand > (JumpingBadChance + Trapchance) && rand < (ManualReplaceableChance + JumpingBadChance + Trapchance))
+         else if(rand > (JumpingBadChance + Trapchance) && rand < (PlaceHolderChance + JumpingBadChance + Trapchance))
         {
+            //Regular should be changed later for place Holder whatever that is (maybe teleport)
             gridObj.SetGridType(GridType.MANUAL_REPLACEABLE);
-        }
-        else if(rand > (ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
-        {
-            gridObj.SetGridType(GridType.HIDDENTRAP);
         } else
         {
             gridObj.SetGridType(GridType.REGULAR);
