@@ -31,6 +31,7 @@ public class EnemyMovement : Movement
         {
             wall.onDestroy.AddListener(this.OnWallDestroyed);
         }
+        this.RotateModel(WallPos.FRONT);
     }
     public void InstantiateEnemy(Vector2Int pos)
     {
@@ -60,7 +61,8 @@ public class EnemyMovement : Movement
         if (!isInstantiated) return;
         WallPos? direction = GetNextEnemyDir();
         if (direction != null)
-        {
+        {   
+            this.RotateModel(direction.Value);
             this.StartMovement(direction.Value, MoveType.WALK);
         }
         else
@@ -117,7 +119,32 @@ public class EnemyMovement : Movement
         if (gridObj != null)
         {
             gridObj.RemoveWall(wallPos);
-            if (this.DEBUG) Debug.Log($"Wand an {wallPos} bei {gridObj} wurde entfernt — Movement-Check aktualisiert.");
+            if (this.DEBUG) Debug.Log($"Wand an {wallPos} bei {gridObj} wurde entfernt ï¿½ Movement-Check aktualisiert.");
         }
+    }
+
+    /// <summary>
+    /// Rotate the enemy model
+    /// </summary>
+    /// <param name="dir"></param>
+    private void RotateModel(WallPos dir)
+    {
+        int rotation;
+        switch (dir)
+        {
+            case WallPos.FRONT:
+                rotation = 180;
+                break;
+            case WallPos.LEFT:
+                rotation = -90;
+                break;
+            case WallPos.RIGHT:
+                rotation = 90;
+                break;
+            default:
+                rotation = 0;
+                break;
+        }
+        this.gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
     }
 }

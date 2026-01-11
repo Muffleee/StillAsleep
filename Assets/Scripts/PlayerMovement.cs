@@ -59,6 +59,7 @@ public class PlayerMovement : Movement
             MoveType mt = this.IsValidMove(wallPos);
             if (mt != MoveType.INVALID)
             {   
+                if(mt == MoveType.TRAP) this.LockMovement(3.292f); // lock for longer animation of trap
                 this.StartMovement(wallPos, mt);
             }
             else
@@ -156,6 +157,11 @@ public class PlayerMovement : Movement
         this.isMoving = false;
         if(this.DEBUG) Debug.Log(this.stepCounter);
         
+        while(this.isLocked)
+        {
+            yield return null;
+        }
+
         if (bufferedMove.HasValue) 
         {   
             MoveType mtb = this.IsValidMove(bufferedMove.Value);
@@ -226,6 +232,8 @@ public class PlayerMovement : Movement
     {
         this.isLocked = false;
     }
+
+    public bool IsLocked() { return this.isLocked; }
     public Vector2Int GetCurrentGridPos()
     {
         if (this.gridPos == null)
