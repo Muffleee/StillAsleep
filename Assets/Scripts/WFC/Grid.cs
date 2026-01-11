@@ -227,11 +227,12 @@ public class Grid
     /// Sets the given GridObj to a random object type.
     /// </summary>
     /// <param name="gridObj">GridObj to be randomised.</param>
-    public void SetRandomGridType(GridObj gridObj)
+     public void SetRandomGridType(GridObj gridObj)
     {   
         int Trapchance = 2;
         int JumpingBadChance = 4;
-        int PlaceHolderChance = 5;
+        int ManualReplaceableChance = 5;
+        int HiddenTrapchance = 1;
         int rand = UnityEngine.Random.Range(0, 100);
         if(rand <= Trapchance)
         {
@@ -243,10 +244,13 @@ public class Grid
             gridObj.SetGridType(GridType.JUMPINGPAD);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad);
         }
-         else if(rand > (JumpingBadChance + Trapchance) && rand < (PlaceHolderChance + JumpingBadChance + Trapchance))
+         else if(rand > (JumpingBadChance + Trapchance) && rand < (ManualReplaceableChance + JumpingBadChance + Trapchance))
         {
-            //Regular should be changed later for place Holder whatever that is (maybe teleport)
             gridObj.SetGridType(GridType.MANUAL_REPLACEABLE);
+        }
+        else if(rand > (ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        {
+            gridObj.SetGridType(GridType.HIDDENTRAP);
         } else
         {
             gridObj.SetGridType(GridType.REGULAR);
