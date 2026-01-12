@@ -41,7 +41,8 @@ public class PlayerMovement : Movement
     /// Check for the player's input each frame and handles movements accordingly. Only allows one move at a time.
     /// </summary>
     private void Update()
-    {
+    {   
+        if(this.isLocked) return;
         if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK); }
         else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT); }
         else if (Input.GetKeyDown(KeyCode.A)) { this.TryMove(WallPos.LEFT); }
