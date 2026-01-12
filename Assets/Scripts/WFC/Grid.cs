@@ -255,8 +255,8 @@ public class Grid
     {   
         int Trapchance = GameManager.trapWeight;
         int JumpingBadChance = GameManager.jumpingWeight;
-        int ManualReplaceableChance = GameManager.replacableWeight;
-        int HiddenTrapchance = 1;
+        int ManualReplaceableChance = GameManager.manualReplacableWeight;
+        int HiddenTrapchance = GameManager.hiddenTrapWeight;
 
         int rand = UnityEngine.Random.Range(0, 100);
         if(rand < Trapchance)
@@ -366,7 +366,7 @@ public class Grid
                 manReplaceableIntro = true; 
                 break;
             case GridType.TRAP: 
-                if (!trapIntro) tutorialUpdate.Invoke(obj, "This is a trap. \n Standing on it will cost you energy.");
+                if (!trapIntro) tutorialUpdate.Invoke(obj, "This is a trap. \n Standing on it will cost you energy. Be careful! There might be hidden traps around.");
                 trapIntro = true;
                 break;
             case GridType.REGULAR: break;
@@ -895,4 +895,6 @@ public class Grid
     {
         return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
+
+    public void SetTutorial(bool tut) { tutorial = tut; }
 }

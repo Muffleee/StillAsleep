@@ -18,20 +18,23 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int oneWall = 0;
     [SerializeField] private int empty = 0;
     [SerializeField] private int jumping = 0;
-    [SerializeField] private int replacable = 0;
+    [SerializeField] private int manualReplacable = 0;
     [SerializeField] private int trap = 0;
+    [SerializeField] private int hiddenTrap = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private EnemyMovement enemyMovement;
     [SerializeField] private Pathfinding pathfinding;
+    [SerializeField] private bool tutorial;
 
     public static int emptyWeight;
     public static int corridorWeight;
     public static int cornerWeight;
     public static int oneWallWeight;
     public static int jumpingWeight;
-    public static int replacableWeight;
+    public static int manualReplacableWeight;
     public static int trapWeight;
+    public static int hiddenTrapWeight;
     public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
@@ -61,6 +64,7 @@ public class GameManager : MonoBehaviour
         this.SetStartingWeights();
         this.grid = new Grid(this.width, this.height);
         grid.tutorialUpdate.AddListener(UpdateTutorialText);
+        grid.SetTutorial(tutorial);
         this.playerResources = this.player.GetComponent<PlayerResources>();
 
         this.grid.CollapseWorld();
@@ -84,8 +88,9 @@ public class GameManager : MonoBehaviour
         cornerWeight = 2;
         oneWallWeight = 1;
         jumpingWeight = 0;
-        replacableWeight = 0;
+        manualReplacableWeight = 0;
         trapWeight = 0;
+        hiddenTrapWeight = 0;
     }
     /// <summary>
     /// sets the static weights
@@ -97,8 +102,9 @@ public class GameManager : MonoBehaviour
         oneWallWeight = this.oneWall;
         emptyWeight = this.empty;
         jumpingWeight = this.jumping;
-        replacableWeight = this.replacable;
+        manualReplacableWeight = this.manualReplacable;
         trapWeight = this.trap;
+        hiddenTrapWeight = this.hiddenTrap;
     }
     /// <summary>
     /// if the player clicks the left mouse button, the tutorial text closes and opens the next one if one is in line
