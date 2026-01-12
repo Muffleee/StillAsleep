@@ -459,11 +459,17 @@ public class Grid
     /// <summary>
     /// Check whether a given grid position is within the current grid's bounds.
     /// </summary>
-    /// <param name="v">Grid position to be checked.</param>
-    /// <returns></returns>
     public bool IsInsideGrid(Vector2Int v)
     {
-        return v.x >= 0 && v.x < this.width && v.y >= 0 && v.y < this.height;
+        return this.IsInsideGrid(v.x, v.y);
+    }
+
+    /// <summary>
+    /// Check whether a given grid position is within the current grid's bounds.
+    /// </summary>
+    public bool IsInsideGrid(int x, int y)
+    {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
     /// <summary>
@@ -637,17 +643,24 @@ public class Grid
     public GridObj[,] GetGridArray() { return this.grid; }
     public int GetWorldOffsetX() {  return this.worldOffsetX; }
     public int GetWorldOffsetY() {  return this.worldOffsetY; }
+    public Exit GetExit() { return this.exit; }
 
     /// <summary>
     /// Get the GridObj at the given grid position.
     /// </summary>
-    /// <param name="pos">Grid position to be searched.</param>
-    /// <returns></returns>
     public GridObj GetGridObj(Vector2Int pos)
     {
-        if (this.IsInsideGrid(pos))
+        return this.GetGridObj(pos.x, pos.y);
+    }
+
+    /// <summary>
+    /// Get the GridObj at the given grid position.
+    /// </summary>
+    public GridObj GetGridObj(int x, int y)
+    {
+        if (this.IsInsideGrid(x, y))
         {
-            return this.grid[pos.x, pos.y];
+            return this.grid[x, y];
         }
         return null;
     }
@@ -708,11 +721,6 @@ public class Grid
         return new Pair<WallPos, int>(closestDir, minDist);
     }
 
-    public bool IsInsideGridArray(int x, int y)
-    {
-        return x >= 0 && x < this.width && y >= 0 && y < this.height;
-    }
-
     /// <summary>
     /// Returns true if the smallest distance to an edge of the player is less than genRange
     /// </summary>
@@ -720,8 +728,23 @@ public class Grid
     /// <returns></returns>
     public bool ShouldGenerate(int genRange, Vector2Int pos)
     {
-        
         Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetEdgeDistances(pos.x, pos.y));
         return closestEdge.second < genRange;
+    }
+
+    /// <summary>
+    /// Calculates the Manhattan Distance between two points.
+    /// </summary>
+    public static int CalculateDistance(Vector2Int start, Vector2Int end)
+    {
+        return CalculateDistance(start.x, start.y, end.x, end.y);
+    }
+
+    /// <summary>
+    /// Calculates the Manhattan Distance between two points.
+    /// </summary>
+    public static int CalculateDistance(int x1, int y1, int x2, int y2)
+    {
+        return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
 }

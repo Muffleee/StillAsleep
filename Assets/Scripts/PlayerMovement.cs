@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,7 +14,7 @@ public class PlayerMovement : Movement
     [SerializeField] private GameObject playerModel;
     [SerializeField] private PlayerAnim anim;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
-    private bool DEBUG = false;
+    private readonly bool DEBUG = false;
     private int stepCounter = 0;
     private bool isMoving = false;
     private WallPos? bufferedMove = null;
@@ -149,6 +150,13 @@ public class PlayerMovement : Movement
         //    InGameTrapManager.ExecuteTrapEffect(destinationTile); 
         //}
         ////end of trap detection
+
+        // Draw debug A* path to the exit
+        if (this.DEBUG)
+        {
+            List<GridObj> DebugPath = this.gameManager.GetPathfinding().FindPath(this.gridPos, this.gameManager.GetEnemyMovement().GetEnemyGridPos());
+            this.gameManager.GetPathfinding().SpawnDebug(DebugPath);
+        }
 
         //this.CheckForExit(destinationTile);
 
