@@ -58,11 +58,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2226212238276423516, guid: 03741992903a35148bbfca60e9108b1a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 0d9c489a776369941a997eae2cb5f0eb, type: 2}
     - target: {fileID: 5365367703789444965, guid: 03741992903a35148bbfca60e9108b1a,
         type: 3}
       propertyPath: m_Name
-      value: Floor Variant
+      value: E
       objectReference: {fileID: 0}
+    - target: {fileID: 5587340986630623522, guid: 03741992903a35148bbfca60e9108b1a,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 0d9c489a776369941a997eae2cb5f0eb, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
