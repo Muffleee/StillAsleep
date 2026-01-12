@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Class handling the gane's grid and its procedual generation through Wave Function Collapse.
@@ -11,14 +12,22 @@ public class Grid
     public int width => this.grid.GetLength(0);
     public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
-
+    public UnityEvent<GridObj, string> tutorialUpdate = new UnityEvent<GridObj, string> ();
     /// <summary>
     /// Count the times the grid has grown so far.
     /// </summary>
     private int worldOffsetX = 0;
     private int worldOffsetY = 0;
     private Exit exit;
-
+    /// <summary>
+    /// The tutorial booleans so that everything is only introduced once
+    /// </summary>
+    private bool tutorial = true;
+    private bool jumpingIntro = false;
+    private bool exitIntro = false;
+    private bool trapIntro = false;
+    private bool replaceableIntro = false;
+    private bool manReplaceableIntro = false;
     /// <summary>
     /// Create a new grid given an initial size.
     /// </summary>
@@ -177,7 +186,21 @@ public class Grid
             }
 
             GridObj chosenTemplate = this.PickWeightedRandom(candidates);
+            candidates.Remove(chosenTemplate);
             this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+            while (!this.CheckSolvability(new Vector2Int(x,y)))
+            {
+                if (candidates.Count == 0)
+                {
+                    chosenTemplate = new GridObj(new WallStatus(), GameManager.emptyWeight);
+                    this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+                    break;
+                }
+                chosenTemplate = this.PickWeightedRandom(candidates);
+                candidates.Remove(chosenTemplate);
+                this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+            }
+            
             this.SetRandomGridType(this.grid[x,y]);
 
             if(this.grid[x,y].GetGridType() == GridType.MANUAL_REPLACEABLE) this.grid[x,y].RemoveAllWalls();
@@ -191,6 +214,7 @@ public class Grid
                     toProcess.Enqueue(nPos);
             }
         }
+        
     }
     private void IncreaseWeight(List<GridObj> filtered, GridObj neighbor, WallPos side)
     {
@@ -229,17 +253,18 @@ public class Grid
     /// <param name="gridObj">GridObj to be randomised.</param>
      public void SetRandomGridType(GridObj gridObj)
     {   
-        int Trapchance = 2;
-        int JumpingBadChance = 4;
-        int ManualReplaceableChance = 5;
-        int HiddenTrapchance = 1;
+        int Trapchance = GameManager.trapWeight;
+        int JumpingBadChance = GameManager.jumpingWeight;
+        int ManualReplaceableChance = GameManager.manualReplacableWeight;
+        int HiddenTrapchance = GameManager.hiddenTrapWeight;
+
         int rand = UnityEngine.Random.Range(0, 100);
-        if(rand <= Trapchance)
+        if(rand < Trapchance)
         {
             gridObj.SetGridType(GridType.TRAP);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabTrap);
         }
-        else if(rand > Trapchance && rand < (JumpingBadChance +Trapchance  ))
+        else if(rand > Trapchance && rand < (JumpingBadChance + Trapchance  ))
         {
             gridObj.SetGridType(GridType.JUMPINGPAD);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad);
@@ -315,10 +340,39 @@ public class Grid
                 if (obj == null || obj.IsInstantiated()) continue;
                 Dictionary<WallPos, GridObj> neighbors = this.GetNeighbors(obj);
                 obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
+                if (tutorial) StartTutorial(obj);
             }
         }
     }
-
+    /// <summary>
+    /// Setting the tutorialText to introduce the player
+    /// </summary>
+    /// <param name="type"> what type of grid is going to be introduced</param>
+    private void StartTutorial(GridObj obj)
+    {
+        GridType type = obj.GetGridType();
+        switch (type)
+        {
+            case GridType.JUMPINGPAD: 
+                if (!jumpingIntro) tutorialUpdate.Invoke(obj, "This is a jumping pad. \n With it you can jump over adjacent walls.");
+                jumpingIntro = true;
+                break;
+            case GridType.REPLACEABLE: 
+                if (!replaceableIntro) tutorialUpdate.Invoke(obj, "This is a replaceable tile.\n You can place a tile from your inventory there. The playfield will expand in direction of the replacable tiles.");
+                replaceableIntro = true;
+                break;
+            case GridType.MANUAL_REPLACEABLE: 
+                if (!manReplaceableIntro) tutorialUpdate.Invoke(obj, "This is a manually replaceable tile. \n This is also a replacable tile, but it will not be filled unless you place one of your tiles.");
+                manReplaceableIntro = true; 
+                break;
+            case GridType.TRAP: 
+                if (!trapIntro) tutorialUpdate.Invoke(obj, "This is a trap. \n Standing on it will cost you energy. Be careful! There might be hidden traps around.");
+                trapIntro = true;
+                break;
+            case GridType.REGULAR: break;
+        }
+        if (jumpingIntro && replaceableIntro && manReplaceableIntro && trapIntro && exitIntro) tutorial = false;
+    }
     /// <summary>
     /// Increase the size of the grid by 1 in each direction.
     /// </summary>
@@ -632,7 +686,8 @@ public class Grid
 
         WallPos chosen = free[UnityEngine.Random.Range(0, free.Count)];
         gridObj.PlaceWallAt(chosen, WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
-
+        if(!exitIntro) tutorialUpdate.Invoke(gridObj, "This is the exit. \n Your goal is to reach it. It moves away from you, but only between tiles with no walls! \n Maybe you can make use of this feature...");
+        exitIntro = true;
         GridObj adjacentGridObj = this.GetAdjacentGridObj(gridObj, chosen);
         adjacentGridObj?.PlaceWallAt(WallStatus.GetOppositePos(chosen), WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
 
@@ -733,6 +788,99 @@ public class Grid
     }
 
     /// <summary>
+    /// Returns true if the grid has no completely closed of rooms
+    /// </summary>
+    /// <returns></returns>
+    /// 
+    //TODO: Return false if there is no way from now to the goal (not even by using crystals to place tiles)
+    private bool CheckSolvability(Vector2Int startingPosition)
+    {
+        if (this.width == 0 || this.height == 0) return true;
+        Grid incGrid = new Grid(this.width + 2, this.height + 2);
+        GridObj[,] incGridArray = incGrid.GetGridArray();
+        for (int x = 0; x < incGrid.width; x++)
+        {
+            for (int y = 0; y < incGrid.height; y++)
+            {
+                if (x == 0 || y == 0 || x == incGrid.width - 1 || y == incGrid.height - 1 || this.grid[x - 1, y - 1] == null)
+                {
+                    GridObj tile = new GridObj(new WallStatus(), GameManager.emptyWeight);
+                    tile.SetGridPos(new Vector2Int(x, y));
+                    incGridArray[x, y] = tile;
+                }
+                else
+                {
+                    GridObj tile = this.grid[x - 1, y - 1].Clone();
+                    tile.SetGridPos(new Vector2Int(x, y));
+                    incGridArray[x, y] = tile;
+                }
+            }
+        }
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+        Stack<Vector2Int> stack = new Stack<Vector2Int>();
+
+        stack.Push(startingPosition);
+
+        while (stack.Count > 0)
+        {
+            Vector2Int pos = stack.Pop();
+            if (visited.Contains(pos)) continue;
+            visited.Add(pos);
+            GridObj current = incGrid.GetGridObj(pos);
+
+            if (current == null) continue;
+            //TODO: Add adjacent Tiles if current is a jumping pad and energy is not zero -> should find shortest path to goal and check if its reachable with energy crystals?
+            if (!current.HasWallAt(WallPos.BACK))
+            {
+                GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.BACK);
+                if (neighbour != null && !neighbour.HasWallAt(WallPos.FRONT))
+                {
+                    stack.Push(neighbour.GetGridPos());
+                }
+            }
+            if (!current.HasWallAt(WallPos.FRONT))
+            {
+                GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.FRONT);
+                if (neighbour != null && !neighbour.HasWallAt(WallPos.BACK))
+                {
+                    stack.Push(neighbour.GetGridPos());
+                }
+            }
+            if (!current.HasWallAt(WallPos.LEFT))
+            {
+                GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.LEFT);
+                if (neighbour != null && !neighbour.HasWallAt(WallPos.RIGHT))
+                {
+                    stack.Push(neighbour.GetGridPos());
+                }
+            }
+            if (!current.HasWallAt(WallPos.RIGHT))
+            {
+                GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.RIGHT);
+                if (neighbour != null && !neighbour.HasWallAt(WallPos.LEFT))
+                {
+                    stack.Push(neighbour.GetGridPos());
+                }
+            }
+        }
+
+        for (int x = 0; x < incGrid.width; x++)
+        {
+            for (int y = 0; y < incGrid.height; y++)
+            {
+                // Only returns false if the problem tile is on the edge, which indicates that it's a newly generated tile we are checking
+                // and not a closed off room the player created itself by placing his tiles
+                if (!visited.Contains(new Vector2Int(x, y)) && (x == 1 || x == width - 2 || y == 1 || y == height - 2))
+                {
+                    // TODO: if energy is zero and no crystals are in reach
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /// <summary>
     /// Calculates the Manhattan Distance between two points.
     /// </summary>
     public static int CalculateDistance(Vector2Int start, Vector2Int end)
@@ -747,4 +895,6 @@ public class Grid
     {
         return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
+
+    public void SetTutorial(bool tut) { tutorial = tut; }
 }

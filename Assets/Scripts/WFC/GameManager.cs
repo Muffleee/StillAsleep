@@ -17,22 +17,32 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int corner = 0;
     [SerializeField] private int oneWall = 0;
     [SerializeField] private int empty = 0;
+    [SerializeField] private int jumping = 0;
+    [SerializeField] private int manualReplacable = 0;
+    [SerializeField] private int trap = 0;
+    [SerializeField] private int hiddenTrap = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private EnemyMovement enemyMovement;
     [SerializeField] private Pathfinding pathfinding;
+    [SerializeField] private bool tutorial;
 
     public static int emptyWeight;
     public static int corridorWeight;
     public static int cornerWeight;
     public static int oneWallWeight;
+    public static int jumpingWeight;
+    public static int manualReplacableWeight;
+    public static int trapWeight;
+    public static int hiddenTrapWeight;
     public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
-
+    private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
+    bool tutorialOpen = false;
     /*
     public GameObject wallPrefab;
     public GameObject floorPrefab;
@@ -49,16 +59,16 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
+        
         INSTANCE = this;
-        corridorWeight = this.corridor;
-        cornerWeight = this.corner;
-        oneWallWeight = this.oneWall;
-        emptyWeight = this.empty;
+        this.SetStartingWeights();
         this.grid = new Grid(this.width, this.height);
-
+        grid.tutorialUpdate.AddListener(UpdateTutorialText);
+        grid.SetTutorial(tutorial);
         this.playerResources = this.player.GetComponent<PlayerResources>();
 
         this.grid.CollapseWorld();
+        this.SetWeights();
         Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
         this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos));
 
@@ -68,7 +78,55 @@ public class GameManager : MonoBehaviour
         // EnemyMovement.INSTANCE.SetEnemyGridPos();
         EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(1,1));
     }
-
+    /// <summary>
+    /// Sets starting weights so the initial grid is very open and no special tiles
+    /// </summary>
+    private void SetStartingWeights()
+    {
+        emptyWeight = 20;
+        corridorWeight = 5;
+        cornerWeight = 2;
+        oneWallWeight = 1;
+        jumpingWeight = 0;
+        manualReplacableWeight = 0;
+        trapWeight = 0;
+        hiddenTrapWeight = 0;
+    }
+    /// <summary>
+    /// sets the static weights
+    /// </summary>
+    private void SetWeights()
+    {
+        corridorWeight = this.corridor;
+        cornerWeight = this.corner;
+        oneWallWeight = this.oneWall;
+        emptyWeight = this.empty;
+        jumpingWeight = this.jumping;
+        manualReplacableWeight = this.manualReplacable;
+        trapWeight = this.trap;
+        hiddenTrapWeight = this.hiddenTrap;
+    }
+    /// <summary>
+    /// if the player clicks the left mouse button, the tutorial text closes and opens the next one if one is in line
+    /// </summary>
+    private void Update()
+    {
+        if (tutorialOpen)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                gui.CloseTutorialText();
+                tutorialOpen = false;
+                if (tutorials.Count > 0)
+                {
+                    tutorialOpen = true;
+                    (GridObj, string) next= tutorials.Dequeue();
+                    gui.OpenTutorialText(next.Item1.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY()), next.Item2);
+                }
+            }
+        }
+        
+    }
     /// <summary>
     /// Function to be called on player movement, handles dynamic map generation and movement of the exit
     /// </summary>
@@ -145,7 +203,19 @@ public class GameManager : MonoBehaviour
 
         this.gui.RemoveSelected(false);
     }
-
+    /// <summary>
+    /// Calls a function in gui to set the tutorial text if one is not already open
+    /// enqeues the tutorial to the line
+    /// </summary>
+    /// <param name="text"></param>
+    private void UpdateTutorialText(GridObj obj, string text)
+    {
+        tutorials.Enqueue((obj,text));
+        if (tutorialOpen) return;
+        (GridObj, string) next = tutorials.Dequeue();
+        gui.OpenTutorialText(next.Item1.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY()), next.Item2);
+        tutorialOpen = true;
+    }
     /// <summary>
     /// Gets the grid in its current state
     /// </summary>
@@ -153,6 +223,7 @@ public class GameManager : MonoBehaviour
     public Grid GetCurrentGrid() { return this.grid; }
     public PrefabLibrary GetPrefabLibrary() { return this.prefabLibrary; }
     public PlayerMovement GetPlayerMovement() { return this.playerMovement; }
+    public bool IsTutorialOpen() { return this.tutorialOpen; }
     public EnemyMovement GetEnemyMovement() { return this.enemyMovement; }
     public Pathfinding GetPathfinding() { return this.pathfinding; }
 }
