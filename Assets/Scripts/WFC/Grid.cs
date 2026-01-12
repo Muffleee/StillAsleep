@@ -39,6 +39,22 @@ public class Grid
     }
 
     /// <summary>
+    /// Gets all GridObjs adjacent to the given one.
+    /// </summary>
+    /// <param name="gridObj"></param>
+    /// <returns></returns>
+    public Dictionary<WallPos, GridObj> GetNeighbors(GridObj gridObj)
+    {
+        return new Dictionary<WallPos, GridObj>()
+        {
+            { WallPos.FRONT, this.GetAdjacentGridObj(gridObj, WallPos.FRONT) }, 
+            { WallPos.BACK, this.GetAdjacentGridObj(gridObj, WallPos.BACK) }, 
+            { WallPos.LEFT, this.GetAdjacentGridObj(gridObj, WallPos.LEFT) }, 
+            { WallPos.RIGHT, this.GetAdjacentGridObj(gridObj, WallPos.RIGHT) }
+        };
+    }
+    
+    /// <summary>
     /// Place a GridObj in the grid at the GridObj's current world position. Will destroy any existing GridObj at this position.
     /// </summary>
     /// <param name="gridObj">GridObj to be placed</param>
@@ -68,10 +84,7 @@ public class Grid
             gridObj.SetGridType(GridType.REGULAR);
         }
 
-        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.GetAdjacentGridObj(gridObj, WallPos.FRONT) }, 
-                                                                                            { WallPos.BACK, this.GetAdjacentGridObj(gridObj, WallPos.BACK) }, 
-                                                                                            { WallPos.LEFT, this.GetAdjacentGridObj(gridObj, WallPos.LEFT) }, 
-                                                                                            { WallPos.RIGHT, this.GetAdjacentGridObj(gridObj, WallPos.RIGHT) } };
+        Dictionary<WallPos, GridObj> neighbors = this.GetNeighbors(gridObj);
         this.grid[gridPos.x, gridPos.y].InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
         this.InstantiateMissingWalls(gridObj);
         
@@ -83,14 +96,15 @@ public class Grid
     /// <param name="gridObj"></param>
     private void InstantiateMissingWalls(GridObj gridObj)
     {
-        WallPos[] wallPos = new WallPos[] { WallPos.FRONT, WallPos.BACK, WallPos.LEFT, WallPos.RIGHT };
-        foreach (WallPos wPos in wallPos)
+        foreach (WallPos wPos in Enum.GetValues(typeof(WallPos)))
         {
             GridObj neighbour = this.GetAdjacentGridObj(gridObj.GetGridPos(), wPos);
-            if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE)
+            if (gridObj.HasWallAt(wPos) && neighbour != null && neighbour.GetGridType() != GridType.REPLACEABLE && neighbour.GetGridType() != GridType.MANUAL_REPLACEABLE)
             {
-                neighbour.PlaceWallAt(WallStatus.GetOppositePos(wPos), this.worldOffsetX, this.worldOffsetY);
-                neighbour.InstantiateWall(WallStatus.GetOppositePos(wPos), this.worldOffsetX, this.worldOffsetY);
+                WallPos oppWPos = WallStatus.GetOppositePos(wPos);
+                WallType wType = gridObj.GetWallAt(wPos);
+                neighbour.PlaceWallAt(oppWPos, wType, this.worldOffsetX, this.worldOffsetY);
+                neighbour.InstantiateWall(oppWPos, wType, this.worldOffsetX, this.worldOffsetY);
             }
         }
     }
@@ -237,11 +251,13 @@ public class Grid
     /// Sets the given GridObj to a random object type.
     /// </summary>
     /// <param name="gridObj">GridObj to be randomised.</param>
-    public void SetRandomGridType(GridObj gridObj)
+     public void SetRandomGridType(GridObj gridObj)
     {   
         int Trapchance = GameManager.trapWeight;
         int JumpingBadChance = GameManager.jumpingWeight;
-        int PlaceHolderChance = GameManager.replacableWeight;
+        int ManualReplaceableChance = GameManager.replacableWeight;
+        int HiddenTrapchance = 1;
+
         int rand = UnityEngine.Random.Range(0, 100);
         if(rand < Trapchance)
         {
@@ -253,9 +269,13 @@ public class Grid
             gridObj.SetGridType(GridType.JUMPINGPAD);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad);
         }
-         else if(rand > (JumpingBadChance + Trapchance) && rand < (PlaceHolderChance + JumpingBadChance + Trapchance))
+         else if(rand > (JumpingBadChance + Trapchance) && rand < (ManualReplaceableChance + JumpingBadChance + Trapchance))
         {
             gridObj.SetGridType(GridType.MANUAL_REPLACEABLE);
+        }
+        else if(rand > (ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        {
+            gridObj.SetGridType(GridType.HIDDENTRAP);
         } else
         {
             gridObj.SetGridType(GridType.REGULAR);
@@ -318,10 +338,7 @@ public class Grid
             {
                 GridObj obj = this.grid[w, h];
                 if (obj == null || obj.IsInstantiated()) continue;
-                Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.GetAdjacentGridObj(obj, WallPos.FRONT) },
-                                                                                            { WallPos.BACK, this.GetAdjacentGridObj(obj, WallPos.BACK) },
-                                                                                            { WallPos.LEFT, this.GetAdjacentGridObj(obj, WallPos.LEFT) },
-                                                                                            { WallPos.RIGHT, this.GetAdjacentGridObj(obj, WallPos.RIGHT) } };
+                Dictionary<WallPos, GridObj> neighbors = this.GetNeighbors(obj);
                 obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
                 if (tutorial) StartTutorial(obj);
             }
@@ -474,9 +491,10 @@ public class Grid
         // Update world offset
         this.worldOffsetX += addLeft;
         this.worldOffsetY += addFront;
-
-        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + addLeft, PlayerMovement.currentGridPos.y + addFront);
-
+        Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(currentGridPos.x + addLeft, currentGridPos.y + addFront));
+        Vector2Int enemyGridPos = EnemyMovement.INSTANCE.GetEnemyGridPos();
+        EnemyMovement.INSTANCE.SetEnemyGridPos(new Vector2Int(enemyGridPos.x + addLeft, enemyGridPos.y + addFront));
         this.grid = newGrid;
     }
 
@@ -495,11 +513,17 @@ public class Grid
     /// <summary>
     /// Check whether a given grid position is within the current grid's bounds.
     /// </summary>
-    /// <param name="v">Grid position to be checked.</param>
-    /// <returns></returns>
     public bool IsInsideGrid(Vector2Int v)
     {
-        return v.x >= 0 && v.x < this.width && v.y >= 0 && v.y < this.height;
+        return this.IsInsideGrid(v.x, v.y);
+    }
+
+    /// <summary>
+    /// Check whether a given grid position is within the current grid's bounds.
+    /// </summary>
+    public bool IsInsideGrid(int x, int y)
+    {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
     /// <summary>
@@ -628,15 +652,18 @@ public class Grid
         bool TryMoveExit(WallPos direction)
         {
             GridObj currentExitGridObj = this.exit.gridObj;
+            WallPos? exitPos = currentExitGridObj.GetExitPos();
+
+            GridObj currentAdjExitGridObj = null;
+
+            if(exitPos != null) currentAdjExitGridObj = this.GetAdjacentGridObj(currentExitGridObj, (WallPos)exitPos);
+            
+            currentExitGridObj?.RemoveExitWalls();
+            currentAdjExitGridObj?.RemoveExitWalls();
+
             GridObj newExitGridObj = this.PlaceExit(this.GetAdjacentGridObj(currentExitGridObj, direction));
 
             if (newExitGridObj == null || !newExitGridObj.HasExit()) return false;
-
-            currentExitGridObj?.RemoveExitWalls();
-
-            WallPos exitPos = newExitGridObj.GetExitPos();
-            WallPos exitOppositePos = WallStatus.GetOppositePos(exitPos);
-            GridObj adjacentGridObj = this.GetAdjacentGridObj(newExitGridObj, exitPos);
 
             this.exit.gridObj = newExitGridObj;
 
@@ -652,7 +679,7 @@ public class Grid
     /// <returns></returns>
     private GridObj PlaceExit(GridObj gridObj)
     {
-        if (gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE) return null;
+        if (gridObj == null || gridObj.GetGridType() == GridType.REPLACEABLE || gridObj.GetGridType() == GridType.MANUAL_REPLACEABLE) return null;
 
         List<WallPos> free = gridObj.GetFreeWalls();
         if (free.Count == 0) return null;
@@ -661,6 +688,9 @@ public class Grid
         gridObj.PlaceWallAt(chosen, WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
         if(!exitIntro) tutorialUpdate.Invoke(gridObj, "This is the exit. \n Your goal is to reach it. It moves away from you, but only between tiles with no walls! \n Maybe you can make use of this feature...");
         exitIntro = true;
+        GridObj adjacentGridObj = this.GetAdjacentGridObj(gridObj, chosen);
+        adjacentGridObj?.PlaceWallAt(WallStatus.GetOppositePos(chosen), WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
+
         return gridObj;
     }
     
@@ -668,17 +698,24 @@ public class Grid
     public GridObj[,] GetGridArray() { return this.grid; }
     public int GetWorldOffsetX() {  return this.worldOffsetX; }
     public int GetWorldOffsetY() {  return this.worldOffsetY; }
+    public Exit GetExit() { return this.exit; }
 
     /// <summary>
     /// Get the GridObj at the given grid position.
     /// </summary>
-    /// <param name="pos">Grid position to be searched.</param>
-    /// <returns></returns>
     public GridObj GetGridObj(Vector2Int pos)
     {
-        if (this.IsInsideGrid(pos))
+        return this.GetGridObj(pos.x, pos.y);
+    }
+
+    /// <summary>
+    /// Get the GridObj at the given grid position.
+    /// </summary>
+    public GridObj GetGridObj(int x, int y)
+    {
+        if (this.IsInsideGrid(x, y))
         {
-            return this.grid[pos.x, pos.y];
+            return this.grid[x, y];
         }
         return null;
     }
@@ -687,11 +724,11 @@ public class Grid
     /// Returns the next direction of map generation
     /// </summary>
     /// <returns></returns>
-    public WallPos GetNextGenPos()
+    public WallPos GetNextGenPos(Vector2Int gridPos)
     {
-        if (PlayerMovement.currentGridPos == null) return WallPos.BACK;
+        if (gridPos == null) return WallPos.BACK;
        
-        Dictionary<WallPos, int> distances = this.GetPlayerToEdgeDistances();
+        Dictionary<WallPos, int> distances = this.GetEdgeDistances(gridPos.x, gridPos.y);
         return this.GetClosestEdge(distances);
     }
 
@@ -699,18 +736,15 @@ public class Grid
     /// Calculates the distance to each edge of the map
     /// </summary>
     /// <returns></returns>
-    public Dictionary<WallPos, int> GetPlayerToEdgeDistances()
+    public Dictionary<WallPos, int> GetEdgeDistances(int x, int y)
     {
-        int playerX = PlayerMovement.currentGridPos.x;
-        int playerY = PlayerMovement.currentGridPos.y;
-        
         // Distances from the player to each edge
         return new Dictionary<WallPos, int>
         {
-            { WallPos.LEFT, playerX },
-            { WallPos.RIGHT, this.width - 1 - playerX },
-            { WallPos.FRONT, playerY },
-            { WallPos.BACK, this.height - 1 - playerY }
+            { WallPos.LEFT, x },
+            { WallPos.RIGHT, this.width - 1 - x },
+            { WallPos.FRONT, y },
+            { WallPos.BACK, this.height - 1 - y }
         };
     }
 
@@ -742,19 +776,14 @@ public class Grid
         return new Pair<WallPos, int>(closestDir, minDist);
     }
 
-    public bool IsInsideGridArray(int x, int y)
-    {
-        return x >= 0 && x < this.width && y >= 0 && y < this.height;
-    }
-
     /// <summary>
     /// Returns true if the smallest distance to an edge of the player is less than genRange
     /// </summary>
     /// <param name="maxDistance"></param>
     /// <returns></returns>
-    public bool ShouldGenerate(int genRange)
+    public bool ShouldGenerate(int genRange, Vector2Int pos)
     {
-        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetPlayerToEdgeDistances());
+        Pair<WallPos, int> closestEdge = this.GetClosestEdgeAndDistance(this.GetEdgeDistances(pos.x, pos.y));
         return closestEdge.second < genRange;
     }
 
@@ -769,11 +798,11 @@ public class Grid
         if (this.width == 0 || this.height == 0) return true;
         Grid incGrid = new Grid(this.width + 2, this.height + 2);
         GridObj[,] incGridArray = incGrid.GetGridArray();
-        for(int x = 0; x < incGrid.width; x++)
+        for (int x = 0; x < incGrid.width; x++)
         {
-            for(int y = 0; y < incGrid.height; y++)
+            for (int y = 0; y < incGrid.height; y++)
             {
-                if (x == 0 || y == 0 || x == incGrid.width - 1 || y == incGrid.height - 1|| this.grid[x-1,y-1] == null)
+                if (x == 0 || y == 0 || x == incGrid.width - 1 || y == incGrid.height - 1 || this.grid[x - 1, y - 1] == null)
                 {
                     GridObj tile = new GridObj(new WallStatus(), GameManager.emptyWeight);
                     tile.SetGridPos(new Vector2Int(x, y));
@@ -804,7 +833,7 @@ public class Grid
             if (!current.HasWallAt(WallPos.BACK))
             {
                 GridObj neighbour = incGrid.GetAdjacentGridObj(current, WallPos.BACK);
-                if(neighbour!=null && !neighbour.HasWallAt(WallPos.FRONT))
+                if (neighbour != null && !neighbour.HasWallAt(WallPos.FRONT))
                 {
                     stack.Push(neighbour.GetGridPos());
                 }
@@ -834,14 +863,14 @@ public class Grid
                 }
             }
         }
-        
-        for(int x = 0; x < incGrid.width; x++)
+
+        for (int x = 0; x < incGrid.width; x++)
         {
-            for(int y = 0; y < incGrid.height;y++)
+            for (int y = 0; y < incGrid.height; y++)
             {
                 // Only returns false if the problem tile is on the edge, which indicates that it's a newly generated tile we are checking
                 // and not a closed off room the player created itself by placing his tiles
-                if(!visited.Contains(new Vector2Int(x, y)) && (x == 1 || x == width-2|| y == 1 || y == height-2))
+                if (!visited.Contains(new Vector2Int(x, y)) && (x == 1 || x == width - 2 || y == 1 || y == height - 2))
                 {
                     // TODO: if energy is zero and no crystals are in reach
                     return false;
@@ -849,5 +878,21 @@ public class Grid
             }
         }
         return true;
+    }
+
+    /// <summary>
+    /// Calculates the Manhattan Distance between two points.
+    /// </summary>
+    public static int CalculateDistance(Vector2Int start, Vector2Int end)
+    {
+        return CalculateDistance(start.x, start.y, end.x, end.y);
+    }
+
+    /// <summary>
+    /// Calculates the Manhattan Distance between two points.
+    /// </summary>
+    public static int CalculateDistance(int x1, int y1, int x2, int y2)
+    {
+        return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
 }

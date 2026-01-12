@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -80,8 +81,8 @@ public class GridObj
             return;
         }
 
-        this.wallPrefab = builder.GetPrefabLibrary().prefabWall;
-        this.floorPrefab = builder.GetPrefabLibrary().prefabFloor;
+        this.wallPrefab = builder.GetPrefabLibrary().GetRandomWallPrefab();
+        this.floorPrefab = builder.GetPrefabLibrary().GetRandomFloorPrefab();
         this.destructibleWallPrefab = builder.GetPrefabLibrary().prefabDestructibleWall;
         this.exitPrefab = builder.GetPrefabLibrary().prefabExit;
         this.energyCrystalPrefab = builder.GetPrefabLibrary().prefabEnergyCrystal;
@@ -99,6 +100,16 @@ public class GridObj
         this.isPlaceable = false;
     }
 
+    public bool IsMovementAllowed()
+    {
+        return IsMovementAllowed(this);
+    }
+
+    public static bool IsMovementAllowed(GridObj gridObj)
+    {
+        return gridObj != null && gridObj.gridType != GridType.REPLACEABLE && gridObj.gridType != GridType.MANUAL_REPLACEABLE;
+    }
+    
     private void InitType(GridType type)
     {
         switch (type)
@@ -117,6 +128,9 @@ public class GridObj
                 break;
             case GridType.MANUAL_REPLACEABLE:
                 this.interactable = new ManualReplaceable();
+                break;
+            case GridType.HIDDENTRAP: 
+                this.interactable = new HiddenTrap(); 
                 break;
         }
     }
@@ -292,14 +306,15 @@ public class GridObj
             Debug.LogWarning("Attempted to instantiate already existing GridObj");
             return;
         }
+
+        if(this.gridType == GridType.REPLACEABLE || this.gridType == GridType.MANUAL_REPLACEABLE)
+        {
+            this.floorPrefab = GameManager.INSTANCE.GetPrefabLibrary().prefabReplaceable;
+        }
+
         Vector3 worldPos = this.GetWorldPos(worldOffsetX, worldOffsetY);
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
         this.floorObj = GameObject.Instantiate(this.floorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
-
-        if(this.gridType == GridType.REPLACEABLE)
-        {
-            this.floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.green;
-        }
 
         this.floorObj.transform.SetParent(this.parentObj.transform);
         this.interactable.SetColor(this.floorObj);
@@ -395,18 +410,18 @@ public class GridObj
     }
 
     /// <summary>
-    /// Returns the first found exit pos, throws an exception if GridObj does not have any exits ! CHECK WITH gridObj.HasExit() bEFORE CALLING THIS METHOD !
+    /// Returns the first found exit pos, null if there is no exit on this GridObj.
     /// </summary>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public WallPos GetExitPos()
+    public WallPos? GetExitPos()
     {
         foreach(WallPos pos in Enum.GetValues(typeof(WallPos)))
         {
             if(this.GetWallAt(pos) != WallType.EXIT) continue;
             return pos;
         }
-        throw new Exception("Attempted to call GetExitPos on a GridObj that has not exit");
+        return null;
     }
 
     /// <summary>
@@ -435,7 +450,7 @@ public class GridObj
     /// Instantiate a wall and only change the data on the in-game object, helper method
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
-    private void InstantiateWall(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
+    public void InstantiateWall(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call InstantiateWall() on non placeable GridObj");
         if (this.parentObj == null) return;
@@ -623,7 +638,7 @@ public class GridObj
     }
 
     /// <summary>
-    /// Removes all exit walls from this GameObj and replaces them with normal ones
+    /// Removes all exit walls from this GridObj and replaces them with normal ones
     /// </summary>
     public void RemoveExitWalls()
     {
@@ -760,5 +775,5 @@ public class GridObj
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD
+    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP
 }

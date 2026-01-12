@@ -14,6 +14,6 @@ public class EnergyUI : MonoBehaviour
     /// </summary>
     void Update()
     {
-        this.energyText.text = "Energy: " + this.player.CurrentEnergy;
+        this.energyText.text = ""+ this.player.CurrentEnergy;
     }
 }

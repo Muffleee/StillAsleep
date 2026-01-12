@@ -22,6 +22,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int trap = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private EnemyMovement enemyMovement;
+    [SerializeField] private Pathfinding pathfinding;
 
     public static int emptyWeight;
     public static int corridorWeight;
@@ -33,6 +35,7 @@ public class GameManager : MonoBehaviour
     public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
+    private PlayerResources playerResources;
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
@@ -58,13 +61,18 @@ public class GameManager : MonoBehaviour
         this.SetStartingWeights();
         this.grid = new Grid(this.width, this.height);
         grid.tutorialUpdate.AddListener(UpdateTutorialText);
+        this.playerResources = this.player.GetComponent<PlayerResources>();
+
         this.grid.CollapseWorld();
         this.SetWeights();
-        this.grid.IncreaseGrid(this.grid.GetNextGenPos());
+        Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos));
 
-        this.grid.CreateExit(new Vector2Int(4, 4), 0, 1);
+       // this.grid.CreateExit(new Vector2Int(4, 4), 0, 1);
         this.grid.InstantiateMissing();
         this.gui.FillList();
+        // EnemyMovement.INSTANCE.SetEnemyGridPos();
+        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(1,1));
     }
     /// <summary>
     /// Sets starting weights so the initial grid is very open and no special tiles
@@ -121,23 +129,45 @@ public class GameManager : MonoBehaviour
     /// <param name="direction">Direction of movement</param>
     /// <param name="step">Count of all movement steps taken by the player</param>
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
-    {   
+    {
+        enemyMovement.MoveEnemy();
+        GridObj toObj = this.grid.GetGridObj(to);
+        if(toObj != null && toObj.GetGridType() == GridType.TRAP)
+        {
+            this.playerMovement.LockMovement(2f);
+        }
         if(step % this.replaceExitAfter == 0)
         {
-            this.grid.RepositionExit(to);
+            //this.grid.RepositionExit(to);
         }
-
-        this.generateAfter = math.max(this.grid.GetClosestEdgeAndDistance(this.grid.GetPlayerToEdgeDistances()).second, 2);
-        if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5))
+        Vector2Int enemyGridPos = EnemyMovement.INSTANCE.GetEnemyGridPos();
+        Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        var enemyEdgeAndDistance = this.grid.GetClosestEdgeAndDistance(this.grid.GetEdgeDistances(enemyGridPos.x, enemyGridPos.y));
+        Debug.Log("Enemy generation: " + enemyEdgeAndDistance.first);
+        var playerEdgeAndDistance = this.grid.GetClosestEdgeAndDistance(this.grid.GetEdgeDistances(currentGridPos.x, currentGridPos.y));
+        Debug.Log("Player generation: " + playerEdgeAndDistance.first);
+        this.generateAfter = math.max(enemyEdgeAndDistance.second, 2);
+        if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5, enemyGridPos))
         {
             this.grid.CollapseWorld();
-            this.grid.IncreaseGrid(this.grid.GetNextGenPos());
+            this.grid.IncreaseGrid(this.grid.GetNextGenPos(enemyGridPos));
             this.grid.InstantiateMissing();
 
             this.gui.FillList();
         }
+        if (enemyEdgeAndDistance.first != playerEdgeAndDistance.first)
+        {
+            Debug.Log("generating for player");
+            this.generateAfter = math.max(playerEdgeAndDistance.second, 2);
+            if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5, currentGridPos))
+            {
+                this.grid.CollapseWorld();
+                this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos));
+                this.grid.InstantiateMissing();
 
-        
+                this.gui.FillList();
+            }
+        }
     }
 
     /// <summary>
@@ -152,22 +182,17 @@ public class GameManager : MonoBehaviour
 
         GridObj virtualObj = this.gui.GetSelected();
 
-        PlayerResources pr = this.player.GetComponent<PlayerResources>();
         int cost = virtualObj.PlacementCost;
 
-        if (!pr.CanAfford(cost))
+        if (!this.playerResources.CanAfford(cost))
         {
             Debug.Log("Nicht genug Energie!");
             return;
         }
-        pr.Spend(cost);
+        this.playerResources.Spend(cost);
 
         GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
-        Dictionary<WallPos, GridObj> neighbors = new Dictionary<WallPos, GridObj>() { { WallPos.FRONT, this.grid.GetAdjacentGridObj(toPlace, WallPos.FRONT) },
-                                                                                            { WallPos.BACK, this.grid.GetAdjacentGridObj(toPlace, WallPos.BACK) },
-                                                                                            { WallPos.LEFT, this.grid.GetAdjacentGridObj(toPlace, WallPos.LEFT) },
-                                                                                            { WallPos.RIGHT, this.grid.GetAdjacentGridObj(toPlace, WallPos.RIGHT) } };
-        toPlace.UpdateWallStatus(neighbors);
+        toPlace.UpdateWallStatus(this.grid.GetNeighbors(toPlace));
         this.grid.PlaceObj(toPlace);
 
         this.gui.RemoveSelected(false);
@@ -193,4 +218,6 @@ public class GameManager : MonoBehaviour
     public PrefabLibrary GetPrefabLibrary() { return this.prefabLibrary; }
     public PlayerMovement GetPlayerMovement() { return this.playerMovement; }
     public bool IsTutorialOpen() { return this.tutorialOpen; }
+    public EnemyMovement GetEnemyMovement() { return this.enemyMovement; }
+    public Pathfinding GetPathfinding() { return this.pathfinding; }
 }
