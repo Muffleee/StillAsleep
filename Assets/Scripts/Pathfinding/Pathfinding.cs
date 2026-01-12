@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Rendering.Universal.Internal;
 
 /// <summary>
 /// Class handling pathfinding within the grid using the A* algorithm.
@@ -11,6 +13,7 @@ public class Pathfinding : MonoBehaviour
 {
     [SerializeField] public int weight = 15;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private GameObject pathObject;
     private Grid grid;
     private PathNode[,] nodeGrid;
     private List<PathNode> openList;
@@ -124,30 +127,57 @@ public class Pathfinding : MonoBehaviour
         return lowestFCostNode;
     }
 
-    private List<GameObject> debugObjects = new List<GameObject>();
-    public void SpawnDebug(List<GridObj> path)
-    {
-        foreach (GameObject debugObj in this.debugObjects)
+    private List<GameObject> pathObjects = new List<GameObject>();
+    private readonly Vector3 EMITTER_OFFSET = new Vector3(0, 0.5f, 0);
+    public void SpawnPath(List<GridObj> path)
+    {   
+        for (int i = this.pathObjects.Count - 1; i >= 0; i--)
         {
-            Destroy(debugObj);
+            GameObject debugObj = this.pathObjects[i];
+            bool found = false;
+
+            foreach (GridObj obj in path)
+            {
+                if (obj.GetWorldPos(this.grid.GetWorldOffsetX(), this.grid.GetWorldOffsetY()) + EMITTER_OFFSET == debugObj.transform.position)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                Destroy(debugObj);
+                this.pathObjects.RemoveAt(i);
+            }
         }
-        this.debugObjects.Clear();
 
         if (path != null)
         {
-            GameObject debugObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            debugObj.GetComponent<Collider>().enabled = false;
             foreach (GridObj node in path)
-            {
-                this.debugObjects.Add(Instantiate
+            {   
+                bool exists = false;
+                Vector3 worldPos = node.GetWorldPos(this.grid.GetWorldOffsetX(), this.grid.GetWorldOffsetY()) + EMITTER_OFFSET;
+
+                foreach(GameObject obj in this.pathObjects)
+                {
+                    if(obj.transform.position == worldPos)
+                    {
+                        exists = true;
+                        break;
+                    }
+                } 
+                
+                if(exists) continue;
+
+                this.pathObjects.Add(Instantiate
                 (
-                    debugObj,
-                    node.GetWorldPos(this.grid.GetWorldOffsetX(), this.grid.GetWorldOffsetY()) + new Vector3(0, 1, 0),
+                    this.pathObject,
+                    worldPos,
                     new Quaternion()
                 ));
                 
             }
-            Destroy(debugObj);
         }
     }
 }
