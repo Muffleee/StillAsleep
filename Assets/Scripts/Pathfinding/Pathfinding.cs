@@ -133,7 +133,7 @@ public class Pathfinding : MonoBehaviour
         }
         this.debugObjects.Clear();
 
-        if (this.grid.GetExit() != null && path != null)
+        if (path != null)
         {
             GameObject debugObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             debugObj.GetComponent<Collider>().enabled = false;
