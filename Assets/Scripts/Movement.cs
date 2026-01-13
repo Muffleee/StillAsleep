@@ -97,7 +97,6 @@ public class Movement : MonoBehaviour
         Vector3 startPos = this.transform.position;
         Vector3 endPos = startPos + this.GetMoveDir(wallPos);
 
-
         yield return null; // use this to get less sliding with the animations
 
         while (elapsed < totalDuration)

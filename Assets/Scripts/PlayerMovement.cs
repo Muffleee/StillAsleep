@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -13,7 +14,8 @@ public class PlayerMovement : Movement
     [SerializeField] private GameObject playerModel;
     [SerializeField] private PlayerAnim anim;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
-    private bool DEBUG = false;
+    private readonly bool DEBUG = false;
+    private readonly bool DRAW_PATH = true;
     private int stepCounter = 0;
     private bool isMoving = false;
     private WallPos? bufferedMove = null;
@@ -41,7 +43,9 @@ public class PlayerMovement : Movement
     /// Check for the player's input each frame and handles movements accordingly. Only allows one move at a time.
     /// </summary>
     private void Update()
-    {
+    {   
+        if(this.isLocked || gameManager.IsTutorialOpen()) return;
+
         if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK); }
         else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT); }
         else if (Input.GetKeyDown(KeyCode.A)) { this.TryMove(WallPos.LEFT); }
@@ -59,6 +63,7 @@ public class PlayerMovement : Movement
             MoveType mt = this.IsValidMove(wallPos);
             if (mt != MoveType.INVALID)
             {   
+                if(mt == MoveType.TRAP) this.LockMovement(3.292f); // lock for longer animation of trap
                 this.StartMovement(wallPos, mt);
             }
             else
@@ -148,6 +153,13 @@ public class PlayerMovement : Movement
         //}
         ////end of trap detection
 
+        // Draw debug A* path to the exit
+        if (this.DRAW_PATH)
+        {
+            List<GridObj> DebugPath = this.gameManager.GetPathfinding().FindPath(this.gridPos, this.gameManager.GetEnemyMovement().GetEnemyGridPos());
+            this.gameManager.GetPathfinding().SpawnPath(DebugPath);
+        }
+
         //this.CheckForExit(destinationTile);
 
         this.onPlayerMoved?.Invoke(lastGridPos, this.gridPos, wallPos, this.stepCounter);
@@ -156,6 +168,11 @@ public class PlayerMovement : Movement
         this.isMoving = false;
         if(this.DEBUG) Debug.Log(this.stepCounter);
         
+        while(this.isLocked)
+        {
+            yield return null;
+        }
+
         if (bufferedMove.HasValue) 
         {   
             MoveType mtb = this.IsValidMove(bufferedMove.Value);
@@ -226,6 +243,8 @@ public class PlayerMovement : Movement
     {
         this.isLocked = false;
     }
+
+    public bool IsLocked() { return this.isLocked; }
     public Vector2Int GetCurrentGridPos()
     {
         if (this.gridPos == null)

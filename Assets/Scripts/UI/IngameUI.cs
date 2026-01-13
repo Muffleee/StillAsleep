@@ -1,7 +1,10 @@
-using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Dynamic;
+using TMPro;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// Class handling the game's user interface, including providing the player with placeable tiles and handling placing selected tiles.
@@ -13,6 +16,7 @@ public class IngameUI : MonoBehaviour
     private GridObj selectedObj;
     private int selectedIndex = -1;
     private bool DEBUG = false;
+    [SerializeField] private TMP_Text tutorialText;
 
     [Header("Sprite Configuration")]
     public Sprite imgF; 
@@ -217,15 +221,52 @@ public GameObject GetPrefabByName(string nameCode)
     public GridObj GetSelected() {return this.selectedObj;}
 
     /// <summary>
+    /// Setting components and disabling the tutorial canvas
+    /// </summary>
+    private void Awake()
+    {
+        tutorialText.enabled = false;
+    }
+    /// <summary>
     /// At game start, fill the list of selectable GridObjs and add listeners to all toggles.
     /// </summary>
     private void Start()
     {
+        
         this.FillList();
 
         foreach (Toggle t in this.toggles)
         {
             t.onValueChanged.AddListener(delegate { this.OnToggleChanged(t); });
+        }
+    }
+    /// <summary>
+    /// Open the tutorial by setting the text and enabling it. Freezes the game
+    /// </summary>
+    /// <param name="text"> The text it should be set to</param>
+    /// <param name="objPosition"> The object worldPos it should be positioned at</param>
+    public void OpenTutorialText (Vector3 objPosition, string text)
+    {
+        if(tutorialText != null)
+        {
+            Vector2 textPos = Camera.main.WorldToScreenPoint(objPosition);
+            textPos.y += 50f;
+            tutorialText.rectTransform.position = textPos;
+            tutorialText.enabled = true;
+            Time.timeScale = 0;
+            tutorialText.text = text;
+        } else Debug.Log("no tutorial text");
+
+    }
+    /// <summary>
+    /// Closing tutorial and setting the game to normal speed
+    /// </summary>
+    public void CloseTutorialText()
+    {
+        if (tutorialText != null)
+        {
+            tutorialText.enabled = false;
+            Time.timeScale = 1f;
         }
     }
 }
