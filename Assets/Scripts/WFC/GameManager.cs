@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
-        
+        if (pathfinding == null) GetComponent<Pathfinding>();
         INSTANCE = this;
         this.SetStartingWeights();
         this.grid = new Grid(this.width, this.height);

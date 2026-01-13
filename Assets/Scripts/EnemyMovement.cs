@@ -59,7 +59,7 @@ public class EnemyMovement : Movement
     public void MoveEnemy()
     {
         if (!isInstantiated) return;
-        WallPos? direction = GetNextEnemyDir();
+        WallPos? direction = GetBestEnemyMove();
         if (direction != null)
         {   
             this.RotateModel(direction.Value);
@@ -70,6 +70,26 @@ public class EnemyMovement : Movement
             Debug.Log("Enemy can't move anywhere: " + this.gridPos.x + ", " + this.gridPos.y);
         }
         
+    }
+    private WallPos? GetBestEnemyMove()
+    {
+        int maxPath = 0;
+        List<GridObj> currentPath = this.gameManager.GetPathfinding().FindPath(this.gridPos, this.gameManager.GetPlayerMovement().GetCurrentGridPos());
+        int currentPathLength = currentPath.Count;
+        WallPos? nextDir = null;
+        foreach(WallPos dir in Enum.GetValues(typeof(WallPos)))
+        {
+            Vector2Int nextPos = GetMoveDirGrid(dir);
+            if (this.IsValidMove(dir) != MoveType.WALK || nextPos == lastGridPos || nextPos == this.gameManager.GetPlayerMovement().GetCurrentGridPos()) continue;
+            List<GridObj> thisPath = this.gameManager.GetPathfinding().FindPath(nextPos, this.gameManager.GetPlayerMovement().GetCurrentGridPos());
+            if(thisPath != null && thisPath.Count > maxPath)
+            {
+                maxPath = thisPath.Count;
+                nextDir = dir;
+            }
+        }
+        if (nextDir == null) nextDir = GetNextEnemyDir();
+        return nextDir;
     }
     private WallPos? GetNextEnemyDir()
     {
