@@ -29,7 +29,7 @@ namespace MainMenu
             if (this.quitButton != null)
                 quitButton.onClick.AddListener(QuitGame);
 
-            this.playerAnimator.SetTrigger("TriggerMenu");
+            this.playerAnimator.SetTrigger("TriggerIdle");
 
 
         }
