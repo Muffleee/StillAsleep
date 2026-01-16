@@ -114,7 +114,6 @@ public class Movement : MonoBehaviour
         }
         this.lastGridPos = this.gridPos;
         gridPos = this.GetNextGridPos(wallPos);
-        Debug.Log("Enemy: " + gridPos.x + ", " + gridPos.y);
         this.transform.position = endPos;
 
         //traps detection on movment 

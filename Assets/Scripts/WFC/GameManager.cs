@@ -149,9 +149,7 @@ public class GameManager : MonoBehaviour
         Vector2Int enemyGridPos = EnemyMovement.INSTANCE.GetEnemyGridPos();
         Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
         var enemyEdgeAndDistance = this.grid.GetClosestEdgeAndDistance(this.grid.GetEdgeDistances(enemyGridPos.x, enemyGridPos.y));
-        Debug.Log("Enemy generation: " + enemyEdgeAndDistance.first);
         var playerEdgeAndDistance = this.grid.GetClosestEdgeAndDistance(this.grid.GetEdgeDistances(currentGridPos.x, currentGridPos.y));
-        Debug.Log("Player generation: " + playerEdgeAndDistance.first);
         this.generateAfter = math.max(enemyEdgeAndDistance.second, 2);
         if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5, enemyGridPos))
         {
@@ -163,7 +161,6 @@ public class GameManager : MonoBehaviour
         }
         if (enemyEdgeAndDistance.first != playerEdgeAndDistance.first)
         {
-            Debug.Log("generating for player");
             this.generateAfter = math.max(playerEdgeAndDistance.second, 2);
             if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5, currentGridPos))
             {

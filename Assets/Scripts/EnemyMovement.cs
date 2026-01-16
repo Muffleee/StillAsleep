@@ -15,6 +15,8 @@ public class EnemyMovement : Movement
     public UnityEvent lose = new UnityEvent();
     public static EnemyMovement INSTANCE;
     private bool isInstantiated = false;
+    int stepCounter = 0;
+    [SerializeField] public int destroyWall = 3;
 
     private void Awake()
     {
@@ -33,6 +35,11 @@ public class EnemyMovement : Movement
         }
         this.RotateModel(WallPos.FRONT);
     }
+
+    /// <summary>
+    /// Instantiating the Enemy
+    /// </summary>
+    /// <param name="pos"></param>
     public void InstantiateEnemy(Vector2Int pos)
     {
         if (!gameManager.GetCurrentGrid().IsInsideGrid(pos))
@@ -47,50 +54,71 @@ public class EnemyMovement : Movement
         this.gameObject.SetActive(true);
         isInstantiated = true;
     }
+
     public Vector2Int GetEnemyGridPos()
     {
         return this.gridPos;
     }
     public void SetEnemyGridPos(Vector2Int newGridPos)
     {
-        Debug.Log("new enemyGridPos: " + newGridPos.x + ", " +  newGridPos.y);
         this.gridPos = newGridPos;
     }
+
+    /// <summary>
+    /// Moving the Enemey
+    /// </summary>
     public void MoveEnemy()
     {
         if (!isInstantiated) return;
+        stepCounter++;
         WallPos? direction = GetNextEnemyDir();
         if (direction != null)
         {   
             this.RotateModel(direction.Value);
             this.StartMovement(direction.Value, MoveType.WALK);
         }
-        else
-        {
-            Debug.Log("Enemy can't move anywhere: " + this.gridPos.x + ", " + this.gridPos.y);
-        }
-        
     }
+
+    /// <summary>
+    /// Calculating the best next enemy position
+    /// </summary>
+    /// <returns></returns>
     private WallPos? GetNextEnemyDir()
     {
         List<WallPos> allowed = new List<WallPos>();
-
+        List<WallPos> destroyNextWall = new List<WallPos>();
         Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
 
-        Debug.Log("Enemy Position: " + this.gridPos.x + ", " + this.gridPos.y);
 
         int diffX = playerPos.x - this.gridPos.x;
         int diffY = playerPos.y - this.gridPos.y;
 
-        Debug.Log($"x-difference: {diffX}, y-difference: {diffY}");
 
         WallPos wPos = new WallPos();
-
+        
         foreach (WallPos wallPos in Enum.GetValues(typeof(WallPos)))
         {
-            if(this.IsValidMove(wallPos) == MoveType.WALK && GetNextGridPos(wallPos) != lastGridPos && GetNextGridPos(wallPos) != playerPos)
+            if (this.IsValidMove(wallPos) == MoveType.WALK && GetNextGridPos(wallPos) != lastGridPos && GetNextGridPos(wallPos) != playerPos)
             {
+                Debug.Log("Adding " + wallPos + "to be allowed");
                 allowed.Add(wallPos);
+            }
+        }
+        if (stepCounter % destroyWall == 0)
+        {
+            foreach (WallPos wallPos in Enum.GetValues(typeof(WallPos)))
+            {
+                Vector2Int nextPos = GetNextGridPos(wallPos);
+                Grid thisGrid = this.gameManager.GetCurrentGrid();
+                if (!thisGrid.IsInsideGrid(nextPos)) continue;
+                if (nextPos != lastGridPos && nextPos != playerPos 
+                    && thisGrid.GetGridArray()[nextPos.x, nextPos.y].GetGridType() != GridType.REPLACEABLE 
+                    && thisGrid.GetGridArray()[nextPos.x, nextPos.y].GetGridType() != GridType.MANUAL_REPLACEABLE 
+                    && thisGrid.GetGridArray()[this.gridPos.x, this.gridPos.y].HasWallAt(wallPos))
+                {
+                    Debug.Log("Adding " + wallPos + "to be maybe destroyed");
+                    destroyNextWall.Add(wallPos);
+                }
             }
         }
         if (diffX == 0 && diffY == 0)
@@ -98,12 +126,88 @@ public class EnemyMovement : Movement
             this.winScreen.ShowWinScreen();
             return null;
         }
-        else if (allowed.Count <= 0) return null;
-        else if (diffX <= 0 && allowed.Contains(WallPos.RIGHT)) wPos = WallPos.RIGHT;
-        else if (diffX > 0 && allowed.Contains(WallPos.LEFT)) wPos = WallPos.LEFT;
-        else if (diffY <= 0 && allowed.Contains(WallPos.BACK)) wPos = WallPos.BACK;
-        else if (diffY > 0 && allowed.Contains(WallPos.FRONT)) wPos = WallPos.FRONT;
-        else wPos = allowed[0];
+        else if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
+        else if (diffX <= 0 && (allowed.Contains(WallPos.RIGHT) || destroyNextWall.Contains(WallPos.RIGHT)))
+        {
+            if (allowed.Contains(WallPos.RIGHT))
+            {
+                wPos = WallPos.RIGHT;
+                Debug.Log("Choosing: " + wPos);
+            }
+            else if (destroyNextWall.Contains(WallPos.RIGHT))
+            {
+                Vector2Int nextPos = GetNextGridPos(WallPos.RIGHT);
+                wPos = WallPos.RIGHT;
+                Debug.Log("planning to destroy wall: " + wPos);
+                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.RIGHT);
+                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.LEFT);
+            }
+        }
+        else if (diffX > 0 && (allowed.Contains(WallPos.LEFT) || destroyNextWall.Contains(WallPos.LEFT)))
+        {
+            if (allowed.Contains(WallPos.LEFT))
+            {
+                wPos = WallPos.LEFT;
+                Debug.Log("Choosing: " + wPos);
+            }
+            else if (destroyNextWall.Contains(WallPos.LEFT))
+            {
+                Vector2Int nextPos = GetNextGridPos(WallPos.LEFT);
+                wPos = WallPos.LEFT;
+                Debug.Log("planning to destroy wall: " + wPos);
+                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.LEFT);
+                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.RIGHT);
+            }
+        }
+        else if (diffY <= 0 && (allowed.Contains(WallPos.BACK) || destroyNextWall.Contains(WallPos.BACK)))
+        {
+            if (allowed.Contains(WallPos.BACK))
+            {
+                wPos = WallPos.BACK;
+                Debug.Log("Choosing: " + wPos);
+            }
+            else if (destroyNextWall.Contains(WallPos.BACK))
+            {
+                Vector2Int nextPos = GetNextGridPos(WallPos.BACK);
+                wPos = WallPos.BACK;
+                Debug.Log("planning to destroy wall: " + wPos);
+                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.BACK);
+                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.FRONT);
+            }
+        }
+        else if (diffY > 0 && (allowed.Contains(WallPos.FRONT) || destroyNextWall.Contains(WallPos.FRONT)))
+        {
+            if (allowed.Contains(WallPos.FRONT))
+            {
+                wPos = WallPos.FRONT;
+                Debug.Log("Choosing: " + wPos);
+            }
+            else if (destroyNextWall.Contains(WallPos.FRONT))
+            {
+                Vector2Int nextPos = GetNextGridPos(WallPos.FRONT);
+                wPos = WallPos.FRONT;
+                Debug.Log("planning to destroy wall: " + wPos);
+                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.FRONT);
+                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.BACK);
+            }
+        }
+        else
+        {
+            if(allowed.Count == 0)
+            {
+                wPos = destroyNextWall[0];
+                Debug.Log("planning to destroy wall: " + wPos);
+                Vector2Int nextPos = GetNextGridPos(wPos);
+                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(wPos);
+                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallStatus.GetOppositePos(wPos));
+            } else
+            {
+                wPos = allowed[0];
+            }
+            Debug.Log("sorry no other is good! Choosing: " + wPos);
+        }
+
+        Debug.Log("choosing next direction: " + wPos);
         return wPos;
     }
 
