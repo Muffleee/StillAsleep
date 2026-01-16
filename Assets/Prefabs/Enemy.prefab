@@ -118,6 +118,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -620415951837155060, guid: 6ad08a20b6a46b64db3c10646fef486e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -185890270495829811, guid: 6ad08a20b6a46b64db3c10646fef486e,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -130,9 +135,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3619269450882997285, guid: 6ad08a20b6a46b64db3c10646fef486e,
         type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3619269450882997285, guid: 6ad08a20b6a46b64db3c10646fef486e,
+        type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3619269450882997285, guid: 6ad08a20b6a46b64db3c10646fef486e,
+        type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 86942c537ba77be4bad682fd4a1e8166, type: 2}
+      objectReference: {fileID: 2100000, guid: e70e740e32e1f3343a3693008fc2808a, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 5148817236446094103, guid: 6ad08a20b6a46b64db3c10646fef486e, type: 3}

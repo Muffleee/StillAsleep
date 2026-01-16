@@ -120,6 +120,13 @@ public class PlayerMovement : Movement
 
         yield return null; // use this to get less sliding with the animations
 
+        // Draw A* path to the exit
+        if (this.DRAW_PATH)
+        {
+            List<GridObj> DebugPath = this.gameManager.GetPathfinding().FindPath(this.GetNextGridPos(wallPos), this.gameManager.GetEnemyMovement().GetEnemyGridPos());
+            this.gameManager.GetPathfinding().SpawnPath(DebugPath);
+        }
+
         while (elapsed < totalDuration)
         {   
             elapsed += Time.deltaTime;
@@ -152,13 +159,6 @@ public class PlayerMovement : Movement
         //    InGameTrapManager.ExecuteTrapEffect(destinationTile); 
         //}
         ////end of trap detection
-
-        // Draw debug A* path to the exit
-        if (this.DRAW_PATH)
-        {
-            List<GridObj> DebugPath = this.gameManager.GetPathfinding().FindPath(this.gridPos, this.gameManager.GetEnemyMovement().GetEnemyGridPos());
-            this.gameManager.GetPathfinding().SpawnPath(DebugPath);
-        }
 
         //this.CheckForExit(destinationTile);
 
