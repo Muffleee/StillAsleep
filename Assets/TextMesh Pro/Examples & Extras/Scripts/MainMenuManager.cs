@@ -46,11 +46,13 @@ namespace MainMenu
 
         private void StartGame()
         {
+            AudioManager.Instance.PlayButtonClick();
             SceneManager.LoadScene(gameSceneName);
         }
 
         private void QuitGame()
         {
+            AudioManager.Instance.PlayButtonClick();
             #if UNITY_EDITOR
                 UnityEditor.EditorApplication.isPlaying = false;
             #else
