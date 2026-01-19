@@ -9,6 +9,7 @@ public class SimpleWindowController : MonoBehaviour
 
     // Called by the Button OnClick()
     public void ToggleWindow() {
+        AudioManager.Instance.PlayButtonClick();
         if (this.windowPanel != null) this.windowPanel.SetActive(!this.windowPanel.activeSelf);
     }
 }
