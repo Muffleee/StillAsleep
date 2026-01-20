@@ -32,6 +32,7 @@ public class DestructiveExit : MonoBehaviour
         // timer initialisieren & starten
         this.timer.Init(this.time, finishedEvent);
         this.timer.StartTimer();
+        ExitManager.Instance.RegisterExit(transform);
     }
 
     /// <summary>
@@ -64,5 +65,21 @@ public class DestructiveExit : MonoBehaviour
     {
         this.onDestroy.Invoke(this.gridObj, this.wallPos);
         Destroy(this.gameObject);
+    }
+}
+public class ExitManager : MonoBehaviour
+{
+    public static ExitManager Instance;
+
+    public Transform CurrentExit { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    public void RegisterExit(Transform exit)
+    {
+        CurrentExit = exit;
     }
 }
