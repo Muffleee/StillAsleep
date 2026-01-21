@@ -15,7 +15,6 @@ public class PlayerMovement : Movement
     [SerializeField] private PlayerAnim anim;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private readonly bool DEBUG = false;
-    private readonly bool DRAW_PATH = true;
     private int stepCounter = 0;
     private bool isMoving = false;
     private WallPos? bufferedMove = null;
