@@ -131,6 +131,7 @@ public class Pathfinding : MonoBehaviour
     private readonly Vector3 EMITTER_OFFSET = new Vector3(0, 0.5f, 0);
     public void SpawnPath(List<GridObj> path)
     {   
+        if(path == null || path.Count == 0) return;
         for (int i = this.pathObjects.Count - 1; i >= 0; i--)
         {
             GameObject debugObj = this.pathObjects[i];

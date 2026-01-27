@@ -93,14 +93,21 @@ public class EnemyMovement : Movement
         int diffX = playerPos.x - this.gridPos.x;
         int diffY = playerPos.y - this.gridPos.y;
 
-
+        Grid thisGrid = this.gameManager.GetCurrentGrid();
         WallPos wPos = new WallPos();
         
         foreach (WallPos wallPos in Enum.GetValues(typeof(WallPos)))
         {
-            if (this.IsValidMove(wallPos) == MoveType.WALK && GetNextGridPos(wallPos) != lastGridPos && GetNextGridPos(wallPos) != playerPos)
+            Vector2Int nextPos = GetNextGridPos(wallPos);
+            if (!thisGrid.IsInsideGrid(nextPos)) continue;
+            if ((this.IsValidMove(wallPos) == MoveType.WALK 
+                    || this.IsValidMove(wallPos) == MoveType.TRAP 
+                    || (this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].GetGridType() == GridType.MANUAL_REPLACEABLE 
+                        && !this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].HasWallAt(wallPos)))
+                && nextPos != lastGridPos 
+                && nextPos != playerPos
+                )
             {
-                Debug.Log("Adding " + wallPos + "to be allowed");
                 allowed.Add(wallPos);
             }
         }
@@ -109,14 +116,11 @@ public class EnemyMovement : Movement
             foreach (WallPos wallPos in Enum.GetValues(typeof(WallPos)))
             {
                 Vector2Int nextPos = GetNextGridPos(wallPos);
-                Grid thisGrid = this.gameManager.GetCurrentGrid();
                 if (!thisGrid.IsInsideGrid(nextPos)) continue;
                 if (nextPos != lastGridPos && nextPos != playerPos 
-                    && thisGrid.GetGridArray()[nextPos.x, nextPos.y].GetGridType() != GridType.REPLACEABLE 
-                    && thisGrid.GetGridArray()[nextPos.x, nextPos.y].GetGridType() != GridType.MANUAL_REPLACEABLE 
+                    && thisGrid.GetGridArray()[nextPos.x, nextPos.y].GetGridType() != GridType.REPLACEABLE
                     && thisGrid.GetGridArray()[this.gridPos.x, this.gridPos.y].HasWallAt(wallPos))
                 {
-                    Debug.Log("Adding " + wallPos + "to be maybe destroyed");
                     destroyNextWall.Add(wallPos);
                 }
             }
@@ -132,13 +136,11 @@ public class EnemyMovement : Movement
             if (allowed.Contains(WallPos.RIGHT))
             {
                 wPos = WallPos.RIGHT;
-                Debug.Log("Choosing: " + wPos);
             }
             else if (destroyNextWall.Contains(WallPos.RIGHT))
             {
                 Vector2Int nextPos = GetNextGridPos(WallPos.RIGHT);
                 wPos = WallPos.RIGHT;
-                Debug.Log("planning to destroy wall: " + wPos);
                 this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.RIGHT);
                 this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.LEFT);
             }
@@ -148,13 +150,11 @@ public class EnemyMovement : Movement
             if (allowed.Contains(WallPos.LEFT))
             {
                 wPos = WallPos.LEFT;
-                Debug.Log("Choosing: " + wPos);
             }
             else if (destroyNextWall.Contains(WallPos.LEFT))
             {
                 Vector2Int nextPos = GetNextGridPos(WallPos.LEFT);
                 wPos = WallPos.LEFT;
-                Debug.Log("planning to destroy wall: " + wPos);
                 this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.LEFT);
                 this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.RIGHT);
             }
@@ -164,13 +164,11 @@ public class EnemyMovement : Movement
             if (allowed.Contains(WallPos.BACK))
             {
                 wPos = WallPos.BACK;
-                Debug.Log("Choosing: " + wPos);
             }
             else if (destroyNextWall.Contains(WallPos.BACK))
             {
                 Vector2Int nextPos = GetNextGridPos(WallPos.BACK);
                 wPos = WallPos.BACK;
-                Debug.Log("planning to destroy wall: " + wPos);
                 this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.BACK);
                 this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.FRONT);
             }
@@ -180,13 +178,11 @@ public class EnemyMovement : Movement
             if (allowed.Contains(WallPos.FRONT))
             {
                 wPos = WallPos.FRONT;
-                Debug.Log("Choosing: " + wPos);
             }
             else if (destroyNextWall.Contains(WallPos.FRONT))
             {
                 Vector2Int nextPos = GetNextGridPos(WallPos.FRONT);
                 wPos = WallPos.FRONT;
-                Debug.Log("planning to destroy wall: " + wPos);
                 this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.FRONT);
                 this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.BACK);
             }
@@ -196,7 +192,6 @@ public class EnemyMovement : Movement
             if(allowed.Count == 0)
             {
                 wPos = destroyNextWall[0];
-                Debug.Log("planning to destroy wall: " + wPos);
                 Vector2Int nextPos = GetNextGridPos(wPos);
                 this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(wPos);
                 this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallStatus.GetOppositePos(wPos));
@@ -204,10 +199,8 @@ public class EnemyMovement : Movement
             {
                 wPos = allowed[0];
             }
-            Debug.Log("sorry no other is good! Choosing: " + wPos);
         }
 
-        Debug.Log("choosing next direction: " + wPos);
         return wPos;
     }
 
