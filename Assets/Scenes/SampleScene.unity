@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 220377178}
   - component: {fileID: 220377179}
   - component: {fileID: 220377180}
+  - component: {fileID: 220377181}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -156,16 +157,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   generateAfter: 4
   replaceExitAfter: 2
-  width: 3
-  height: 3
+  width: 9
+  height: 9
   gui: {fileID: 944478704}
   corridor: 6
   corner: 8
   oneWall: 6
   empty: 10
-  jumping: 0
+  jumping: 5
   manualReplacable: 0
-  trap: 0
+  trap: 5
   hiddenTrap: 0
   prefabLibrary: {fileID: 220377179}
   playerMovement: {fileID: 6834562829543864870}
@@ -231,6 +232,9 @@ MonoBehaviour:
     type: 3}
   prefabJumppad: {fileID: 5826230866194392711, guid: 0d7d4b8585540d241b6601c5b7e41bf4,
     type: 3}
+  torchPrefabs:
+  - {fileID: 5441399533277537789, guid: da90a9d2befa96e41ab1155b323c8d44, type: 3}
+  - {fileID: 5441399533277537789, guid: b3bb23bf7ef24f04a8230dc745766e8a, type: 3}
 --- !u!114 &220377180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,6 +251,21 @@ MonoBehaviour:
   gameManager: {fileID: 220377176}
   pathObject: {fileID: 4440374643767912817, guid: 61fc95f43a57f444f9ae40f27d6d8781,
     type: 3}
+--- !u!114 &220377181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 220377175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f908addebb3afa943a20ca9460f71043, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameManager: {fileID: 220377176}
+  camFollow: {fileID: 330585548}
+  pathfinding: {fileID: 220377180}
 --- !u!1 &231321110
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,6 +437,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 4935640045213018686, guid: 1caa8523d777f0c4bba08a3f28c7b6d1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7055469904910618350, guid: 1caa8523d777f0c4bba08a3f28c7b6d1,
         type: 3}
@@ -599,6 +623,8 @@ MonoBehaviour:
   camOffsetFurthest: {x: 0, y: 13, z: -8.5}
   camOffsetClosest: {x: 0, y: 5, z: -4}
   target: {fileID: 6834562829543864866}
+  gameManager: {fileID: 220377176}
+  pathfinding: {fileID: 220377180}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1890,6 +1916,7 @@ GameObject:
   m_Component:
   - component: {fileID: 832575519}
   - component: {fileID: 832575518}
+  - component: {fileID: 832575520}
   m_Layer: 0
   m_Name: Global Volume
   m_TagString: Untagged
@@ -1929,6 +1956,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &832575520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 832575517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78800a8f826078642a810346f891f419, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  globalVolume: {fileID: 832575518}
+  vignetteIntensities: {x: 0.4, y: 0.6}
+  vignetteGrowthSpeed: 0.003
 --- !u!114 &944478704 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8035139586016312334, guid: eac25753f9874c54eaf889dd858015a2,
@@ -2801,6 +2843,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 3246171411109070801, guid: 220c7dec9ee469541a1aa4ec393fa355,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

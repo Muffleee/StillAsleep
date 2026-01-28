@@ -14,7 +14,6 @@ public class PlayerMovement : Movement
     [SerializeField] private PlayerAnim anim;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private readonly bool DEBUG = false;
-    private readonly bool DRAW_PATH = true;
     private int stepCounter = 0;
     private bool isMoving = false;
     private WallPos? bufferedMove = null;
@@ -118,13 +117,6 @@ public class PlayerMovement : Movement
         anim.TriggerMoveAnim(mt);
 
         yield return null; // use this to get less sliding with the animations
-
-        // Draw A* path to the exit
-        if (this.DRAW_PATH)
-        {
-            List<GridObj> DebugPath = this.gameManager.GetPathfinding().FindPath(this.GetNextGridPos(wallPos), this.gameManager.GetEnemyMovement().GetEnemyGridPos());
-            this.gameManager.GetPathfinding().SpawnPath(DebugPath);
-        }
 
         while (elapsed < totalDuration)
         {   

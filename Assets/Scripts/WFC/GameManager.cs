@@ -197,6 +197,7 @@ public class GameManager : MonoBehaviour
         GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
         toPlace.UpdateWallStatus(this.grid.GetNeighbors(toPlace));
         this.grid.PlaceObj(toPlace);
+        AudioManager.Instance.PlayTilePlacing();
 
         this.gui.RemoveSelected(false);
     }

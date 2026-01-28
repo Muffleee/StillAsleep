@@ -13,6 +13,7 @@ public class PrefabLibrary : MonoBehaviour
     [SerializeField] public GameObject prefabReplaceable;
     [SerializeField] public GameObject prefabTrap;
     [SerializeField] public GameObject prefabJumppad;
+    [SerializeField] public List<GameObject> torchPrefabs;
 
 
     public GameObject GetRandomWallPrefab()
@@ -23,5 +24,10 @@ public class PrefabLibrary : MonoBehaviour
     public GameObject GetRandomFloorPrefab()
     {
         return this.prefabFloors[Random.Range(0, this.prefabFloors.Count)];
+    }
+
+    public GameObject GetRandomTorchPrefab()
+    {
+        return this.torchPrefabs[Random.Range(0, this.torchPrefabs.Count)];
     }
 }
