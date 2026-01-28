@@ -21,6 +21,7 @@ public class EnemyMovement : Movement
     private void Awake()
     {
         INSTANCE = this;
+        this.model = this.gameObject;
         this.gameObject.SetActive(false);
     }
     /// <summary>
@@ -28,6 +29,7 @@ public class EnemyMovement : Movement
     /// </summary>
     private void Start()
     {
+
         this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         foreach (var wall in FindObjectsOfType<DestructibleWall>())
         {
@@ -95,116 +97,116 @@ public class EnemyMovement : Movement
 
         Grid thisGrid = this.gameManager.GetCurrentGrid();
         WallPos wPos = new WallPos();
-        
+
         foreach (WallPos wallPos in Enum.GetValues(typeof(WallPos)))
         {
-            Vector2Int nextPos = GetNextGridPos(wallPos);
-            if (!thisGrid.IsInsideGrid(nextPos)) continue;
-            if ((this.IsValidMove(wallPos) == MoveType.WALK 
-                    || this.IsValidMove(wallPos) == MoveType.TRAP 
-                    || (this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].GetGridType() == GridType.MANUAL_REPLACEABLE 
-                        && !this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].HasWallAt(wallPos)))
-                && nextPos != lastGridPos 
-                && nextPos != playerPos
-                )
+            if (this.IsValidMove(wallPos) == MoveType.WALK)
             {
                 allowed.Add(wallPos);
             }
-        }
-        if (stepCounter % destroyWall == 0)
-        {
-            foreach (WallPos wallPos in Enum.GetValues(typeof(WallPos)))
+            else if (stepCounter % destroyWall == 0 && this.IsValidMove(wallPos) == MoveType.JUMP)
             {
-                Vector2Int nextPos = GetNextGridPos(wallPos);
-                if (!thisGrid.IsInsideGrid(nextPos)) continue;
-                if (nextPos != lastGridPos && nextPos != playerPos 
-                    && thisGrid.GetGridArray()[nextPos.x, nextPos.y].GetGridType() != GridType.REPLACEABLE
-                    && thisGrid.GetGridArray()[this.gridPos.x, this.gridPos.y].HasWallAt(wallPos))
-                {
-                    destroyNextWall.Add(wallPos);
-                }
+                destroyNextWall.Add(wallPos);
             }
         }
         if (diffX == 0 && diffY == 0)
-        {
-            this.winScreen.ShowWinScreen();
-            return null;
-        }
-        else if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
-        else if (diffX <= 0 && (allowed.Contains(WallPos.RIGHT) || destroyNextWall.Contains(WallPos.RIGHT)))
-        {
-            if (allowed.Contains(WallPos.RIGHT))
             {
-                wPos = WallPos.RIGHT;
+                this.winScreen.ShowWinScreen();
+                return null;
             }
-            else if (destroyNextWall.Contains(WallPos.RIGHT))
+            else if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
+            else if (diffX <= 0 && (allowed.Contains(WallPos.RIGHT) || destroyNextWall.Contains(WallPos.RIGHT)))
             {
-                Vector2Int nextPos = GetNextGridPos(WallPos.RIGHT);
-                wPos = WallPos.RIGHT;
-                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.RIGHT);
-                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.LEFT);
+                if (allowed.Contains(WallPos.RIGHT))
+                {
+                    wPos = WallPos.RIGHT;
+                }
+                else if (destroyNextWall.Contains(WallPos.RIGHT))
+                {
+                    Vector2Int nextPos = GetNextGridPos(WallPos.RIGHT);
+                    wPos = WallPos.RIGHT;
+                    this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.RIGHT);
+                    this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.LEFT);
+                }
             }
-        }
-        else if (diffX > 0 && (allowed.Contains(WallPos.LEFT) || destroyNextWall.Contains(WallPos.LEFT)))
-        {
-            if (allowed.Contains(WallPos.LEFT))
+            else if (diffX > 0 && (allowed.Contains(WallPos.LEFT) || destroyNextWall.Contains(WallPos.LEFT)))
             {
-                wPos = WallPos.LEFT;
+                if (allowed.Contains(WallPos.LEFT))
+                {
+                    wPos = WallPos.LEFT;
+                }
+                else if (destroyNextWall.Contains(WallPos.LEFT))
+                {
+                    Vector2Int nextPos = GetNextGridPos(WallPos.LEFT);
+                    wPos = WallPos.LEFT;
+                    this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.LEFT);
+                    this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.RIGHT);
+                }
             }
-            else if (destroyNextWall.Contains(WallPos.LEFT))
+            else if (diffY <= 0 && (allowed.Contains(WallPos.BACK) || destroyNextWall.Contains(WallPos.BACK)))
             {
-                Vector2Int nextPos = GetNextGridPos(WallPos.LEFT);
-                wPos = WallPos.LEFT;
-                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.LEFT);
-                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.RIGHT);
+                if (allowed.Contains(WallPos.BACK))
+                {
+                    wPos = WallPos.BACK;
+                }
+                else if (destroyNextWall.Contains(WallPos.BACK))
+                {
+                    Vector2Int nextPos = GetNextGridPos(WallPos.BACK);
+                    wPos = WallPos.BACK;
+                    this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.BACK);
+                    this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.FRONT);
+                }
             }
-        }
-        else if (diffY <= 0 && (allowed.Contains(WallPos.BACK) || destroyNextWall.Contains(WallPos.BACK)))
-        {
-            if (allowed.Contains(WallPos.BACK))
+            else if (diffY > 0 && (allowed.Contains(WallPos.FRONT) || destroyNextWall.Contains(WallPos.FRONT)))
             {
-                wPos = WallPos.BACK;
+                if (allowed.Contains(WallPos.FRONT))
+                {
+                    wPos = WallPos.FRONT;
+                }
+                else if (destroyNextWall.Contains(WallPos.FRONT))
+                {
+                    Vector2Int nextPos = GetNextGridPos(WallPos.FRONT);
+                    wPos = WallPos.FRONT;
+                    this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.FRONT);
+                    this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.BACK);
+                }
             }
-            else if (destroyNextWall.Contains(WallPos.BACK))
+            else
             {
-                Vector2Int nextPos = GetNextGridPos(WallPos.BACK);
-                wPos = WallPos.BACK;
-                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.BACK);
-                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.FRONT);
+                if (allowed.Count == 0)
+                {
+                    wPos = destroyNextWall[0];
+                    Vector2Int nextPos = GetNextGridPos(wPos);
+                    this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(wPos);
+                    this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallStatus.GetOppositePos(wPos));
+                }
+                else
+                {
+                    wPos = allowed[0];
+                }
             }
-        }
-        else if (diffY > 0 && (allowed.Contains(WallPos.FRONT) || destroyNextWall.Contains(WallPos.FRONT)))
-        {
-            if (allowed.Contains(WallPos.FRONT))
-            {
-                wPos = WallPos.FRONT;
-            }
-            else if (destroyNextWall.Contains(WallPos.FRONT))
-            {
-                Vector2Int nextPos = GetNextGridPos(WallPos.FRONT);
-                wPos = WallPos.FRONT;
-                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(WallPos.FRONT);
-                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallPos.BACK);
-            }
-        }
-        else
-        {
-            if(allowed.Count == 0)
-            {
-                wPos = destroyNextWall[0];
-                Vector2Int nextPos = GetNextGridPos(wPos);
-                this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(wPos);
-                this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallStatus.GetOppositePos(wPos));
-            } else
-            {
-                wPos = allowed[0];
-            }
-        }
 
         return wPos;
     }
 
-    
+    protected override MoveType IsValidMove(WallPos wallPos)
+    {
+        Grid cGrid = this.gameManager.GetCurrentGrid();
+        Vector2Int next = this.GetNextGridPos(wallPos);
+
+        if (!cGrid.IsInsideGrid(next) || next == PlayerMovement.INSTANCE.GetCurrentGridPos() || next == lastGridPos) return MoveType.INVALID;
+
+        GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
+
+        if (nextObj.GetGridType() == GridType.REPLACEABLE) return MoveType.INVALID;
+
+        GridObj current = cGrid.GetGridArray()[gridPos.x, gridPos.y];
+
+        if(current.HasWallAt(wallPos) || nextObj.HasWallAt(WallStatus.GetOppositePos(wallPos)))
+            return MoveType.JUMP;
+        else
+            return MoveType.WALK;
+    }
 
     /// <summary>
     /// Called whenever a wall gets destroyed. Removes the respective wall at the WallPos of the GridObj.
@@ -220,28 +222,4 @@ public class EnemyMovement : Movement
         }
     }
 
-    /// <summary>
-    /// Rotate the enemy model
-    /// </summary>
-    /// <param name="dir"></param>
-    private void RotateModel(WallPos dir)
-    {
-        int rotation;
-        switch (dir)
-        {
-            case WallPos.FRONT:
-                rotation = 180;
-                break;
-            case WallPos.LEFT:
-                rotation = -90;
-                break;
-            case WallPos.RIGHT:
-                rotation = 90;
-                break;
-            default:
-                rotation = 0;
-                break;
-        }
-        this.gameObject.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
-    }
 }
