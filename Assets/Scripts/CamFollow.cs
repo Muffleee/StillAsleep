@@ -10,10 +10,13 @@ public class CamFollow : MonoBehaviour
     [SerializeField] private Vector3 camOffsetFurthest = new Vector3(0f, 13f, -8.5f);
     [SerializeField] private Vector3 camOffsetClosest = new Vector3(0f, 5f, -4f);
     [SerializeField] private Transform target;
+    [SerializeField] private GameManager gameManager;
+    [SerializeField] private Pathfinding pathfinding;
     private Vector3 currentPos;
-
+    private Camera cam;
     private void Start()
     {
+        this.cam = this.GetComponent<Camera>();
         this.currentPos = this.camOffsetFurthest;
     }
 
@@ -28,6 +31,20 @@ public class CamFollow : MonoBehaviour
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if(scroll == 0f) return;
         this.currentPos = this.MoveAlongLineByFraction(camOffsetClosest, camOffsetFurthest, currentPos, scroll);
+    }
+
+    /// <summary>
+    /// Checks if a world position is visible within the camera's viewport
+    /// </summary>
+    public bool IsPositionVisibleInCamera(Vector3 worldPosition)
+    {
+        if (cam == null) return false;
+        Vector3 viewportPoint = cam.WorldToViewportPoint(worldPosition);
+
+        // Check if point is infront of camera
+        return viewportPoint.x >= 0 && viewportPoint.x <= 1 &&
+               viewportPoint.y >= 0 && viewportPoint.y <= 1 &&
+               viewportPoint.z > 0;
     }
 
     /// <summary>
