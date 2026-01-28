@@ -26,6 +26,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EnemyMovement enemyMovement;
     [SerializeField] private Pathfinding pathfinding;
     [SerializeField] private bool tutorial;
+    [SerializeField] private GameObject Audio;
+
 
     public static int emptyWeight;
     public static int corridorWeight;
@@ -54,6 +56,13 @@ public class GameManager : MonoBehaviour
 
     Grid grid;
 
+    private void Awake()
+    {
+        if (AudioManager.Instance == null)
+        {
+            Instantiate(Audio);
+        }
+    }
     /// <summary>
     /// Initializes the grid, clearing the collapse-list and start the collapsing process from the first node
     /// </summary>
