@@ -11,7 +11,6 @@ using UnityEngine.Events;
 public class PlayerMovement : Movement
 {
     [SerializeField] private WinScreen winScreen;
-    [SerializeField] private GameObject playerModel;
     [SerializeField] private PlayerAnim anim;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private readonly bool DEBUG = false;
@@ -204,26 +203,7 @@ public class PlayerMovement : Movement
         }
     }
 
-    private void RotateModel(WallPos dir)
-    {
-        int rotation;
-        switch (dir)
-        {
-            case WallPos.FRONT:
-                rotation = 180;
-                break;
-            case WallPos.LEFT:
-                rotation = -90;
-                break;
-            case WallPos.RIGHT:
-                rotation = 90;
-                break;
-            default:
-                rotation = 0;
-                break;
-        }
-        this.playerModel.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
-    }
+   
     
     public void LockMovement(float timeSecs)
     {
