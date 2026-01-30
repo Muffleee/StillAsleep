@@ -402,6 +402,11 @@ PrefabInstance:
       propertyPath: ColorModule.gradient.maxGradient.key1.r
       value: 0.7669722
       objectReference: {fileID: 0}
+    - target: {fileID: 8609330563011402696, guid: 5138b7213b03ab94498481f7bf472275,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 87daa325d35362540866d7763d0a94e1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -475,7 +480,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 64c3811bc8d71fd4fbbef4420f72f62b, type: 2}
+      objectReference: {fileID: 2100000, guid: 87daa325d35362540866d7763d0a94e1, type: 2}
     - target: {fileID: 919132149155446097, guid: 5f413659b48c61f4f804bfaadaf668c6,
         type: 3}
       propertyPath: m_Name
