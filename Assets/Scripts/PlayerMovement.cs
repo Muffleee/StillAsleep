@@ -11,11 +11,9 @@ using UnityEngine.Events;
 public class PlayerMovement : Movement
 {
     [SerializeField] private WinScreen winScreen;
-    [SerializeField] private GameObject playerModel;
     [SerializeField] private PlayerAnim anim;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private readonly bool DEBUG = false;
-    private readonly bool DRAW_PATH = true;
     private int stepCounter = 0;
     private bool isMoving = false;
     private WallPos? bufferedMove = null;
@@ -124,13 +122,6 @@ public class PlayerMovement : Movement
 
         yield return null; // use this to get less sliding with the animations
 
-        // Draw A* path to the exit
-        if (this.DRAW_PATH)
-        {
-            List<GridObj> DebugPath = this.gameManager.GetPathfinding().FindPath(this.GetNextGridPos(wallPos), this.gameManager.GetEnemyMovement().GetEnemyGridPos());
-            this.gameManager.GetPathfinding().SpawnPath(DebugPath);
-        }
-
         while (elapsed < totalDuration)
         {   
             elapsed += Time.deltaTime;
@@ -216,26 +207,7 @@ public class PlayerMovement : Movement
         }
     }
 
-    private void RotateModel(WallPos dir)
-    {
-        int rotation;
-        switch (dir)
-        {
-            case WallPos.FRONT:
-                rotation = 180;
-                break;
-            case WallPos.LEFT:
-                rotation = -90;
-                break;
-            case WallPos.RIGHT:
-                rotation = 90;
-                break;
-            default:
-                rotation = 0;
-                break;
-        }
-        this.playerModel.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
-    }
+   
     
     public void LockMovement(float timeSecs)
     {

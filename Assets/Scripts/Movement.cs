@@ -6,6 +6,7 @@ public class Movement : MonoBehaviour
 {
     
     [SerializeField] protected GameManager gameManager;
+    [SerializeField] protected GameObject model;
     protected Vector2Int lastGridPos;
     protected Vector2Int gridPos;
     /// <summary>
@@ -14,7 +15,7 @@ public class Movement : MonoBehaviour
     /// </summary>
     /// <param name="wallPos">Movement direction to be checked.</param>
     /// <returns></returns>
-    protected MoveType IsValidMove(WallPos wallPos)
+    protected virtual MoveType IsValidMove(WallPos wallPos)
     {
         Grid cGrid = this.gameManager.GetCurrentGrid();
         Vector2Int next = this.GetNextGridPos(wallPos);
@@ -114,15 +115,28 @@ public class Movement : MonoBehaviour
         }
         this.lastGridPos = this.gridPos;
         gridPos = this.GetNextGridPos(wallPos);
-        Debug.Log("Enemy: " + gridPos.x + ", " + gridPos.y);
         this.transform.position = endPos;
 
-        //traps detection on movment 
-        Grid cGrid = this.gameManager.GetCurrentGrid();
+    }
 
-        // Look up the GridObj using the array accessor method already used in IsValidMove
-        GridObj destinationTile = cGrid.GetGridArray()[gridPos.x,gridPos.y];
-
-        destinationTile.GetInteract().OnUse(destinationTile);
+    protected void RotateModel(WallPos dir)
+    {
+        int rotation;
+        switch (dir)
+        {
+            case WallPos.FRONT:
+                rotation = 180;
+                break;
+            case WallPos.LEFT:
+                rotation = -90;
+                break;
+            case WallPos.RIGHT:
+                rotation = 90;
+                break;
+            default:
+                rotation = 0;
+                break;
+        }
+        this.model.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
     }
 }
