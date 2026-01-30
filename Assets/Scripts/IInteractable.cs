@@ -34,6 +34,12 @@ public interface IInteractable
     /// </summary>
     /// <returns></returns>
     GameObject GetPrefab();
+
+    /// <summary>
+    /// Triggers possible animations
+    /// </summary>
+    /// <param name="animator"></param>
+    public void TriggerAnimation(Animator animator, MoveType mt);
 }
 
 /// <summary>
@@ -66,6 +72,8 @@ public class Regular : IInteractable
     {
         return null;
     }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
 }
 
 /// <summary>
@@ -131,6 +139,8 @@ public class Trap : IInteractable
     {
         return GameManager.INSTANCE.GetPrefabLibrary().prefabTrap;
     }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
 }
 
 /// <summary>
@@ -140,7 +150,7 @@ public class JumpingPads : IInteractable
 {
     void IInteractable.SetColor(GameObject obj)
     {
-        obj.GetComponentInChildren<MeshRenderer>().material.color = Color.magenta;
+        // obj.GetComponentInChildren<MeshRenderer>().material.color = Color.magenta;
     }
     void IInteractable.OnUse(GridObj obj)
     {
@@ -166,7 +176,7 @@ public class JumpingPads : IInteractable
                 return MoveType.JUMP;
             }
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
-            if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
             return MoveType.WALK;
         }
         if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
@@ -176,6 +186,12 @@ public class JumpingPads : IInteractable
     GameObject IInteractable.GetPrefab()
     {
         return GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad;
+    }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt)
+    {
+        if(mt != MoveType.JUMP) return;
+        animator.SetTrigger("TriggerAnim");
     }
 }
 
@@ -201,6 +217,8 @@ public class Replaceable : IInteractable
     {
         return null;
     }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
 }
 
 public class ManualReplaceable : IInteractable
@@ -228,6 +246,8 @@ public class ManualReplaceable : IInteractable
     {
         return null;
     }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
 }
 
 /// <summary>
@@ -291,4 +311,6 @@ public class HiddenTrap : IInteractable
     {
         return GameManager.INSTANCE.GetPrefabLibrary().prefabTrap;
     }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
 }

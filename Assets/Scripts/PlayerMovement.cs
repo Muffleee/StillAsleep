@@ -118,6 +118,10 @@ public class PlayerMovement : Movement
         RotateModel(wallPos);
         anim.TriggerMoveAnim(mt);
 
+        GridObj currentTile = this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y];
+        Animator animator = currentTile.GetFloorObj().GetComponentInChildren<Animator>();
+        if(animator != null) currentTile.GetInteract().TriggerAnimation(animator, mt);
+
         yield return null; // use this to get less sliding with the animations
 
         // Draw A* path to the exit

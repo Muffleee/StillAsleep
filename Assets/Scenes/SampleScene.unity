@@ -163,7 +163,7 @@ MonoBehaviour:
   corner: 8
   oneWall: 6
   empty: 10
-  jumping: 0
+  jumping: 10
   manualReplacable: 0
   trap: 0
   hiddenTrap: 0
@@ -218,6 +218,7 @@ MonoBehaviour:
   prefabWalls:
   - {fileID: 2144594829894418979, guid: eef91b874a904944db0a7edec2db821b, type: 3}
   - {fileID: 2144594829894418979, guid: 994206736d4403e418f02cbce0cf1a80, type: 3}
+  - {fileID: 2144594829894418979, guid: c1be69274dfae8a42af22c227f385bb7, type: 3}
   prefabDestructibleWall: {fileID: 5852734629184053177, guid: 81a2fa19464c3d5469133302f759fea0,
     type: 3}
   prefabExit: {fileID: 5393983432708434800, guid: 8bef5b077c3bfc146a4c2e4a1004f9b1,
@@ -225,6 +226,7 @@ MonoBehaviour:
   prefabFloors:
   - {fileID: 5365367703789444965, guid: f17a422dad59262409f46efbd9d548fc, type: 3}
   - {fileID: 5365367703789444965, guid: df3ed19a93e972f4a85d9835901ec08f, type: 3}
+  - {fileID: 5365367703789444965, guid: 872b7659ae6c1564dbf71f454e5bf153, type: 3}
   prefabReplaceable: {fileID: 5365367703789444965, guid: 03741992903a35148bbfca60e9108b1a,
     type: 3}
   prefabTrap: {fileID: 7963245411701999052, guid: 9a4e1b7c5502d5b4c8c2cab355155f71,
