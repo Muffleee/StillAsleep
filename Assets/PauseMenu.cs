@@ -18,15 +18,7 @@ public class PauseMenu : MonoBehaviour
 
         if(this.quitButton != null) this.quitButton.onClick.AddListener(this.QuitGame);
 
-        if(this.resumeButton != null) this.resumeButton.onClick.AddListener(this.ResumeGame);
-    }
-
-    void Update()
-    {
-        if (this.PauseMenuPanel.active)
-        {
-            if(Input.GetKeyDown(KeyCode.Escape)) hidePauseMenu();
-        }
+        if(this.resumeButton != null) this.resumeButton.onClick.AddListener(this.hidePauseMenu);
     }
 
     public void ShowPauseMenu()
@@ -44,15 +36,10 @@ public class PauseMenu : MonoBehaviour
     {
         if(this.PauseMenuPanel != null)
         {
+            AudioManager.Instance.PlayButtonClick();
             this.PauseMenuPanel.SetActive(false);
             Time.timeScale = 1f;
         }
-    }
-
-    private void ResumeGame()
-    {
-        AudioManager.Instance.PlayButtonClick();
-        hidePauseMenu();
     }
 
     private void RestartGame()
@@ -72,5 +59,10 @@ public class PauseMenu : MonoBehaviour
         Time.timeScale = 1f;
 
         SceneManager.LoadScene("Menu"); // Start Menu
+    }
+
+    public bool IsPauseMenuActive()
+    {
+        return this.PauseMenuPanel != null && this.PauseMenuPanel.activeSelf;
     }
 }

@@ -45,7 +45,19 @@ public class PlayerMovement : Movement
     {   
         if(this.isLocked || gameManager.IsTutorialOpen()) return;
 
-        if(Input.GetKeyDown(KeyCode.Escape)) {this.pausescreen.ShowPauseMenu();}
+        if(Input.GetKeyDown(KeyCode.Escape)) 
+        {
+            if(this.pausescreen.IsPauseMenuActive())
+            {
+                this.pausescreen.hidePauseMenu();
+            }
+            else
+            {
+                this.pausescreen.ShowPauseMenu();
+            }
+            return;
+        }
+            
 
         if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK); }
         else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT); }
