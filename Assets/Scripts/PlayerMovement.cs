@@ -11,6 +11,7 @@ using UnityEngine.Events;
 public class PlayerMovement : Movement
 {
     [SerializeField] private WinScreen winScreen;
+    [SerializeField] private PauseMenu pausescreen;
     [SerializeField] private PlayerAnim anim;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private readonly bool DEBUG = false;
@@ -43,6 +44,8 @@ public class PlayerMovement : Movement
     private void Update()
     {   
         if(this.isLocked || gameManager.IsTutorialOpen()) return;
+
+        if(Input.GetKeyDown(KeyCode.Escape)) {this.pausescreen.ShowPauseMenu();}
 
         if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK); }
         else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT); }
