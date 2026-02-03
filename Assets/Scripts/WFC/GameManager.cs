@@ -86,7 +86,7 @@ public class GameManager : MonoBehaviour
         this.grid.InstantiateMissing();
         this.gui.FillList();
         // EnemyMovement.INSTANCE.SetEnemyGridPos();
-        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(1,1));
+        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3,3));
     }
     /// <summary>
     /// Sets starting weights so the initial grid is very open and no special tiles
