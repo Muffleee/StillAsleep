@@ -423,7 +423,7 @@ public class Grid
     }
     */
 
-    public void IncreaseGrid(WallPos direction)
+    public void IncreaseGrid(WallPos direction,long MaxGridArea)
     {
         int addLeft = 0, addRight = 0, addFront = 0, addBack = 0;
 
@@ -440,6 +440,9 @@ public class Grid
         int newH = this.height + addFront + addBack;
 
         GridObj[,] newGrid = new GridObj[newW, newH];
+        long newArea = (long)newW * (long)newH;
+        if (newArea > MaxGridArea)
+            return; // do nothing
 
         // Copy old tiles into shifted positions
         for (int x = 0; x < this.width; x++)
