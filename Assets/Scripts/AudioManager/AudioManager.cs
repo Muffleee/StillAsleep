@@ -24,7 +24,7 @@ public class AudioManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        musicSource.volume = 0.5f;
+        musicSource.volume = 0.3f;
     }
     private void Start()
     {
@@ -32,7 +32,7 @@ public class AudioManager : MonoBehaviour
         musicSource.Play();
         musicSource.PlayScheduled(AudioSettings.dspTime + intro.length);
         AudioSource loopSource = gameObject.AddComponent<AudioSource>();
-        loopSource.volume = 0.5f;
+        loopSource.volume = 0.3f;
         loopSource.clip = loop;
         loopSource.loop = true;
         loopSource.PlayScheduled(AudioSettings.dspTime + intro.length);
