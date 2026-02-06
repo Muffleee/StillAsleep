@@ -5,14 +5,17 @@ using UnityEngine;
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance;
-    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioSource musicSource;
+    [SerializeField] private AudioSource sfxSource;
     [SerializeField] private AudioClip tilePlacing;
     [SerializeField] private AudioClip buttonClick;
+    [SerializeField] private AudioClip jumping;
+    [SerializeField] private AudioClip trap;
     [SerializeField] private AudioClip intro;
     [SerializeField] private AudioClip loop;
     void Awake()
     {
-        if(audioSource == null) audioSource = this.GetComponent<AudioSource>();
+        if(musicSource == null) musicSource = this.GetComponent<AudioSource>();
         if(Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -21,24 +24,36 @@ public class AudioManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        musicSource.volume = 0.5f;
     }
     private void Start()
     {
-        audioSource.clip = intro;
-        audioSource.Play();
-        audioSource.PlayScheduled(AudioSettings.dspTime + intro.length);
+        musicSource.clip = intro;
+        musicSource.Play();
+        musicSource.PlayScheduled(AudioSettings.dspTime + intro.length);
         AudioSource loopSource = gameObject.AddComponent<AudioSource>();
+        loopSource.volume = 0.5f;
         loopSource.clip = loop;
         loopSource.loop = true;
         loopSource.PlayScheduled(AudioSettings.dspTime + intro.length);
     }
     public void PlayTilePlacing()
     {
-        audioSource.PlayOneShot(tilePlacing);
+        sfxSource.PlayOneShot(tilePlacing, 1.0f);
     }
-
+    public void PlayJumping()
+    {
+        sfxSource.PlayOneShot(jumping, 1.0f);
+    }
     public void PlayButtonClick()
     {
-        audioSource.PlayOneShot(buttonClick);
+        sfxSource.PlayOneShot(buttonClick, 1.0f);
+    }
+    public void PlayTrap()
+    {
+        sfxSource.clip = trap;
+        sfxSource.loop = false;
+        sfxSource.volume = 1.0f;
+        sfxSource.PlayScheduled(AudioSettings.dspTime + 0.15f);
     }
 }
