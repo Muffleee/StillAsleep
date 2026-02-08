@@ -102,7 +102,8 @@ public class Trap : IInteractable
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
         if (pr != null)
         {
-            pr.RemoveEnergy(3);  
+            pr.RemoveEnergy(3);
+            AudioManager.Instance.PlayTrap();
         }
     }
 
@@ -192,6 +193,7 @@ public class JumpingPads : IInteractable
     {
         if(mt != MoveType.JUMP) return;
         animator.SetTrigger("TriggerAnim");
+        AudioManager.Instance.PlayJumping();
     }
 }
 
