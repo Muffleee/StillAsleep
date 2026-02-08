@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] int replaceExitAfter = 2;
     [SerializeField] private int width;
     [SerializeField] private int height;
+    [SerializeField] private long MaxGridArea = 1000;
     [SerializeField] private IngameUI gui;
     [SerializeField] private int corridor = 0;
     [SerializeField] private int corner = 0;
@@ -79,13 +80,13 @@ public class GameManager : MonoBehaviour
         this.grid.CollapseWorld();
         this.SetWeights();
         Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
-        this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos));
+        this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos),MaxGridArea);
 
        // this.grid.CreateExit(new Vector2Int(4, 4), 0, 1);
         this.grid.InstantiateMissing();
         this.gui.FillList();
         // EnemyMovement.INSTANCE.SetEnemyGridPos();
-        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(1,1));
+        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3,3));
     }
     /// <summary>
     /// Sets starting weights so the initial grid is very open and no special tiles
@@ -163,7 +164,7 @@ public class GameManager : MonoBehaviour
         if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5, enemyGridPos))
         {
             this.grid.CollapseWorld();
-            this.grid.IncreaseGrid(this.grid.GetNextGenPos(enemyGridPos));
+            this.grid.IncreaseGrid(this.grid.GetNextGenPos(enemyGridPos),MaxGridArea);
             this.grid.InstantiateMissing();
 
             this.gui.FillList();
@@ -174,7 +175,7 @@ public class GameManager : MonoBehaviour
             if (step % this.generateAfter == 0 && this.grid.ShouldGenerate(5, currentGridPos))
             {
                 this.grid.CollapseWorld();
-                this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos));
+                this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos),MaxGridArea);
                 this.grid.InstantiateMissing();
 
                 this.gui.FillList();

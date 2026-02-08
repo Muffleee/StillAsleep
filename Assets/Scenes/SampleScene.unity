@@ -260,17 +260,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   generateAfter: 4
   replaceExitAfter: 2
-  width: 3
-  height: 3
+  width: 5
+  height: 5
   gui: {fileID: 944478704}
   corridor: 6
   corner: 8
   oneWall: 6
   empty: 10
-  jumping: 10
-  manualReplacable: 0
-  trap: 0
-  hiddenTrap: 0
+  jumping: 6
+  manualReplacable: 8
+  trap: 5
+  hiddenTrap: 3
   prefabLibrary: {fileID: 220377179}
   playerMovement: {fileID: 6834562829543864870}
   enemyMovement: {fileID: 270545165}
@@ -684,6 +684,11 @@ PrefabInstance:
       propertyPath: winScreen
       value: 
       objectReference: {fileID: 415214965}
+    - target: {fileID: 7055469904910618350, guid: 1caa8523d777f0c4bba08a3f28c7b6d1,
+        type: 3}
+      propertyPath: destroyWall
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 7055469904910618350, guid: 1caa8523d777f0c4bba08a3f28c7b6d1,
         type: 3}
       propertyPath: gameManager

@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.PackageManager;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UIElements;
 
 /// <summary>
 /// Class describing a singular grid object/tile.
@@ -341,7 +332,7 @@ public class GridObj
         {
             float energyRatio = (float)pr.CurrentEnergy / pr.MaxEnergy;
 
-            float baseChance = 0.10f; 
+            float baseChance = 0.05f; 
             float spawnChance = baseChance * (1.5f - energyRatio);
             spawnChance = Mathf.Clamp(spawnChance, 0.02f, 0.25f); 
             //      spawnChance = baseChance * (1.5 - energyRatio)
