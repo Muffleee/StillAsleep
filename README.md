@@ -1,3 +1,9 @@
+# How to play
+To play the game, download the latest release [here](https://github.com/Muffleee/StillAsleep/releases/).
+Once downloaded, unzip ```StillAsleep.zip```, open the resulting folder and run ```StillAsleep.exe```.
+
+Enjoy.
+
 # Codeconventions for this project
 
 ## Naming Conventions
