@@ -353,19 +353,19 @@ public class Grid
         switch (type)
         {
             case GridType.JUMPINGPAD: 
-                if (!jumpingIntro) tutorialUpdate.Invoke(obj, "This is a jumping pad. \n With it you can jump over adjacent walls.");
+                if (!jumpingIntro) tutorialUpdate.Invoke(obj, "This is a jumping pad. \n With it you can jump over adjacent walls by using 1 Energy.");
                 jumpingIntro = true;
                 break;
             case GridType.REPLACEABLE: 
-                if (!replaceableIntro) tutorialUpdate.Invoke(obj, "This is a replaceable tile.\n You can place a tile from your inventory there. The playfield will expand in direction of the replacable tiles.");
+                if (!replaceableIntro) tutorialUpdate.Invoke(obj, "This is a replaceable tile.\n You can place a tile using from your inventory there. This costs 1 Energy! The playfield will expand in direction of the replacable tiles.");
                 replaceableIntro = true;
                 break;
             case GridType.MANUAL_REPLACEABLE: 
-                if (!manReplaceableIntro) tutorialUpdate.Invoke(obj, "This is a manually replaceable tile. \n This is also a replacable tile, but it will not be filled unless you place one of your tiles.");
+                if (!manReplaceableIntro) tutorialUpdate.Invoke(obj, "This is a manually replaceable tile. \n This is also a replacable tile, but it will not be filled unless you place one of your tiles by using 1 Energy.");
                 manReplaceableIntro = true; 
                 break;
             case GridType.TRAP: 
-                if (!trapIntro) tutorialUpdate.Invoke(obj, "This is a trap. \n Standing on it will cost you energy. Be careful! There might be hidden traps around.");
+                if (!trapIntro) tutorialUpdate.Invoke(obj, "This is a trap. \n Standing on it will cost you Energy. Be careful! There might be hidden traps around.");
                 trapIntro = true;
                 break;
             case GridType.REGULAR: break;
