@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.PackageManager;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UIElements;
 
 /// <summary>
 /// Class describing a singular grid object/tile.
