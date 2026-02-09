@@ -31,9 +31,13 @@ Enjoy! :)
 The central theme of this game jam-esque course has been *Tamed Growth*, which we have implemented through our grid system. The grid itself keeps growing on its own through the means of our Wave Function Collapse algorithm implementation. As the ghost-like figure moves through the map, the player can tame this chaotic growth through strategically placing tiles in order to block off the soul's movement to catch it.
 
 ## Gameplay
-Avoid traps, manage your energy, jump over walls using jumping pads, and corner in your soul by strategically placing tile to reunite yourself.
+Avoid traps, manage your energy crystals, jump over walls using jumping pads, and corner in your soul by strategically placing tile to reunite yourself.
 
 ![](PromoMaterial/Images/StillAsleep_Gameplay_2560x1080.png)
+
+Lost? If all seems hopeless and your soul got too far away, a trail nudges you into the right direction.
+
+![](PromoMaterial/Images/StillAsleep_Trail_2560x1080.png)
 
 ## Running the Game
 To play the game, download the latest release from our [GitHub repository](https://github.com/Muffleee/StillAsleep/releases/).
