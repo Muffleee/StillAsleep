@@ -22,7 +22,6 @@ public class Grid
     /// <summary>
     /// The tutorial booleans so that everything is only introduced once
     /// </summary>
-    private bool tutorial = true;
     private bool jumpingIntro = false;
     private bool exitIntro = false;
     private bool trapIntro = false;
@@ -340,7 +339,7 @@ public class Grid
                 if (obj == null || obj.IsInstantiated()) continue;
                 Dictionary<WallPos, GridObj> neighbors = this.GetNeighbors(obj);
                 obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
-                if (tutorial) StartTutorial(obj);
+                if (MainMenu.tutorial) StartTutorial(obj);
             }
         }
     }
@@ -371,7 +370,7 @@ public class Grid
                 break;
             case GridType.REGULAR: break;
         }
-        if (jumpingIntro && replaceableIntro && manReplaceableIntro && trapIntro && exitIntro) tutorial = false;
+        if (jumpingIntro && replaceableIntro && manReplaceableIntro && trapIntro) MainMenu.tutorial = false;
     }
     /// <summary>
     /// Increase the size of the grid by 1 in each direction.
@@ -898,6 +897,4 @@ public class Grid
     {
         return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
-
-    public void SetTutorial(bool tut) { tutorial = tut; }
 }

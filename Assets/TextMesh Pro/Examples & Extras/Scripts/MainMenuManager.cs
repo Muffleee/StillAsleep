@@ -6,9 +6,8 @@ using UnityEngine.SceneManagement;
 using TMPro;
 
 
-namespace MainMenu
-{
-    
+
+
     public class MainMenu : MonoBehaviour
     {
 
@@ -16,9 +15,12 @@ namespace MainMenu
         [SerializeField] private TMP_Text gameTitleText;
         [SerializeField] private Button startButton;
         [SerializeField] private Button quitButton;
+        [SerializeField] private Toggle tutorialToggle;
         [SerializeField] private Animator playerAnimator;
 
         [SerializeField] private string gameSceneName;
+
+        public static bool tutorial;
         void Start()
         {
             ShowMainMenu();
@@ -46,6 +48,7 @@ namespace MainMenu
 
         private void StartGame()
         {
+            MainMenu.tutorial = tutorialToggle.isOn;
             AudioManager.Instance.PlayButtonClick();
             SceneManager.LoadScene(gameSceneName);
         }
@@ -60,4 +63,4 @@ namespace MainMenu
             #endif
         }
     }
-}
+

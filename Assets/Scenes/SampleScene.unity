@@ -159,6 +159,7 @@ MonoBehaviour:
   replaceExitAfter: 2
   width: 5
   height: 5
+  MaxGridArea: 1000
   gui: {fileID: 944478704}
   corridor: 6
   corner: 8
@@ -172,7 +173,6 @@ MonoBehaviour:
   playerMovement: {fileID: 6834562829543864870}
   enemyMovement: {fileID: 270545165}
   pathfinding: {fileID: 220377180}
-  tutorial: 0
   Audio: {fileID: 7712494145165585650, guid: dcfaec5b534bece499f2638d66792c9c, type: 3}
   player: {fileID: 6834562829543864865}
 --- !u!4 &220377177
@@ -1156,6 +1156,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 5013854207324618794, guid: eac25753f9874c54eaf889dd858015a2,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 5013854207324618794, guid: eac25753f9874c54eaf889dd858015a2,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 5144759291766676543, guid: eac25753f9874c54eaf889dd858015a2,
         type: 3}
