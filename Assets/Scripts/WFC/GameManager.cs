@@ -26,9 +26,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private EnemyMovement enemyMovement;
     [SerializeField] private Pathfinding pathfinding;
-    [SerializeField] private bool tutorial;
     [SerializeField] private GameObject Audio;
-
 
     public static int emptyWeight;
     public static int corridorWeight;
@@ -74,7 +72,6 @@ public class GameManager : MonoBehaviour
         this.SetStartingWeights();
         this.grid = new Grid(this.width, this.height);
         grid.tutorialUpdate.AddListener(UpdateTutorialText);
-        grid.SetTutorial(tutorial);
         this.playerResources = this.player.GetComponent<PlayerResources>();
 
         this.grid.CollapseWorld();

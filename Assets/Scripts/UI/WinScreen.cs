@@ -42,6 +42,7 @@ public class WinScreen : MonoBehaviour
     private void RestartGame()
     {
         AudioManager.Instance.PlayButtonClick();
+        MainMenu.tutorial = false;
         //Unpause Game
         Time.timeScale = 1f;
         PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(0, 0));
