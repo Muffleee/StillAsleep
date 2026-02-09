@@ -19,15 +19,21 @@ Enjoy! :)
 
 ## Table of Contents
 1. [The Game](#the-game)
-2. [Running the Game](#running-the-game)
-3. [Bugs, Help & Contact](#bugs-help--contact)
-4. [The Team](#the-team)
-5. [License](#license)
+2. [Gameplay](#gameplay)
+3. [Running the Game](#running-the-game)
+4. [Bugs, Help & Contact](#bugs-help--contact)
+5. [The Team](#the-team)
+6. [License](#license)
 
 ## The Game
 *Still Asleep*, formerly called *Escape Exit*, is a project made for the *Computer Games* practical course at the University of Tübingen over the 2025/2026 winter semester.
 
 The central theme of this game jam-esque course has been *Tamed Growth*, which we have implemented through our grid system. The grid itself keeps growing on its own through the means of our Wave Function Collapse algorithm implementation. As the ghost-like figure moves through the map, the player can tame this chaotic growth through strategically placing tiles in order to block off the soul's movement to catch it.
+
+## Gameplay
+Avoid traps, manage your energy, jump over walls using jumping pads, and corner in your soul by strategically placing tile to reunite yourself.
+
+![](PromoMaterial/Images/StillAsleep_Gameplay_2560x1080.png)
 
 ## Running the Game
 To play the game, download the latest release from our [GitHub repository](https://github.com/Muffleee/StillAsleep/releases/).
