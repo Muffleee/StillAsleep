@@ -100,10 +100,16 @@ public class Trap : IInteractable
     private void ActivateTrap()
     {
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
-        if (pr != null)
+        if (pr == null) return;
+        const int cost = 3;
+
+        AudioManager.Instance.PlayTrap();
+
+        bool wouldGoNegative = (pr.CurrentEnergy - cost) < 0;
+        pr.RemoveEnergy(cost);
+        if (wouldGoNegative && PlayerMovement.INSTANCE != null)
         {
-            pr.RemoveEnergy(3);
-            AudioManager.Instance.PlayTrap();
+            PlayerMovement.INSTANCE.RespawnToSpawn();
         }
     }
 

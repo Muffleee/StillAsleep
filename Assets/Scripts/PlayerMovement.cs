@@ -13,13 +13,20 @@ public class PlayerMovement : Movement
     [SerializeField] private WinScreen winScreen;
     [SerializeField] private PauseMenu pausescreen;
     [SerializeField] private PlayerAnim anim;
+    [SerializeField] private float playerGroundOffsetY = 0.9f;
+    [SerializeField] private float respawnTrapVisualDuration = 1.5f;
+    [SerializeField] private float respawnTrapVisualYOffset = 0.01f;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private readonly bool DEBUG = false;
     private int stepCounter = 0;
     private bool isMoving = false;
+    private GameObject respawnTrapVisualObj = null;
+    private GameObject respawnHiddenFloorObj = null;
+    private Vector3 spawnWorldPos;
     private WallPos? bufferedMove = null;
     private bool isLocked = false;
-    public static PlayerMovement INSTANCE;
+    private Vector2Int spawnGridPos;
+    public static PlayerMovement INSTANCE { get; private set; }
 
     private void Awake()
     {
@@ -35,7 +42,22 @@ public class PlayerMovement : Movement
         {
             wall.onDestroy.AddListener(this.OnWallDestroyed);
         }
+        Grid g = gameManager.GetCurrentGrid();
+        Vector3 tileWorld = GridObj.GridPosToWorldPos(gridPos, g.GetWorldOffsetX(), g.GetWorldOffsetY());
+        playerGroundOffsetY = transform.position.y - tileWorld.y;
         RotateModel(WallPos.FRONT);
+        StartCoroutine(CaptureSpawnAfterInit());
+    }
+    private System.Collections.IEnumerator CaptureSpawnAfterInit()
+    {
+        yield return null;
+        spawnWorldPos = transform.position;
+        Grid g = gameManager.GetCurrentGrid();
+        spawnGridPos = GridObj.WorldPosToGridPos(
+            this.transform.position,
+            g.GetWorldOffsetX(),
+            g.GetWorldOffsetY()
+        );
     }
 
     /// <summary>
@@ -221,9 +243,91 @@ public class PlayerMovement : Movement
             } else Debug.LogWarning("Kein WinScreen gefunden");  
         }
     }
+    public void RespawnToSpawn()
+    {
+        CleanupRespawnTrapVisual();
 
-   
-    
+        StopAllCoroutines();
+        isMoving = false;
+        bufferedMove = null;
+
+        transform.position = spawnWorldPos;
+
+        Grid g = gameManager.GetCurrentGrid();
+        gridPos = GridObj.WorldPosToGridPos(transform.position, g.GetWorldOffsetX(), g.GetWorldOffsetY());
+        ShowRespawnTrapVisualAtPlayer();
+    }
+    private void CleanupRespawnTrapVisual()
+    {
+        CancelInvoke(nameof(CleanupRespawnTrapVisual));
+
+        if (respawnTrapVisualObj != null)
+        {
+            Destroy(respawnTrapVisualObj);
+            respawnTrapVisualObj = null;
+        }
+
+        if (respawnHiddenFloorObj != null)
+        {
+            respawnHiddenFloorObj.SetActive(true);
+            respawnHiddenFloorObj = null;
+        }
+    }
+
+    private void ShowRespawnTrapVisualAtPlayer()
+    {
+        CleanupRespawnTrapVisual();
+
+        Grid g = gameManager.GetCurrentGrid();
+        if (g != null)
+        {
+            GridObj tile = g.GetGridObj(gridPos);
+            if (tile != null)
+            {
+                GameObject floor = tile.GetFloorObj();
+                if (floor != null)
+                {
+                    respawnHiddenFloorObj = floor;
+                    floor.SetActive(false);
+                }
+            }
+        }
+
+        GameObject trapPrefab = gameManager.GetPrefabLibrary().prefabTrap;
+        if (trapPrefab == null) return;
+
+        Vector3 spawnPos = transform.position;
+        spawnPos.y = respawnTrapVisualYOffset;
+
+        respawnTrapVisualObj = Instantiate(trapPrefab, spawnPos, Quaternion.identity);
+
+        if (g != null)
+        {
+            GridObj tile = g.GetGridObj(gridPos);
+            if (tile != null && tile.GetparentObj() != null)
+            {
+                respawnTrapVisualObj.transform.SetParent(tile.GetparentObj().transform, true);
+            }
+        }
+
+        Invoke(nameof(CleanupRespawnTrapVisual), respawnTrapVisualDuration);
+    }
+
+    public void TeleportToGridPos(Vector2Int targetGridPos)
+    {
+        StopAllCoroutines();
+        isMoving = false;
+        bufferedMove = null;
+
+        lastGridPos = gridPos;
+        gridPos = targetGridPos;
+
+        Grid g = gameManager.GetCurrentGrid();
+        Vector3 basePos = GridObj.GridPosToWorldPos(targetGridPos, g.GetWorldOffsetX(), g.GetWorldOffsetY());
+
+        transform.position = basePos + new Vector3(0f, playerGroundOffsetY, 0f);
+    }
+
     public void LockMovement(float timeSecs)
     {
         this.isLocked = true;
