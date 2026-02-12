@@ -134,10 +134,6 @@ public class Pathfinding : MonoBehaviour
         
         for (int i = this.pathObjects.Count - 1; i >= 0; i--)
         {
-            if (path == null || path.Count == 0)
-            {
-                return;
-            }
             GameObject debugObj = this.pathObjects[i];
             bool found = false;
 
