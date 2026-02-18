@@ -24,6 +24,10 @@ public class GridObj
     private IInteractable interactable = null;
     private int weight = 0;
 
+    private GameObject fogQuad = null;
+    public bool IsFogged   { get; private set; } = false;
+    public bool IsRevealed { get; private set; } = false;
+
     [SerializeField] private GameObject energyCrystalPrefab;
 
     [SerializeField] private int placementCost = 1;
@@ -507,6 +511,7 @@ public class GridObj
     public void DestroyObj()
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call DestroyObj() on non placeable GridObj");
+        this.DestroyFogQuad();
         GameObject.Destroy(this.floorObj);
         this.floorObj = null;
         foreach(WallPos wallPos in Enum.GetValues(typeof(WallPos))){
@@ -732,6 +737,34 @@ public class GridObj
         }
 
         return clone;
+    }
+
+    public void SetFogQuad(GameObject quad)
+    {
+        fogQuad = quad;
+        IsFogged = true;
+    }
+
+    public void DestroyFogQuad()
+    {
+        if (fogQuad != null)
+        {
+            GameObject.Destroy(fogQuad);
+            fogQuad = null;
+        }
+        IsFogged = false;
+    }
+
+    public void MarkRevealed()
+    {
+        IsRevealed = true;
+        DestroyFogQuad();
+    }
+
+    public void ResetFogState()
+    {
+        IsRevealed = false;
+        DestroyFogQuad();
     }
 
     // Generic getters

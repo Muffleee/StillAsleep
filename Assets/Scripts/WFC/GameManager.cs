@@ -81,6 +81,7 @@ public class GameManager : MonoBehaviour
 
        // this.grid.CreateExit(new Vector2Int(4, 4), 0, 1);
         this.grid.InstantiateMissing();
+        FogOfWarScript.INSTANCE?.RefreshFog();
         this.gui.FillList();
         // EnemyMovement.INSTANCE.SetEnemyGridPos();
         EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3,3));
@@ -163,6 +164,7 @@ public class GameManager : MonoBehaviour
             this.grid.CollapseWorld();
             this.grid.IncreaseGrid(this.grid.GetNextGenPos(enemyGridPos),MaxGridArea);
             this.grid.InstantiateMissing();
+            FogOfWarScript.INSTANCE?.RefreshFog();
 
             this.gui.FillList();
         }
@@ -174,6 +176,7 @@ public class GameManager : MonoBehaviour
                 this.grid.CollapseWorld();
                 this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos),MaxGridArea);
                 this.grid.InstantiateMissing();
+                FogOfWarScript.INSTANCE?.RefreshFog();
 
                 this.gui.FillList();
             }
