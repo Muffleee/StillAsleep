@@ -4178,14 +4178,12 @@ MonoBehaviour:
   gameManager: {fileID: 220377176}
   playerMovement: {fileID: 6834562829543864870}
   revealRadius: 2
-  fogMaterial: {fileID: 2100000, guid: 2a206c0aa8930a24f85f665395728300, type: 2}
-  cubeHeight: 2
+  cubeHeight: 1.5
   cubeScale: 1
-  particleMaterial: {fileID: 2100000, guid: d32022fda504b254aaa0c008f3c5e74e, type: 2}
-  particleColor: {r: 1, g: 1, b: 1, a: 0.6}
-  particleSpeed: 0.1
-  particleSize: 2
-  particleRate: 20
+  fogMaterial: {fileID: 2100000, guid: 2a206c0aa8930a24f85f665395728300, type: 2}
+  fogTexture: {fileID: 2800000, guid: 1cdc5b506b1a4a33a53c30669ced1f51, type: 3}
+  scrollSpeedX: 0.5
+  scrollSpeedZ: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
