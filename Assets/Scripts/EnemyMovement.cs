@@ -17,6 +17,7 @@ public class EnemyMovement : Movement
     public static EnemyMovement INSTANCE;
     private bool isInstantiated = false;
     int stepCounter = 0;
+    private EnemyDifficulty difficulty = EnemyDifficulty.VERY_EASY;
     
     private void Awake()
     {
@@ -199,4 +200,9 @@ public class EnemyMovement : Movement
         }
     }
 
+}
+
+public enum EnemyDifficulty
+{
+    VERY_EASY, EASY, MEDIUM, HARD, VERY_HARD
 }
