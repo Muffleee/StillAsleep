@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] int replaceExitAfter = 2;
     [SerializeField] private int width;
     [SerializeField] private int height;
-    [SerializeField] private long MaxGridArea = 1000;
+    [SerializeField] private long MaxGridArea = 50;
     [SerializeField] private IngameUI gui;
     [SerializeField] private int corridor = 0;
     [SerializeField] private int corner = 0;
@@ -44,6 +44,9 @@ public class GameManager : MonoBehaviour
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
     bool tutorialOpen = false;
+
+    private int phase;
+    private int round;
     /*
     public GameObject wallPrefab;
     public GameObject floorPrefab;
@@ -69,21 +72,12 @@ public class GameManager : MonoBehaviour
     {
         
         INSTANCE = this;
-        this.SetStartingWeights();
+        
         this.grid = new Grid(this.width, this.height);
         grid.tutorialUpdate.AddListener(UpdateTutorialText);
         this.playerResources = this.player.GetComponent<PlayerResources>();
 
-        this.grid.CollapseWorld();
-        this.SetWeights();
-        Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
-        this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos),MaxGridArea);
-
-       // this.grid.CreateExit(new Vector2Int(4, 4), 0, 1);
-        this.grid.InstantiateMissing();
-        this.gui.FillList();
-        // EnemyMovement.INSTANCE.SetEnemyGridPos();
-        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3,3));
+        NewPhase();
     }
     /// <summary>
     /// Sets starting weights so the initial grid is very open and no special tiles
@@ -102,16 +96,52 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// sets the static weights
     /// </summary>
-    private void SetWeights()
+    private void SetWeights(WeightType weightType)
     {
-        corridorWeight = this.corridor;
-        cornerWeight = this.corner;
-        oneWallWeight = this.oneWall;
-        emptyWeight = this.empty;
-        jumpingWeight = this.jumping;
-        manualReplacableWeight = this.manualReplacable;
-        trapWeight = this.trap;
-        hiddenTrapWeight = this.hiddenTrap;
+        switch (weightType)
+        {
+            case WeightType.NORMAL:
+                corridorWeight = this.corridor;
+                cornerWeight = this.corner;
+                oneWallWeight = this.oneWall;
+                emptyWeight = this.empty;
+                jumpingWeight = this.jumping;
+                manualReplacableWeight = this.manualReplacable;
+                trapWeight = this.trap;
+                hiddenTrapWeight = this.hiddenTrap;
+                break;
+            case WeightType.CLOSED:
+                corridorWeight = 9;
+                cornerWeight = 10;
+                oneWallWeight = 4;
+                emptyWeight = 2;
+                jumpingWeight = 8;
+                manualReplacableWeight = 4;
+                trapWeight = 3;
+                hiddenTrapWeight = 4;
+                break;
+            case WeightType.OPEN:
+                corridorWeight = 3;
+                cornerWeight = 2;
+                oneWallWeight = 10;
+                emptyWeight = 12;
+                jumpingWeight = 3;
+                manualReplacableWeight = 10;
+                trapWeight = 8;
+                hiddenTrapWeight = 3;
+                break;
+            case WeightType.START:
+                emptyWeight = 20;
+                corridorWeight = 5;
+                cornerWeight = 2;
+                oneWallWeight = 1;
+                jumpingWeight = 0;
+                manualReplacableWeight = 0;
+                trapWeight = 0;
+                hiddenTrapWeight = 0;
+                break;
+        }
+        
     }
     /// <summary>
     /// if the player clicks the left mouse button, the tutorial text closes and opens the next one if one is in line
@@ -221,6 +251,69 @@ public class GameManager : MonoBehaviour
         gui.OpenTutorialText(next.Item1.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY()), next.Item2);
         tutorialOpen = true;
     }
+
+    public void OnWin(WeightType weightType)
+    {
+        if(this.round % 3 == 0)
+        {
+            Debug.Log("You win!");
+            NewPhase();
+        } else
+        {
+            NewRound(weightType);
+        }
+    }
+    private void NewPhase()
+    {
+        this.grid.DestroyGrid();
+        EnergyCrystal.DestroyAllCrystals();
+        playerResources.ResetEnergy();
+        this.SetStartingWeights();
+        this.grid.SetNewGrid(this.width, this.height);
+        this.grid.CollapseWorld();
+        this.SetWeights(WeightType.NORMAL);
+        PlayerMovement.INSTANCE.ResetFigure(new Vector2Int(0,0));
+        
+        Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos), MaxGridArea);
+
+        this.grid.InstantiateMissing();
+        this.gui.FillList();
+        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3,3));
+        NextCondition();
+        NewRound(WeightType.START);
+    }
+    private void NextCondition()
+    {
+        Debug.Log("Setting next condition");
+    }
+    /// <summary>
+    /// Increase the maxGridArea each round
+    /// Increase EnemyDifficulty each round
+    /// Influence the WFC Algorithm
+    /// </summary>
+    private void NewRound(WeightType weights)
+    {
+        switch (this.round)
+        {
+            case 0:
+                MaxGridArea = 75;
+                break;
+            case 1:
+                MaxGridArea = 500;
+                break;
+            case 2:
+                MaxGridArea = 1000;
+                break;
+            default:
+                MaxGridArea = 1000;
+                break;
+        }
+        SetWeights(weights);
+        this.round = (this.round + 1) % 3;
+        Debug.Log(this.round);
+
+    }
     /// <summary>
     /// Gets the grid in its current state
     /// </summary>
@@ -231,4 +324,9 @@ public class GameManager : MonoBehaviour
     public bool IsTutorialOpen() { return this.tutorialOpen; }
     public EnemyMovement GetEnemyMovement() { return this.enemyMovement; }
     public Pathfinding GetPathfinding() { return this.pathfinding; }
+}
+
+public enum WeightType
+{
+    OPEN, CLOSED, NORMAL, START
 }

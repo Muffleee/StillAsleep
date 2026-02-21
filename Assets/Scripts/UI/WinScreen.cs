@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Security.Cryptography.X509Certificates;
 
 public class WinScreen : MonoBehaviour
 {
@@ -12,33 +13,69 @@ public class WinScreen : MonoBehaviour
     [SerializeField] private TMP_Text winText;
     [SerializeField] private Button restartButton;
     [SerializeField] private Button quitButton;
+    [SerializeField] private GameObject nextRoundPanel;
+    [SerializeField] private Button nextRoundButton;
+    [SerializeField] private Button nextRoundQuit;
+    [SerializeField] private ToggleGroup wfcChoice;
 
     void Start()
     {
         if (this.winScreenPanel != null)
             this.winScreenPanel.SetActive(false);
 
+        if (this.nextRoundPanel != null)
+            this.nextRoundPanel.SetActive(false);
+
+
         if (this.restartButton != null)
             this.restartButton.onClick.AddListener(this.RestartGame);
 
-        if(this.quitButton != null)
+        if (this.nextRoundButton != null)
+            this.nextRoundButton.onClick.AddListener(this.StartNextRound);
+
+        if (this.quitButton != null)
             this.quitButton.onClick.AddListener(this.QuitGame);
+
+        if (this.nextRoundQuit != null)
+            this.nextRoundQuit.onClick.AddListener(this.QuitGame);
     }
 
     public void ShowWinScreen(string message = "You Win!")
     {
-        if (this.winScreenPanel != null)
+        //if (this.winScreenPanel != null)
+        //{
+        //    this.winScreenPanel.SetActive(true);
+
+        //    if (this.winText != null)
+        //        this.winText.text = message;
+
+        //    //Pause Game
+        //    Time.timeScale = 0f;
+        //}
+        if(this.nextRoundPanel != null)
         {
-            this.winScreenPanel.SetActive(true);
-
-            if (this.winText != null)
-                this.winText.text = message;
-
-            //Pause Game
-            Time.timeScale = 0f;
+            this.nextRoundPanel.SetActive(true);
         }
+        Time.timeScale = 0f;
     }
 
+    private void StartNextRound()
+    {
+        WeightType weight; 
+        switch (wfcChoice.GetFirstActiveToggle().name)
+        {
+            case "OPEN": weight = WeightType.OPEN; break;
+            case "NORMAL": weight = WeightType.NORMAL; break;
+            case "CLOSED": weight = WeightType.CLOSED; break;
+            default: weight = WeightType.NORMAL; break;
+        }
+        if(this.nextRoundPanel != null)
+        {
+            this.nextRoundPanel.SetActive(false);
+            Time.timeScale = 1f;
+        }
+        GameManager.INSTANCE.OnWin(weight);
+    }
     private void RestartGame()
     {
         AudioManager.Instance.PlayButtonClick();

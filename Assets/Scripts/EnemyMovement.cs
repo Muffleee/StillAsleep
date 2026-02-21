@@ -44,6 +44,7 @@ public class EnemyMovement : Movement
     /// <param name="pos"></param>
     public void InstantiateEnemy(Vector2Int pos)
     {
+        if (isInstantiated) { ResetFigure(pos); return; }
         if (!gameManager.GetCurrentGrid().IsInsideGrid(pos))
         {
             Debug.LogWarning("You are trying to instantiate the enemy outside of the grid! Don't do that");

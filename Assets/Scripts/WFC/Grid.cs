@@ -897,4 +897,20 @@ public class Grid
     {
         return Math.Abs(x1 - x2) + Math.Abs(y1 - y2);
     }
+
+    public void DestroyGrid()
+    {
+        for(int x = 0; x < this.width; x++)
+        {
+            for(int y = 0; y < this.height; y++)
+            {
+                if(grid[x,y] != null) grid[x, y].DestroyObj();
+            }
+        }
+        this.grid = null;
+    }
+    public void SetNewGrid(int width, int height)
+    {
+        this.grid = new GridObj[width, height];
+    }
 }
