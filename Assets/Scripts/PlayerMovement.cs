@@ -28,6 +28,35 @@ public class PlayerMovement : Movement
     private Vector2Int spawnGridPos;
     public static PlayerMovement INSTANCE { get; private set; }
 
+    private WallPos facingDir = WallPos.FRONT;
+    public WallPos FacingDir => this.facingDir;
+
+    [Header("Trap Shield")]
+    [SerializeField] private bool debugTrapShield = false;
+
+    private int trapShieldStepsRemaining = 0;
+
+    /// <summary>
+    /// True while the Reflector Shield is active. When active, Trap/HiddenTrap tiles do not harm the player.
+    /// The shield is consumed by player movement steps.
+    /// </summary>
+    public bool HasTrapShield => trapShieldStepsRemaining > 0;
+
+    public int GetTrapShieldStepsRemaining() => trapShieldStepsRemaining;
+
+    public void ActivateTrapShield(int steps)
+    {
+        trapShieldStepsRemaining = Mathf.Max(trapShieldStepsRemaining, Mathf.Max(0, steps));
+        if (debugTrapShield) Debug.Log("Trap shield activated, steps: " + trapShieldStepsRemaining);
+    }
+
+    private void ConsumeTrapShieldStep()
+    {
+        if (trapShieldStepsRemaining <= 0) return;
+        trapShieldStepsRemaining--;
+        if (debugTrapShield) Debug.Log("Trap shield step consumed, remaining: " + trapShieldStepsRemaining);
+    }
+
     private void Awake()
     {
         INSTANCE = this;
@@ -93,7 +122,10 @@ public class PlayerMovement : Movement
     /// <param name="wallPos">Direction in which the player wants to move.</param>
     private void TryMove(WallPos wallPos)
     {   
-        if(!this.isMoving)
+        
+        // Remember the last intended direction (used by tools/items like Wall Breaker).
+        this.facingDir = wallPos;
+if(!this.isMoving)
         {   
             MoveType mt = this.IsValidMove(wallPos);
             if (mt != MoveType.INVALID)
@@ -173,6 +205,7 @@ public class PlayerMovement : Movement
             yield return null;
         }
         this.stepCounter++;
+        ConsumeTrapShieldStep();
 
         lastGridPos = this.gridPos;
         this.gridPos = this.GetNextGridPos(wallPos);
@@ -328,6 +361,55 @@ public class PlayerMovement : Movement
         transform.position = basePos + new Vector3(0f, playerGroundOffsetY, 0f);
     }
 
+
+    /// <summary>
+    /// Instantly move the player to a target grid position (used by items like Grappling Hook).
+    /// Counts as one player step (enemy moves once, generation checks run once).
+    /// Skipped tiles in-between do not trigger OnUse.
+    /// </summary>
+    public bool PerformInstantMove(Vector2Int targetGridPos, WallPos direction, MoveType moveType = MoveType.JUMP)
+    {
+        if (isLocked) return false;
+        if (isMoving) return false;
+        if (gameManager == null || gameManager.GetCurrentGrid() == null) return false;
+        if (targetGridPos == gridPos) return false;
+
+        StopAllCoroutines();
+        isMoving = false;
+        bufferedMove = null;
+
+        RotateModel(direction);
+        if (anim != null)
+        {
+            anim.TriggerMoveAnim(moveType);
+        }
+
+        lastGridPos = gridPos;
+        gridPos = targetGridPos;
+        stepCounter++;
+        ConsumeTrapShieldStep();
+
+        Grid g = gameManager.GetCurrentGrid();
+        Vector3 basePos = GridObj.GridPosToWorldPos(targetGridPos, g.GetWorldOffsetX(), g.GetWorldOffsetY());
+        transform.position = basePos + new Vector3(0f, playerGroundOffsetY, 0f);
+
+        GridObj destinationTile = g.GetGridObj(gridPos);
+        if (destinationTile != null && destinationTile.GetInteract() != null)
+        {
+            destinationTile.GetInteract().OnUse(destinationTile);
+        }
+
+        onPlayerMoved?.Invoke(lastGridPos, gridPos, direction, stepCounter);
+        gameManager.OnMove(lastGridPos, gridPos, direction, stepCounter);
+
+        // Return to idle right away (optional)
+        if (anim != null)
+        {
+            anim.TriggerMoveAnim(MoveType.INVALID);
+        }
+
+        return true;
+    }
     public void LockMovement(float timeSecs)
     {
         this.isLocked = true;

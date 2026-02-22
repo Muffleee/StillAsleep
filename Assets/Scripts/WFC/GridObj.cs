@@ -16,6 +16,10 @@ public class GridObj
     private WallStatus wallStatus;
     private GameObject parentObj = null;
     private GameObject floorObj = null;
+    // Scanner support: temporarily tint hidden traps while a scan is active
+    private bool hiddenTrapHasOriginalColor = false;
+    private Color hiddenTrapOriginalColor;
+
     private Dictionary<WallPos, GameObject> wallObjs = new Dictionary<WallPos, GameObject>() { { WallPos.FRONT, null }, { WallPos.BACK, null }, { WallPos.LEFT, null }, { WallPos.RIGHT, null } };
     private UnityEvent<GridObj, WallPos>[] destructibleWallCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
     private UnityEvent<GridObj, WallPos>[] exitCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
@@ -23,7 +27,6 @@ public class GridObj
     private GridType gridType = GridType.REGULAR;
     private IInteractable interactable = null;
     private int weight = 0;
-
     [SerializeField] private int placementCost = 1;
     public int PlacementCost => this.placementCost;
 
@@ -120,7 +123,11 @@ public class GridObj
             case GridType.HIDDENTRAP: 
                 this.interactable = new HiddenTrap(); 
                 break;
-        }
+        
+            case GridType.SLUDGE:
+                this.interactable = new Sludge();
+                break;
+}
     }
 
     /// <summary>
@@ -305,6 +312,7 @@ public class GridObj
         this.floorObj = GameObject.Instantiate(this.floorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
 
         this.floorObj.transform.SetParent(this.parentObj.transform);
+        if (GameManager.INSTANCE != null) GameManager.INSTANCE.ApplyScannerRevealToTile(this);
         this.interactable.SetColor(this.floorObj);
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
@@ -325,13 +333,10 @@ public class GridObj
         }
 
         // Energy crystal spawning is centralized in GameManager (tunable like weights).
-
         if (GameManager.INSTANCE != null)
         {
             GameManager.INSTANCE.TrySpawnEnergyCrystal(this, worldOffsetX, worldOffsetY);
         }
-
-
     }
 
     /// <summary>
@@ -415,7 +420,38 @@ public class GridObj
         GameObject.Destroy(this.floorObj);
         this.floorObj = GameObject.Instantiate(this.floorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
         this.floorObj.transform.SetParent(this.parentObj.transform);
+        if (GameManager.INSTANCE != null) GameManager.INSTANCE.ApplyScannerRevealToTile(this);
     }
+
+    /// <summary>
+    /// Used by the Scanner item: temporarily tint HiddenTrap floors to make them visible.
+    /// </summary>
+    public void SetHiddenTrapReveal(bool reveal, Color revealColor)
+    {
+        if (this.gridType != GridType.HIDDENTRAP) return;
+        if (this.floorObj == null) return;
+
+        MeshRenderer mr = this.floorObj.GetComponentInChildren<MeshRenderer>();
+        if (mr == null) return;
+
+        if (reveal)
+        {
+            if (!hiddenTrapHasOriginalColor)
+            {
+                hiddenTrapOriginalColor = mr.material.color;
+                hiddenTrapHasOriginalColor = true;
+            }
+            mr.material.color = revealColor;
+        }
+        else
+        {
+            if (hiddenTrapHasOriginalColor)
+            {
+                mr.material.color = hiddenTrapOriginalColor;
+            }
+        }
+    }
+
 
     /// <summary>
     /// Instantiate a wall and only change the data on the in-game object, helper method
@@ -746,5 +782,5 @@ public class GridObj
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP, DESTROYED
+    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP, SLUDGE, DESTROYED
 }

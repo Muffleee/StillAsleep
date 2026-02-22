@@ -18,6 +18,10 @@ public class EnemyMovement : Movement
     private bool isInstantiated = false;
     int stepCounter = 0;
     
+    
+    private readonly List<Vector2Int> positionHistory = new List<Vector2Int>();
+    private int stuckMovesRemaining = 0;
+    [SerializeField] private int maxHistory = 20;
     private void Awake()
     {
         INSTANCE = this;
@@ -55,7 +59,10 @@ public class EnemyMovement : Movement
         this.transform.position = newPosition;
         this.gameObject.SetActive(true);
         isInstantiated = true;
-    }
+            // Initialize rewind history with the spawn position.
+        positionHistory.Clear();
+        positionHistory.Add(pos);
+}
 
     public Vector2Int GetEnemyGridPos()
     {
@@ -72,10 +79,19 @@ public class EnemyMovement : Movement
     public void MoveEnemy()
     {
         if (!isInstantiated) return;
+
+        // If the enemy is stuck on a Sludge tile, it "wastes" a turn.
+        if (stuckMovesRemaining > 0)
+        {
+            stuckMovesRemaining--;
+            return;
+        }
+
         stepCounter++;
         WallPos? direction = GetNextEnemyDir();
         if (direction != null)
-        {   
+        {
+            RecordHistory();
             this.RotateModel(direction.Value);
             this.StartMovement(direction.Value, MoveType.WALK);
         }
@@ -183,6 +199,91 @@ public class EnemyMovement : Movement
             return MoveType.JUMP;
         else
             return MoveType.WALK;
+    }
+
+
+    // --- Item effects ------------------------------------------------------
+
+    /// <summary>
+    /// Records the current grid position to allow time-reversal (rewind).
+    /// Called right before the enemy starts a new move.
+    /// </summary>
+    private void RecordHistory()
+    {
+        if (maxHistory <= 0) return;
+
+        if (positionHistory.Count == 0 || positionHistory[positionHistory.Count - 1] != this.gridPos)
+        {
+            positionHistory.Add(this.gridPos);
+        }
+
+        // Keep list bounded (Inspector-tunable).
+        int overflow = positionHistory.Count - maxHistory;
+        if (overflow > 0)
+        {
+            positionHistory.RemoveRange(0, overflow);
+        }
+    }
+
+    /// <summary>
+    /// Teleports the enemy a few steps back along its recorded path.
+    /// </summary>
+    public void Rewind(int steps)
+    {
+        if (!isInstantiated) return;
+        if (steps <= 0) return;
+
+        // If a movement coroutine is running, stop it and snap to a valid tile.
+        StopAllCoroutines();
+
+        Vector2Int target = this.gridPos;
+        for (int i = 0; i < steps && positionHistory.Count > 0; i++)
+        {
+            target = positionHistory[positionHistory.Count - 1];
+            positionHistory.RemoveAt(positionHistory.Count - 1);
+        }
+
+        Grid g = this.gameManager != null ? this.gameManager.GetCurrentGrid() : null;
+        if (g == null || !g.IsInsideGrid(target)) return;
+
+        this.lastGridPos = target;
+        this.gridPos = target;
+
+        Vector3 worldPos = g.GetGridArray()[target.x, target.y].GetWorldPos(g.GetWorldOffsetX(), g.GetWorldOffsetY());
+        worldPos.y = 1f;
+        this.transform.position = worldPos;
+
+        // Rewind should also cancel any "stuck" state.
+        stuckMovesRemaining = 0;
+    }
+
+    /// <summary>
+    /// After moving, apply tile effects that are relevant for the enemy (e.g. Sludge).
+    /// </summary>
+    protected override IEnumerator MovementCoroutine(WallPos wallPos, MoveType mt)
+    {
+        yield return base.MovementCoroutine(wallPos, mt);
+
+        Grid g = this.gameManager != null ? this.gameManager.GetCurrentGrid() : null;
+        if (g == null || !g.IsInsideGrid(this.gridPos)) yield break;
+
+        GridObj tile = g.GetGridArray()[this.gridPos.x, this.gridPos.y];
+        if (tile == null) yield break;
+
+        // Sludge: enemy gets stuck for a few turns, optionally consumed on trigger.
+        if (tile.GetGridType() == GridType.SLUDGE)
+        {
+            stuckMovesRemaining = this.gameManager.GetSludgeStuckSteps();
+
+            if (this.gameManager.GetSludgeConsumeOnTrigger())
+            {
+                // Replace the tile back to REGULAR while keeping walls consistent.
+                GridObj toPlace = new GridObj(tile.GetGridPos(), tile.GetWallStatus().Clone());
+                toPlace.SetGridType(GridType.REGULAR);
+                toPlace.UpdateWallStatus(g.GetNeighbors(toPlace));
+                g.PlaceObj(toPlace);
+            }
+        }
     }
 
     /// <summary>

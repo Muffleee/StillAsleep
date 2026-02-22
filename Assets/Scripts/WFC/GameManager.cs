@@ -41,16 +41,48 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
 
+    
+    private PlayerItems playerItems;
+
+    [Header("Energy Crystals")]
     [SerializeField] private bool enableEnergyCrystals = true;
     [SerializeField, Range(0f, 1f)] private float crystalBaseChance = 0.05f;
     [SerializeField, Range(0f, 1f)] private float crystalMinChance = 0.02f;
     [SerializeField, Range(0f, 1f)] private float crystalMaxChance = 0.25f;
-
     [SerializeField] private float crystalEnergyBias = 1.5f;
-
     [SerializeField] private int crystalBaseMax = 6;
     [SerializeField] private int crystalBonusMax = 10;
 
+
+
+    [Header("Items")]
+    [SerializeField] private int timeReversalEnergyCost = 2;
+    [SerializeField, Range(1, 10)] private int timeReversalSteps = 3;
+    [SerializeField] private float timeReversalCooldown = 8f;
+
+    [SerializeField] private int wallBreakerEnergyCost = 1;
+    [SerializeField] private float wallBreakerCooldown = 2f;
+
+    [SerializeField] private int sludgeEnergyCost = 2;
+    [SerializeField, Range(1, 10)] private int sludgeStuckSteps = 3;
+    [SerializeField] private bool sludgeConsumeOnTrigger = true;
+
+
+    [Header("New Items")]
+    [SerializeField] private int grapplingHookEnergyCost = 2;
+    [SerializeField] private float grapplingHookCooldown = 4f;
+    [SerializeField, Range(1, 200)] private int grapplingHookMaxRange = 60;
+
+    [SerializeField] private int reflectorShieldEnergyCost = 2;
+    [SerializeField, Range(1, 20)] private int reflectorShieldSteps = 5;
+    [SerializeField] private float reflectorShieldCooldown = 10f;
+
+    [SerializeField] private int scannerEnergyCost = 2;
+    [SerializeField] private float scannerDuration = 4f;
+    [SerializeField] private float scannerCooldown = 12f;
+    [SerializeField] private Color scannerRevealColor = new Color(1f, 0.65f, 0.1f, 1f);
+
+    private float scannerActiveUntil = 0f;
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
@@ -85,7 +117,9 @@ public class GameManager : MonoBehaviour
         grid.tutorialUpdate.AddListener(UpdateTutorialText);
         this.playerResources = this.player.GetComponent<PlayerResources>();
 
-        this.grid.CollapseWorld();
+        
+        this.playerItems = this.player.GetComponent<PlayerItems>();
+this.grid.CollapseWorld();
         this.SetWeights();
         Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
         this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos),MaxGridArea);
@@ -197,11 +231,22 @@ public class GameManager : MonoBehaviour
     /// <param name="clicked">Clicked game object</param>
     public void OnClick(GameObject clicked)
     {
-        GridObj selected = this.grid.GetGridObjFromGameObj(clicked);
+        // Use root object (floors/walls are often children).
+        GameObject rootObj = clicked != null ? clicked.transform.root.gameObject : null;
+        GridObj targetTile = rootObj != null ? this.grid.GetGridObjFromGameObj(rootObj) : null;
+
+        // If an item mode wants to handle this click (e.g. Sludge placement), do it first.
+        if (this.playerItems != null && this.playerItems.TryHandleWorldClick(targetTile))
+        {
+            return;
+        }
+
+        // Default behaviour: place a selected WFC-tile pattern on replaceable tiles.
+        GridObj selected = targetTile;
         if (selected == null || (selected.GetGridType() != GridType.REPLACEABLE && selected.GetGridType() != GridType.MANUAL_REPLACEABLE)) return;
         if (!this.gui.HasSelectedObj()) return;
 
-        GridObj virtualObj = this.gui.GetSelected();
+GridObj virtualObj = this.gui.GetSelected();
 
         int cost = virtualObj.PlacementCost;
 
@@ -219,36 +264,6 @@ public class GameManager : MonoBehaviour
 
         this.gui.RemoveSelected(false);
     }
-
-    /// <summary>
-    /// Spawns an Energy Crystal on a freshly instantiated REGULAR tile based on player energy.
-    /// Centralized here so tuning happens in one place (like WFC weights).
-    /// </summary>
-    public void TrySpawnEnergyCrystal(GridObj tile, int worldOffsetX, int worldOffsetY)
-    {
-        if (!enableEnergyCrystals) return;
-        if (tile == null) return;
-        if (prefabLibrary == null || prefabLibrary.prefabEnergyCrystal == null) return;
-        if (playerResources == null) return;
-        if (tile.GetGridType() != GridType.REGULAR) return;
-
-        float denom = Mathf.Max(1, playerResources.MaxEnergy);
-        float energyRatio = playerResources.CurrentEnergy / denom; // 0..1
-
-        float spawnChance = crystalBaseChance * (crystalEnergyBias - energyRatio);
-        spawnChance = Mathf.Clamp(spawnChance, crystalMinChance, crystalMaxChance);
-
-        int maxCrystals = crystalBaseMax + Mathf.FloorToInt((1f - energyRatio) * crystalBonusMax);
-        maxCrystals = Mathf.Max(0, maxCrystals);
-
-        if (UnityEngine.Random.value >= spawnChance) return;
-
-        Vector3 worldPos = tile.GetWorldPos(worldOffsetX, worldOffsetY);
-        EnergyCrystal.PrepareSpawn(worldPos, maxCrystals);
-        Instantiate(prefabLibrary.prefabEnergyCrystal, worldPos, Quaternion.identity);
-    }
-
-
     /// <summary>
     /// Calls a function in gui to set the tutorial text if one is not already open
     /// enqeues the tutorial to the line
@@ -266,10 +281,124 @@ public class GameManager : MonoBehaviour
     /// Gets the grid in its current state
     /// </summary>
     /// <returns>Grid</returns>
-    public Grid GetCurrentGrid() { return this.grid; }
+    
+
+    /// <summary>
+    /// Spawns an Energy Crystal on a freshly instantiated REGULAR tile based on player energy.
+    /// Centralized here so tuning happens in one place (like WFC weights).
+    /// </summary>
+    public void TrySpawnEnergyCrystal(GridObj tile, int worldOffsetX, int worldOffsetY)
+    {
+        if (!enableEnergyCrystals) return;
+        if (tile == null) return;
+        if (prefabLibrary == null || prefabLibrary.prefabEnergyCrystal == null) return;
+        if (playerResources == null) return;
+        if (tile.GetGridType() != GridType.REGULAR) return;
+
+        // Avoid division by zero if someone sets MaxEnergy to 0 in the Inspector.
+        float denom = Mathf.Max(1, playerResources.MaxEnergy);
+        float energyRatio = playerResources.CurrentEnergy / denom; // 0..1
+
+        float spawnChance = crystalBaseChance * (crystalEnergyBias - energyRatio);
+        spawnChance = Mathf.Clamp(spawnChance, crystalMinChance, crystalMaxChance);
+
+        int maxCrystals = crystalBaseMax + Mathf.FloorToInt((1f - energyRatio) * crystalBonusMax);
+        maxCrystals = Mathf.Max(0, maxCrystals);
+
+        if (UnityEngine.Random.value >= spawnChance) return;
+
+        Vector3 worldPos = tile.GetWorldPos(worldOffsetX, worldOffsetY);
+        EnergyCrystal.PrepareSpawn(worldPos, maxCrystals);
+        Instantiate(prefabLibrary.prefabEnergyCrystal, worldPos, Quaternion.identity);
+    }
+
+public Grid GetCurrentGrid() { return this.grid; }
     public PrefabLibrary GetPrefabLibrary() { return this.prefabLibrary; }
     public PlayerMovement GetPlayerMovement() { return this.playerMovement; }
     public bool IsTutorialOpen() { return this.tutorialOpen; }
     public EnemyMovement GetEnemyMovement() { return this.enemyMovement; }
     public Pathfinding GetPathfinding() { return this.pathfinding; }
+
+    // --- Item tuning getters (centralized like weights) ---
+    
+    // --------------------- Scanner (Reveal Hidden Traps) ---------------------
+    public bool IsScannerActive()
+    {
+        return Time.time < scannerActiveUntil;
+    }
+
+    public void ActivateScanner(float durationSecs)
+    {
+        scannerActiveUntil = Time.time + Mathf.Max(0f, durationSecs);
+        RevealAllHiddenTraps(true);
+
+        CancelInvoke(nameof(DisableScanner));
+        Invoke(nameof(DisableScanner), Mathf.Max(0f, durationSecs));
+    }
+
+    private void DisableScanner()
+    {
+        scannerActiveUntil = 0f;
+        RevealAllHiddenTraps(false);
+    }
+
+    /// <summary>
+    /// Called from GridObj.InstantiateObj/ReplaceFloorPrefab so newly spawned HiddenTraps also become visible while scanning.
+    /// </summary>
+    public void ApplyScannerRevealToTile(GridObj tile)
+    {
+        if (!IsScannerActive()) return;
+        if (tile == null) return;
+        if (tile.GetGridType() != GridType.HIDDENTRAP) return;
+
+        tile.SetHiddenTrapReveal(true, scannerRevealColor);
+    }
+
+    private void RevealAllHiddenTraps(bool reveal)
+    {
+        if (grid == null) return;
+        GridObj[,] arr = grid.GetGridArray();
+        if (arr == null) return;
+
+        int w = arr.GetLength(0);
+        int h = arr.GetLength(1);
+
+        for (int x = 0; x < w; x++)
+        {
+            for (int y = 0; y < h; y++)
+            {
+                GridObj t = arr[x, y];
+                if (t == null) continue;
+                if (t.GetGridType() != GridType.HIDDENTRAP) continue;
+
+                t.SetHiddenTrapReveal(reveal, scannerRevealColor);
+            }
+        }
+    }
+public int GetTimeReversalEnergyCost() { return this.timeReversalEnergyCost; }
+    public int GetTimeReversalSteps() { return this.timeReversalSteps; }
+    public float GetTimeReversalCooldown() { return this.timeReversalCooldown; }
+
+    public int GetWallBreakerEnergyCost() { return this.wallBreakerEnergyCost; }
+    public float GetWallBreakerCooldown() { return this.wallBreakerCooldown; }
+
+    public int GetSludgeEnergyCost() { return this.sludgeEnergyCost; }
+    public int GetSludgeStuckSteps() { return this.sludgeStuckSteps; }
+    public bool GetSludgeConsumeOnTrigger() { return this.sludgeConsumeOnTrigger; }
+
+    // --------------------- New Items Getters ---------------------
+    public int GetGrapplingHookEnergyCost() { return grapplingHookEnergyCost; }
+    public float GetGrapplingHookCooldown() { return grapplingHookCooldown; }
+    public int GetGrapplingHookMaxRange() { return grapplingHookMaxRange; }
+
+    public int GetReflectorShieldEnergyCost() { return reflectorShieldEnergyCost; }
+    public int GetReflectorShieldSteps() { return reflectorShieldSteps; }
+    public float GetReflectorShieldCooldown() { return reflectorShieldCooldown; }
+
+    public int GetScannerEnergyCost() { return scannerEnergyCost; }
+    public float GetScannerDuration() { return scannerDuration; }
+    public float GetScannerCooldown() { return scannerCooldown; }
+    public Color GetScannerRevealColor() { return scannerRevealColor; }
+
 }
+

@@ -88,6 +88,7 @@ public class Trap : IInteractable
     }
     void IInteractable.OnUse(GridObj obj)
     {
+        if (PlayerMovement.INSTANCE != null && PlayerMovement.INSTANCE.HasTrapShield) return;
         if (this.activated)
         {
             this.ActivateTrap();
@@ -268,6 +269,8 @@ public class HiddenTrap : IInteractable
     }
     void IInteractable.OnUse(GridObj obj)
     {
+        if (PlayerMovement.INSTANCE != null && PlayerMovement.INSTANCE.HasTrapShield) return;
+        if (PlayerMovement.INSTANCE != null && PlayerMovement.INSTANCE.HasTrapShield) return;
         if (this.activated)
         {
             this.ActivateTrap();
@@ -322,3 +325,47 @@ public class HiddenTrap : IInteractable
 
     void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
 }
+
+
+/// <summary>
+/// A sticky tile placed by the player. It does not affect the player, but the enemy can get stuck on it for a few turns.
+/// The actual "stuck" logic is handled in EnemyMovement (because the enemy does not call OnUse on tiles).
+/// </summary>
+public class Sludge : IInteractable
+{
+    void IInteractable.SetColor(GameObject obj)
+    {
+        // Optional: tint the floor to visually stand out (only if the prefab uses a standard MeshRenderer material).
+        MeshRenderer mr = obj.GetComponentInChildren<MeshRenderer>();
+        if (mr != null)
+        {
+            mr.material.color = new Color(0.12f, 0.25f, 0.12f);
+        }
+    }
+
+    void IInteractable.OnUse(GridObj obj)
+    {
+        // No direct effect for the player.
+        return;
+    }
+
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    {
+        // Same movement rules as Regular: allowed if no wall and destination is not replaceable.
+        if (!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
+        {
+            if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
+            if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            return MoveType.WALK;
+        }
+        return MoveType.INVALID;
+    }
+
+    GameObject IInteractable.GetPrefab()
+    {
+        return GameManager.INSTANCE != null ? GameManager.INSTANCE.GetPrefabLibrary().prefabSludge : null;
+    }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) { }
+}
+
