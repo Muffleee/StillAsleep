@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private EnemyMovement enemyMovement;
     [SerializeField] private Pathfinding pathfinding;
+    [SerializeField] private Inventory inventory;
     [SerializeField] private GameObject Audio;
 
     public static int emptyWeight;
