@@ -55,26 +55,37 @@ public class WinScreen : MonoBehaviour
         if(this.nextRoundPanel != null)
         {
             this.nextRoundPanel.SetActive(true);
+            if (GameManager.INSTANCE.GetRound() % 3 == 0) this.wfcChoice.gameObject.SetActive(false);
+            else this.wfcChoice.gameObject.SetActive(true);
         }
         Time.timeScale = 0f;
     }
 
     private void StartNextRound()
     {
-        WeightType weight; 
-        switch (wfcChoice.GetFirstActiveToggle().name)
+        WeightType weight = WeightType.NORMAL;
+        if (this.wfcChoice.IsActive() == false)
         {
-            case "OPEN": weight = WeightType.OPEN; break;
-            case "NORMAL": weight = WeightType.NORMAL; break;
-            case "CLOSED": weight = WeightType.CLOSED; break;
-            default: weight = WeightType.NORMAL; break;
+            GameManager.INSTANCE.OnWin(WeightType.START);
         }
-        if(this.nextRoundPanel != null)
+        else
+        {
+
+            switch (wfcChoice.GetFirstActiveToggle().name)
+            {
+                case "OPEN": weight = WeightType.OPEN; break;
+                case "NORMAL": weight = WeightType.NORMAL; break;
+                case "CLOSED": weight = WeightType.CLOSED; break;
+                default: weight = WeightType.NORMAL; break;
+            }
+        }
+        if (this.nextRoundPanel != null)
         {
             this.nextRoundPanel.SetActive(false);
             Time.timeScale = 1f;
         }
         GameManager.INSTANCE.OnWin(weight);
+        
     }
     private void RestartGame()
     {

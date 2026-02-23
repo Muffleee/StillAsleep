@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -40,6 +41,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
+    private List<IMapCondition> allMapConditions = new List<IMapCondition>();
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
@@ -285,7 +287,10 @@ public class GameManager : MonoBehaviour
     }
     private void NextCondition()
     {
-        Debug.Log("Setting next condition");
+        if (allMapConditions.Count <= 0) return;
+        Unity.Mathematics.Random rnd = new Unity.Mathematics.Random();
+        int index = rnd.NextInt(allMapConditions.Count);
+        allMapConditions[index].Initiate(this.phase);
     }
     /// <summary>
     /// Increase the maxGridArea each round
@@ -310,6 +315,8 @@ public class GameManager : MonoBehaviour
                 break;
         }
         SetWeights(weights);
+        // SET ENEMY POSITION DYNAMICALLY
+        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3, 3));
         this.round = (this.round + 1) % 3;
         Debug.Log(this.round);
 
@@ -324,6 +331,8 @@ public class GameManager : MonoBehaviour
     public bool IsTutorialOpen() { return this.tutorialOpen; }
     public EnemyMovement GetEnemyMovement() { return this.enemyMovement; }
     public Pathfinding GetPathfinding() { return this.pathfinding; }
+    public int GetRound() { return this.round; }
+    public int GetPhase() {  return this.phase; }
 }
 
 public enum WeightType
