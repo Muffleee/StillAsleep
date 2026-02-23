@@ -502,7 +502,7 @@ public class GridObj
             GameObject.Destroy(this.wallObjs[wallPos]);
             this.wallObjs[wallPos] = null;
         }
-
+        this.DestroyFog();
         GameObject.Destroy(this.parentObj);
         this.parentObj = null;
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,9 +11,11 @@ public class FogOfWarScript : MonoBehaviour
     [SerializeField] private int enemyRevealRadius = 1;
     public static FogOfWarScript INSTANCE { get; private set; }
     private void Awake() { INSTANCE = this;}
+    private bool isActive = false;
 
     public void RefreshFog(Grid grid, Vector2Int playerPos, Vector2Int enemyPos)
-    {
+    {   
+        if(!isActive) return;
         if (grid == null) return;
         var arr = grid.GetGridArray();
         int w = arr.GetLength(0), h = arr.GetLength(1);
@@ -72,4 +75,5 @@ public class FogOfWarScript : MonoBehaviour
 
     public int  GetRevealRadius() { return revealRadius; }
     public void SetRevealRadius(int radius) { revealRadius = Mathf.Max(0, radius); }
+    public void SetIsActive(bool isActive) { this.isActive = isActive; }
 }
