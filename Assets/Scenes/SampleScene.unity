@@ -239,6 +239,7 @@ GameObject:
   - component: {fileID: 220377179}
   - component: {fileID: 220377180}
   - component: {fileID: 220377181}
+  - component: {fileID: 220377182}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -276,6 +277,7 @@ MonoBehaviour:
   playerMovement: {fileID: 6834562829543864870}
   enemyMovement: {fileID: 270545165}
   pathfinding: {fileID: 220377180}
+  fogCondition: {fileID: 220377182}
   Audio: {fileID: 7712494145165585650, guid: dcfaec5b534bece499f2638d66792c9c, type: 3}
   player: {fileID: 6834562829543864865}
 --- !u!4 &220377177
@@ -372,6 +374,28 @@ MonoBehaviour:
   gameManager: {fileID: 220377176}
   camFollow: {fileID: 330585548}
   pathfinding: {fileID: 220377180}
+--- !u!114 &220377182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 220377175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3999da8557df7f7488666e3a6e0b5d58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameManager: {fileID: 220377176}
+  playerMovement: {fileID: 6834562829543864870}
+  revealRadius: 1
+  enemyRevealRadius: 0
+  cubeHeight: 2
+  cubeScale: 1
+  fogMaterial: {fileID: 2100000, guid: 2a206c0aa8930a24f85f665395728300, type: 2}
+  fogTexture: {fileID: 2800000, guid: 1cdc5b506b1a4a33a53c30669ced1f51, type: 3}
+  scrollSpeedX: 1
+  scrollSpeedZ: 1
 --- !u!1 &231321110
 GameObject:
   m_ObjectHideFlags: 0
@@ -4121,11 +4145,7 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1316057197}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3246171411109070801, guid: 220c7dec9ee469541a1aa4ec393fa355,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 6834562829543864873}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 220c7dec9ee469541a1aa4ec393fa355, type: 3}
 --- !u!1 &6834562829543864865 stripped
 GameObject:
@@ -4163,27 +4183,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ee59591d4335ea459582fdbd63b4997, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6834562829543864873
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6834562829543864865}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3999da8557df7f7488666e3a6e0b5d58, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameManager: {fileID: 220377176}
-  playerMovement: {fileID: 6834562829543864870}
-  revealRadius: 2
-  cubeHeight: 1.5
-  cubeScale: 1
-  fogMaterial: {fileID: 2100000, guid: 2a206c0aa8930a24f85f665395728300, type: 2}
-  fogTexture: {fileID: 2800000, guid: 1cdc5b506b1a4a33a53c30669ced1f51, type: 3}
-  scrollSpeedX: 0.5
-  scrollSpeedZ: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

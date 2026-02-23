@@ -26,6 +26,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private EnemyMovement enemyMovement;
     [SerializeField] private Pathfinding pathfinding;
+    [SerializeField] private FogOfWarScript fogCondition;
     [SerializeField] private GameObject Audio;
 
     public static int emptyWeight;
@@ -81,7 +82,7 @@ public class GameManager : MonoBehaviour
 
        // this.grid.CreateExit(new Vector2Int(4, 4), 0, 1);
         this.grid.InstantiateMissing();
-        FogOfWarScript.INSTANCE?.RefreshFog();
+        this.RefreshFog();
         this.gui.FillList();
         // EnemyMovement.INSTANCE.SetEnemyGridPos();
         EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3,3));
@@ -145,6 +146,7 @@ public class GameManager : MonoBehaviour
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {
         enemyMovement.MoveEnemy();
+        this.RefreshFog();
         GridObj toObj = this.grid.GetGridObj(to);
         if(toObj != null && toObj.GetGridType() == GridType.TRAP)
         {
@@ -164,7 +166,7 @@ public class GameManager : MonoBehaviour
             this.grid.CollapseWorld();
             this.grid.IncreaseGrid(this.grid.GetNextGenPos(enemyGridPos),MaxGridArea);
             this.grid.InstantiateMissing();
-            FogOfWarScript.INSTANCE?.RefreshFog();
+            this.RefreshFog();
 
             this.gui.FillList();
         }
@@ -176,7 +178,7 @@ public class GameManager : MonoBehaviour
                 this.grid.CollapseWorld();
                 this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos),MaxGridArea);
                 this.grid.InstantiateMissing();
-                FogOfWarScript.INSTANCE?.RefreshFog();
+                this.RefreshFog();
 
                 this.gui.FillList();
             }
@@ -234,4 +236,11 @@ public class GameManager : MonoBehaviour
     public bool IsTutorialOpen() { return this.tutorialOpen; }
     public EnemyMovement GetEnemyMovement() { return this.enemyMovement; }
     public Pathfinding GetPathfinding() { return this.pathfinding; }
+    private void RefreshFog()
+    {
+        if (fogCondition == null) return;
+        Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        Vector2Int enemyPos  = EnemyMovement.INSTANCE.GetEnemyGridPos();
+        fogCondition.RefreshFog(this.grid, playerPos, enemyPos);
+    }
 }
