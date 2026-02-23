@@ -80,7 +80,6 @@ public class GridObj
         this.floorPrefab = builder.GetPrefabLibrary().GetRandomFloorPrefab();
         this.destructibleWallPrefab = builder.GetPrefabLibrary().prefabDestructibleWall;
         this.exitPrefab = builder.GetPrefabLibrary().prefabExit;
-        this.energyCrystalPrefab = builder.GetPrefabLibrary().prefabEnergyCrystal;
         GameManager.AllGridObjs.Add(this);
     }
 
@@ -331,31 +330,14 @@ public class GridObj
             if (neighbors[WallPos.RIGHT] == null || neighbors[WallPos.RIGHT].GetWallObjs()[WallPos.LEFT] == null) this.InstantiateWall(WallPos.RIGHT, this.GetWallAt(WallPos.RIGHT), worldOffsetX, worldOffsetY);
         }
 
-        PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
-        if (pr != null)
+        // Energy crystal spawning is centralized in GameManager (tunable like weights).
+
+        if (GameManager.INSTANCE != null)
         {
-            float energyRatio = (float)pr.CurrentEnergy / pr.MaxEnergy;
-
-            float baseChance = 0.05f; 
-            float spawnChance = baseChance * (1.5f - energyRatio);
-            spawnChance = Mathf.Clamp(spawnChance, 0.02f, 0.25f); 
-            //      spawnChance = baseChance * (1.5 - energyRatio)
-            //        → Spieler mit wenig Energie erhalten bis zu +50 % höhere Spawn-Chance
-            //        → Spieler mit voller Energie erhalten 50 % weniger Spawn-Chance
-
-            int baseMax = 6;
-            int bonus = 10;
-            int maxCrystals = baseMax + Mathf.FloorToInt((1f - energyRatio) * bonus);
-            //      maxCrystals = baseMax + (1 - energyRatio) * bonus
-            //        → Obergrenze steigt bei wenig Energie (bis zu 16)
-            //        → Obergrenze sinkt bei viel Energie (mindestens 6)
-
-            if (this.gridType == GridType.REGULAR && UnityEngine.Random.value < spawnChance)
-            {
-                EnergyCrystal.PrepareSpawn(this.GetWorldPos(worldOffsetX, worldOffsetY), maxCrystals);
-                GameObject.Instantiate(this.energyCrystalPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
-            }
+            GameManager.INSTANCE.TrySpawnEnergyCrystal(this, worldOffsetX, worldOffsetY);
         }
+
+
     }
 
     /// <summary>

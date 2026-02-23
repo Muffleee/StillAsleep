@@ -42,6 +42,17 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
 
+    [SerializeField] private bool enableEnergyCrystals = true;
+    [SerializeField, Range(0f, 1f)] private float crystalBaseChance = 0.05f;
+    [SerializeField, Range(0f, 1f)] private float crystalMinChance = 0.02f;
+    [SerializeField, Range(0f, 1f)] private float crystalMaxChance = 0.25f;
+
+    [SerializeField] private float crystalEnergyBias = 1.5f;
+
+    [SerializeField] private int crystalBaseMax = 6;
+    [SerializeField] private int crystalBonusMax = 10;
+
+
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
     bool tutorialOpen = false;
@@ -213,6 +224,36 @@ public class GameManager : MonoBehaviour
 
         this.gui.RemoveSelected(false);
     }
+
+    /// <summary>
+    /// Spawns an Energy Crystal on a freshly instantiated REGULAR tile based on player energy.
+    /// Centralized here so tuning happens in one place (like WFC weights).
+    /// </summary>
+    public void TrySpawnEnergyCrystal(GridObj tile, int worldOffsetX, int worldOffsetY)
+    {
+        if (!enableEnergyCrystals) return;
+        if (tile == null) return;
+        if (prefabLibrary == null || prefabLibrary.prefabEnergyCrystal == null) return;
+        if (playerResources == null) return;
+        if (tile.GetGridType() != GridType.REGULAR) return;
+
+        float denom = Mathf.Max(1, playerResources.MaxEnergy);
+        float energyRatio = playerResources.CurrentEnergy / denom; // 0..1
+
+        float spawnChance = crystalBaseChance * (crystalEnergyBias - energyRatio);
+        spawnChance = Mathf.Clamp(spawnChance, crystalMinChance, crystalMaxChance);
+
+        int maxCrystals = crystalBaseMax + Mathf.FloorToInt((1f - energyRatio) * crystalBonusMax);
+        maxCrystals = Mathf.Max(0, maxCrystals);
+
+        if (UnityEngine.Random.value >= spawnChance) return;
+
+        Vector3 worldPos = tile.GetWorldPos(worldOffsetX, worldOffsetY);
+        EnergyCrystal.PrepareSpawn(worldPos, maxCrystals);
+        Instantiate(prefabLibrary.prefabEnergyCrystal, worldPos, Quaternion.identity);
+    }
+
+
     /// <summary>
     /// Calls a function in gui to set the tutorial text if one is not already open
     /// enqeues the tutorial to the line
