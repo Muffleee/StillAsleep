@@ -280,6 +280,13 @@ MonoBehaviour:
   fogCondition: {fileID: 220377182}
   Audio: {fileID: 7712494145165585650, guid: dcfaec5b534bece499f2638d66792c9c, type: 3}
   player: {fileID: 6834562829543864865}
+  enableEnergyCrystals: 1
+  crystalBaseChance: 0.05
+  crystalMinChance: 0.02
+  crystalMaxChance: 0.25
+  crystalEnergyBias: 1.5
+  crystalBaseMax: 6
+  crystalBonusMax: 10
 --- !u!4 &220377177
 Transform:
   m_ObjectHideFlags: 0
@@ -343,6 +350,8 @@ MonoBehaviour:
   torchPrefabs:
   - {fileID: 5441399533277537789, guid: da90a9d2befa96e41ab1155b323c8d44, type: 3}
   - {fileID: 5441399533277537789, guid: b3bb23bf7ef24f04a8230dc745766e8a, type: 3}
+  fogPrefab: {fileID: 5239380601058934888, guid: 57b0c78c9f0ff2c42915c67bdaaa809f,
+    type: 3}
 --- !u!114 &220377180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -389,13 +398,7 @@ MonoBehaviour:
   gameManager: {fileID: 220377176}
   playerMovement: {fileID: 6834562829543864870}
   revealRadius: 1
-  enemyRevealRadius: 0
-  cubeHeight: 2
-  cubeScale: 1
-  fogMaterial: {fileID: 2100000, guid: 2a206c0aa8930a24f85f665395728300, type: 2}
-  fogTexture: {fileID: 2800000, guid: 1cdc5b506b1a4a33a53c30669ced1f51, type: 3}
-  scrollSpeedX: 1
-  scrollSpeedZ: 1
+  enemyRevealRadius: 1
 --- !u!1 &231321110
 GameObject:
   m_ObjectHideFlags: 0

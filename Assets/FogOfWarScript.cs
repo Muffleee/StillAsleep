@@ -7,25 +7,10 @@ public class FogOfWarScript : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private int revealRadius = 3;
-    [SerializeField] private int enemyRevealRadius = 0;
-    [SerializeField] private float cubeHeight = 2f;
-    [SerializeField] private float cubeScale  = 1.01f;
-    [SerializeField] private Material fogMaterial;
-    [SerializeField] private Texture2D fogTexture;
-    [SerializeField] private float scrollSpeedX = 0.04f;
-    [SerializeField] private float scrollSpeedZ = 0.02f;
-    private static readonly int OffsetID = Shader.PropertyToID("_BaseMap_ST");
-    private static readonly int BaseMap  = Shader.PropertyToID("_BaseMap");
+    [SerializeField] private int enemyRevealRadius = 1;
     public static FogOfWarScript INSTANCE { get; private set; }
     private void Awake() { INSTANCE = this;}
-    private void Start()
-    {
-        fogMaterial.SetTexture(BaseMap, fogTexture);
-    }
-    private void Update()
-    {
-        fogMaterial.SetVector(OffsetID, new Vector4(1f, 1f, (Time.time * scrollSpeedX) % 1f, (Time.time * scrollSpeedZ) % 1f));
-    }
+
     public void RefreshFog(Grid grid, Vector2Int playerPos, Vector2Int enemyPos)
     {
         if (grid == null) return;
@@ -36,15 +21,15 @@ public class FogOfWarScript : MonoBehaviour
             for (int y = 0; y < h; y++)
             {
                 var obj = arr[x, y];
-                if (obj == null || !obj.IsInstantiated() || obj.IsRevealed || obj.IsFogged) continue;
-                CreateFogTile(obj, grid);
+                if (obj == null || !obj.IsInstantiated() || obj.isRevealed || obj.isFogged) continue;
+                obj.SpawnFog();
             }
 
         // Permanently reveal around player
-        RevealAround(grid,playerPos,revealRadius,true);
+        RevealAround(grid, playerPos, revealRadius, true);
 
         // Temporarily clear around enemy 
-        RevealAround(grid,enemyPos,enemyRevealRadius,false);
+        RevealAround(grid, enemyPos, enemyRevealRadius, false);
     }
 
     private void RevealAround(Grid grid, Vector2Int center, int radius, bool permanent)
@@ -61,7 +46,7 @@ public class FogOfWarScript : MonoBehaviour
                 if (permanent)
                     obj.MarkRevealed();
                 else
-                    obj.DestroyFogQuad();
+                    obj.DestroyFog();
             }
     }
 
@@ -87,25 +72,4 @@ public class FogOfWarScript : MonoBehaviour
 
     public int  GetRevealRadius() { return revealRadius; }
     public void SetRevealRadius(int radius) { revealRadius = Mathf.Max(0, radius); }
-
-    private void CreateFogTile(GridObj obj, Grid grid)
-    {
-        Vector3 worldPos = obj.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY());
-        float size = GridObj.PLACEMENT_FACTOR * cubeScale;
-
-        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.name = "FogCube";
-        Destroy(cube.GetComponent<Collider>());
-        cube.transform.position = new Vector3(worldPos.x, cubeHeight * 0.5f, worldPos.z);
-        cube.transform.localScale = new Vector3(size, cubeHeight, size);
-
-        if (obj.GetparentObj() != null)
-            cube.transform.SetParent(obj.GetparentObj().transform, true);
-
-        cube.GetComponent<MeshRenderer>().material = fogMaterial;
-        cube.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        cube.GetComponent<MeshRenderer>().receiveShadows = false;
-
-        obj.SetFogQuad(cube);
-    }
 }
