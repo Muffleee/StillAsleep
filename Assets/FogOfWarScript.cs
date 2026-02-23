@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FogOfWarScript : MonoBehaviour, IMapCondition
+public class FogOfWarScript : MonoBehaviour
 {
     [SerializeField] private GameManager gameManager;
     [SerializeField] private PlayerMovement playerMovement;
@@ -26,16 +26,12 @@ public class FogOfWarScript : MonoBehaviour, IMapCondition
     {
         fogMaterial.SetVector(OffsetID, new Vector4(1f, 1f, (Time.time * scrollSpeedX) % 1f, (Time.time * scrollSpeedZ) % 1f));
     }
-
-    public int Difficulty() {return 0;}
-    public void Initiate(int level) { }
     public void RefreshFog(Grid grid, Vector2Int playerPos, Vector2Int enemyPos)
     {
         if (grid == null) return;
         var arr = grid.GetGridArray();
         int w = arr.GetLength(0), h = arr.GetLength(1);
 
-        // Create fog on every unfogged, unrevealed, instantiated tile
         for (int x = 0; x < w; x++)
             for (int y = 0; y < h; y++)
             {
@@ -45,10 +41,10 @@ public class FogOfWarScript : MonoBehaviour, IMapCondition
             }
 
         // Permanently reveal around player
-        RevealAround(grid, playerPos, revealRadius, permanent: true);
+        RevealAround(grid,playerPos,revealRadius,true);
 
-        // Temporarily clear around enemy (not permanent — fog returns on next refresh)
-        RevealAround(grid, enemyPos, enemyRevealRadius, permanent: false);
+        // Temporarily clear around enemy 
+        RevealAround(grid,enemyPos,enemyRevealRadius,false);
     }
 
     private void RevealAround(Grid grid, Vector2Int center, int radius, bool permanent)
