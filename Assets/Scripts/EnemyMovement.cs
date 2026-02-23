@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UIElements;
 
 
 /// <summary>
@@ -11,12 +12,12 @@ using UnityEngine.Events;
 public class EnemyMovement : Movement
 {
     [SerializeField] private WinScreen winScreen;
-    [SerializeField] private int destroyWall = 3;
     private bool DEBUG = false;
     public UnityEvent lose = new UnityEvent();
     public static EnemyMovement INSTANCE;
     private bool isInstantiated = false;
     int stepCounter = 0;
+    private EnemyDifficulty difficulty = new EnemyDifficulty(EnemyDifficultySetting.VERY_EASY);
     
     private void Awake()
     {
@@ -97,7 +98,8 @@ public class EnemyMovement : Movement
         int diffY = playerPos.y - this.gridPos.y;
 
         Grid thisGrid = this.gameManager.GetCurrentGrid();
-        WallPos wPos = new WallPos();
+        bool found = false;
+        WallPos bestDir = new WallPos();
 
         foreach (WallPos wallPos in Enum.GetValues(typeof(WallPos)))
         {
@@ -105,55 +107,65 @@ public class EnemyMovement : Movement
             {
                 allowed.Add(wallPos);
             }
-            else if (stepCounter % destroyWall == 0 && this.IsValidMove(wallPos) == MoveType.JUMP)
+            else if (stepCounter % this.difficulty.GetDestroyWallsAfter() == 0 && this.IsValidMove(wallPos) == MoveType.JUMP)
             {
                 destroyNextWall.Add(wallPos);
             }
         }
-        if (diffX == 0 && diffY == 0)
-            {
-                this.winScreen.ShowWinScreen();
-                return null;
-            }
-            else if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
-            else if (diffX <= 0 && (allowed.Contains(WallPos.RIGHT) || destroyNextWall.Contains(WallPos.RIGHT)))
-            {
-                wPos = WallPos.RIGHT;
-                if(!allowed.Contains(WallPos.RIGHT) && destroyNextWall.Contains(WallPos.RIGHT)) DestroyWallHelper(WallPos.RIGHT);
-                
-            }
-            else if (diffX > 0 && (allowed.Contains(WallPos.LEFT) || destroyNextWall.Contains(WallPos.LEFT)))
-            {
-                wPos = WallPos.LEFT;
-                if (!allowed.Contains(WallPos.LEFT) && destroyNextWall.Contains(WallPos.LEFT)) DestroyWallHelper(WallPos.LEFT);
 
-            }
-            else if (diffY <= 0 && (allowed.Contains(WallPos.BACK) || destroyNextWall.Contains(WallPos.BACK)))
+        if (diffX == 0 && diffY == 0)
+        {
+            this.winScreen.ShowWinScreen();
+            return null;
+        }
+        else if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
+        else if (diffX <= 0 && (allowed.Contains(WallPos.RIGHT) || destroyNextWall.Contains(WallPos.RIGHT)))
+        {
+            bestDir = WallPos.RIGHT;
+            found = true;      
+        }
+        else if (diffX > 0 && (allowed.Contains(WallPos.LEFT) || destroyNextWall.Contains(WallPos.LEFT)))
+        {
+            bestDir = WallPos.LEFT;
+            found = true;
+        }
+        else if (diffY <= 0 && (allowed.Contains(WallPos.BACK) || destroyNextWall.Contains(WallPos.BACK)))
+        {
+            bestDir = WallPos.BACK;
+            found = true;
+        }
+        else if (diffY > 0 && (allowed.Contains(WallPos.FRONT) || destroyNextWall.Contains(WallPos.FRONT)))
+        {
+            bestDir = WallPos.FRONT;
+            found = true;
+        }
+
+        if(found)
+        {
+            List<WallPos> allMoves = new List<WallPos>();
+            allMoves.AddRange(allowed);
+            allMoves.AddRange(destroyNextWall);
+
+            if (allMoves.Count > 1 && UnityEngine.Random.value < difficulty.MisstepChance())
             {
-                wPos = WallPos.BACK;
-                if (!allowed.Contains(WallPos.BACK) && destroyNextWall.Contains(WallPos.BACK)) DestroyWallHelper(WallPos.BACK);
+                bestDir = allMoves[UnityEngine.Random.Range(0, allMoves.Count)];
+            }
             
-            }
-            else if (diffY > 0 && (allowed.Contains(WallPos.FRONT) || destroyNextWall.Contains(WallPos.FRONT)))
+            if (!allowed.Contains(bestDir) && destroyNextWall.Contains(bestDir)) DestroyWallHelper(bestDir);
+        } else
+        {
+            if (allowed.Count == 0)
             {
-                wPos = WallPos.FRONT;
-                if (!allowed.Contains(WallPos.FRONT) && destroyNextWall.Contains(WallPos.FRONT)) DestroyWallHelper(WallPos.FRONT);
+                bestDir = destroyNextWall[0];
+                DestroyWallHelper(bestDir);   
             }
             else
             {
-                if (allowed.Count == 0)
-                {
-                    wPos = destroyNextWall[0];
-                    DestroyWallHelper(wPos);
-                    
-                }
-                else
-                {
-                    wPos = allowed[0];
-                }
+                bestDir = allowed[0];
             }
+        }
 
-        return wPos;
+        return bestDir;
     }
     /// <summary>
     /// Helper for GetNextEnemyDir to destroy walls if wanted
@@ -200,4 +212,80 @@ public class EnemyMovement : Movement
         }
     }
 
+    public void SetEnemyDifficulty(EnemyDifficultySetting setting)
+    {
+        this.difficulty.SetDifficultySetting(setting);
+    }
+
+    public EnemyDifficultySetting GetEnemyDifficulty()
+    {
+        return this.difficulty.GetDifficultySetting();
+    }
+}
+
+public enum EnemyDifficultySetting
+{
+    VERY_EASY, EASY, MEDIUM, HARD, VERY_HARD
+}
+
+public class EnemyDifficulty
+{
+    private EnemyDifficultySetting setting;
+    
+    public EnemyDifficulty(EnemyDifficultySetting setting)
+    {
+        this.setting = setting;
+    }
+
+    public void SetDifficultySetting(EnemyDifficultySetting setting)
+    {
+        this.setting = setting;
+    }
+
+    /// <summary>
+    /// Enemy can destroy walls after x many steps
+    /// </summary>
+    /// <returns></returns>
+    public int GetDestroyWallsAfter()
+    {
+        switch (this.setting)
+        {
+            case EnemyDifficultySetting.VERY_EASY:
+                return 6;
+            case EnemyDifficultySetting.EASY:
+                return 5;
+            case EnemyDifficultySetting.MEDIUM:
+                return 4;
+            case EnemyDifficultySetting.HARD:
+                return 2;
+            default:
+                return 1;
+        }
+    }
+
+    /// <summary>
+    /// Enemy has x chance of making a random misstep instead of taking the best step
+    /// </summary>
+    /// <returns></returns>
+    public float MisstepChance()
+    {
+        switch (this.setting)
+        {
+            case EnemyDifficultySetting.VERY_EASY:
+                return 0.55f;
+            case EnemyDifficultySetting.EASY:
+                return 0.35f;
+            case EnemyDifficultySetting.MEDIUM:
+                return 0.25f;
+            case EnemyDifficultySetting.HARD:
+                return 0.15f;
+            default:
+                return 0f;
+        }
+    }
+
+    public EnemyDifficultySetting GetDifficultySetting()
+    {
+        return this.setting;
+    }
 }

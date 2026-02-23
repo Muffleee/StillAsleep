@@ -39,9 +39,14 @@ public class TileDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
         if (ghostObject != null)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            RaycastHit[] allHits = Physics.RaycastAll(ray);
+            foreach (var hit in allHits)
             {
-                ghostObject.transform.position = hit.point;
+                if (hit.collider.transform.IsChildOf(ghostObject.transform)) continue;
+                Vector3 newPos = hit.point;
+                ghostObject.transform.position = newPos;
+                return;
+                
             }
         }
     }
@@ -52,10 +57,13 @@ public class TileDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
         // Place the real object via GameManager
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        RaycastHit[] allHits = Physics.RaycastAll(ray);
+        foreach (var hit in allHits)
         {
             if (GameManager.INSTANCE != null)
             {
+                GridObj selected = GameManager.INSTANCE.GetCurrentGrid().GetGridObjFromGameObj(hit.collider.transform.root.gameObject);
+                if (selected == null || (selected.GetGridType() != GridType.REPLACEABLE && selected.GetGridType() != GridType.MANUAL_REPLACEABLE)) continue;
                 GameManager.INSTANCE.OnClick(hit.collider.gameObject);
             }
         }

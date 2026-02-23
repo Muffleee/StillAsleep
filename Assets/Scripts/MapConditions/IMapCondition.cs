@@ -6,4 +6,5 @@ public interface IMapCondition
 {
     public int Difficulty();
     public void Initiate(int level);
+    public void Deactivate();
 }

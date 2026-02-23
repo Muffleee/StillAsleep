@@ -98,6 +98,9 @@ public class Movement : MonoBehaviour
         Vector3 startPos = this.transform.position;
         Vector3 endPos = startPos + this.GetMoveDir(wallPos);
 
+        this.lastGridPos = this.gridPos;
+        this.gridPos = this.GetNextGridPos(wallPos);
+
         yield return null; // use this to get less sliding with the animations
 
         while (elapsed < totalDuration)
@@ -113,8 +116,6 @@ public class Movement : MonoBehaviour
 
             yield return null;
         }
-        this.lastGridPos = this.gridPos;
-        gridPos = this.GetNextGridPos(wallPos);
         this.transform.position = endPos;
 
     }
