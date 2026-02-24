@@ -127,9 +127,9 @@ public class GameManager : MonoBehaviour
                 hiddenTrapWeight = this.hiddenTrap;
                 break;
             case WeightType.CLOSED:
-                corridorWeight = 9;
-                cornerWeight = 10;
-                oneWallWeight = 4;
+                corridorWeight = 10;
+                cornerWeight = 12;
+                oneWallWeight = 3;
                 emptyWeight = 2;
                 jumpingWeight = 8;
                 manualReplacableWeight = 4;
@@ -137,9 +137,9 @@ public class GameManager : MonoBehaviour
                 hiddenTrapWeight = 4;
                 break;
             case WeightType.OPEN:
-                corridorWeight = 3;
-                cornerWeight = 2;
-                oneWallWeight = 10;
+                corridorWeight = 2;
+                cornerWeight = 3;
+                oneWallWeight = 7;
                 emptyWeight = 12;
                 jumpingWeight = 3;
                 manualReplacableWeight = 10;
@@ -305,7 +305,6 @@ public class GameManager : MonoBehaviour
     {
         if(this.round % 3 == 0)
         {
-            Debug.Log("You win!");
             NewPhase();
         } else
         {
@@ -329,8 +328,7 @@ public class GameManager : MonoBehaviour
         this.grid.InstantiateMissing();
         this.gui.FillList();
         ChangeEnemyMovement();
-        //if(this.phase != 0)
-        NextCondition();
+        if(this.phase != 0) NextCondition();
         this.phase++;
         NewRound(WeightType.START);
     }
@@ -383,7 +381,7 @@ public class GameManager : MonoBehaviour
         SetWeights(weights);
         PlaceEnemy();
         this.round = (this.round + 1) % 3;
-        Debug.Log(this.round);
+        Debug.Log("round: " + this.round);
 
     }
 
@@ -391,7 +389,6 @@ public class GameManager : MonoBehaviour
     {
         Vector2Int enemyPos = new Vector2Int(0, 0);
         Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
-        Debug.Log("player position: " + playerPos.x + ", " + playerPos.y);
         if (playerPos.x > (this.grid.width / 2))
         {
             for (int i = 3; i >= 0; i--)
@@ -424,7 +421,6 @@ public class GameManager : MonoBehaviour
                 if (this.grid.IsInsideGrid(enemyPos)) break;
             }
         }
-        Debug.Log("enemy pos:" + enemyPos.x + ", " + enemyPos.y);
         EnemyMovement.INSTANCE.InstantiateEnemy(enemyPos);
     }
 

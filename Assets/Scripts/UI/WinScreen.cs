@@ -66,7 +66,7 @@ public class WinScreen : MonoBehaviour
         WeightType weight = WeightType.NORMAL;
         if (this.wfcChoice.IsActive() == false)
         {
-            GameManager.INSTANCE.OnWin(WeightType.START);
+            weight = WeightType.NORMAL;
         }
         else
         {
