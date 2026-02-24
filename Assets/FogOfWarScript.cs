@@ -75,5 +75,9 @@ public class FogOfWarScript : MonoBehaviour
 
     public int  GetRevealRadius() { return revealRadius; }
     public void SetRevealRadius(int radius) { revealRadius = Mathf.Max(0, radius); }
-    public void SetIsActive(bool isActive) { this.isActive = isActive; }
+    public void SetIsActive(bool isActive) 
+    { 
+        this.isActive = isActive; 
+        RefreshFog(gameManager.GetCurrentGrid(), PlayerMovement.INSTANCE.GetCurrentGridPos(), EnemyMovement.INSTANCE.GetEnemyGridPos()); 
+    }
 }

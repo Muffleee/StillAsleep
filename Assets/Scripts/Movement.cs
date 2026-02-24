@@ -140,4 +140,12 @@ public class Movement : MonoBehaviour
         }
         this.model.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
     }
+
+    internal void ResetFigure(Vector2Int pos)
+    {
+        this.gridPos = pos;
+        Vector3 newPosition = GridObj.GridPosToWorldPos(pos, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+        newPosition.y = 1;
+        this.gameObject.transform.position = newPosition;
+    }
 }

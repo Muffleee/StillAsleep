@@ -27,7 +27,14 @@ public class EnergyCrystal : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+    public static void DestroyAllCrystals()
+    {
+        foreach(EnergyCrystal c in allCrystals)
+        {
+            Destroy(c.gameObject);
+        }
+        allCrystals.Clear();
+    }
     public static void PrepareSpawn(Vector3 targetPos, int maxCount)
     {
 
