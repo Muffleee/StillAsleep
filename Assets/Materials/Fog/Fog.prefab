@@ -81,7 +81,7 @@ ParticleSystem:
   ringBufferLoopRange: {x: 0, y: 1}
   emitterVelocityMode: 1
   looping: 1
-  prewarm: 0
+  prewarm: 1
   playOnAwake: 1
   useUnscaledTime: 0
   autoRandomSeed: 1
@@ -254,8 +254,8 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 0.59748423, g: 0.59748423, b: 0.59748423, a: 0.39215687}
-      maxColor: {r: 0.7798742, g: 0.7798742, b: 0.7798742, a: 0.39215687}
+      minColor: {r: 0.59748423, g: 0.59748423, b: 0.59748423, a: 0.78431374}
+      maxColor: {r: 0.7798742, g: 0.7798742, b: 0.7798742, a: 0.78431374}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -319,7 +319,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 1.5
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -902,7 +902,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 50
+      scalar: 2
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -1342,7 +1342,7 @@ ParticleSystem:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 0}
         key1: {r: 1, g: 1, b: 1, a: 1}
-        key2: {r: 0, g: 0, b: 0, a: 1}
+        key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
         key5: {r: 0, g: 0, b: 0, a: 0}
@@ -1357,17 +1357,17 @@ ParticleSystem:
         ctime6: 0
         ctime7: 0
         atime0: 0
-        atime1: 6939
-        atime2: 56797
+        atime1: 32768
+        atime2: 65535
         atime3: 65535
-        atime4: 0
+        atime4: 65535
         atime5: 0
         atime6: 0
         atime7: 0
         m_Mode: 0
         m_ColorSpace: 0
         m_NumColorKeys: 2
-        m_NumAlphaKeys: 4
+        m_NumAlphaKeys: 3
       minGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -1402,7 +1402,7 @@ ParticleSystem:
     serializedVersion: 2
     enabled: 1
     mode: 1
-    timeMode: 0
+    timeMode: 1
     fps: 30
     frameOverTime:
       serializedVersion: 2
@@ -1519,7 +1519,10 @@ ParticleSystem:
     uvChannelMask: -1
     rowMode: 1
     sprites:
-    - sprite: {fileID: 21300000, guid: b6a999f04c31e4f4b9aca5a270033182, type: 3}
+    - sprite: {fileID: 1329915558, guid: 3c7caf2f10b88dc44adb0ae58ece04db, type: 3}
+    - sprite: {fileID: 1301988063, guid: 3c7caf2f10b88dc44adb0ae58ece04db, type: 3}
+    - sprite: {fileID: -950729462, guid: 3c7caf2f10b88dc44adb0ae58ece04db, type: 3}
+    - sprite: {fileID: -1273677454, guid: 3c7caf2f10b88dc44adb0ae58ece04db, type: 3}
     flipU: 0
     flipV: 0
   VelocityModule:

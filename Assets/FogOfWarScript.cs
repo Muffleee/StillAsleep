@@ -11,7 +11,7 @@ public class FogOfWarScript : MonoBehaviour
     [SerializeField] private int enemyRevealRadius = 1;
     public static FogOfWarScript INSTANCE { get; private set; }
     private void Awake() { INSTANCE = this;}
-    private bool isActive = false;
+    private bool isActive = true;
 
     public void RefreshFog(Grid grid, Vector2Int playerPos, Vector2Int enemyPos)
     {   
