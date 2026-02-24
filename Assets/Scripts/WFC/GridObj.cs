@@ -25,7 +25,6 @@ public class GridObj
     private IInteractable interactable = null;
     private int weight = 0;
 
-    private GameObject fogQuad = null;
     public bool isFogged   { get; private set; } = false;
     public bool isRevealed { get; private set; } = false;
 
