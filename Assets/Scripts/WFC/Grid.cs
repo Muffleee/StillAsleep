@@ -912,5 +912,7 @@ public class Grid
     public void SetNewGrid(int width, int height)
     {
         this.grid = new GridObj[width, height];
+        this.worldOffsetX = 0;
+        this.worldOffsetY = 0;
     }
 }

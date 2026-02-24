@@ -52,7 +52,7 @@ public class EnemyMovement : Movement
             return;
         }
         this.gridPos = pos;
-        Vector3 newPosition = this.gameManager.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos();
+        Vector3 newPosition = this.gameManager.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos(this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         newPosition.y = 1;
         this.transform.position = newPosition;
         this.gameObject.SetActive(true);

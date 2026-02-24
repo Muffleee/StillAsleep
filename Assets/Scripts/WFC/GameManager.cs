@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -42,7 +43,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
-    private List<IMapCondition> allMapConditions = new List<IMapCondition>();
+    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon() };
+    private IMapCondition currentCond;
 
     [SerializeField] private bool enableEnergyCrystals = true;
     [SerializeField, Range(0f, 1f)] private float crystalBaseChance = 0.05f;
@@ -84,7 +86,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     void Start()
     {
-        
+        fogCondition.SetIsActive(false);
         INSTANCE = this;
         
         this.grid = new Grid(this.width, this.height);
@@ -326,16 +328,35 @@ public class GameManager : MonoBehaviour
 
         this.grid.InstantiateMissing();
         this.gui.FillList();
-        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3,3));
+        ChangeEnemyMovement();
+        //if(this.phase != 0)
         NextCondition();
+        this.phase++;
         NewRound(WeightType.START);
+    }
+    private void ChangeEnemyMovement()
+    {
+        switch (this.phase)
+        {
+            case 0: EnemyMovement.INSTANCE.SetEnemyDifficulty(EnemyDifficultySetting.VERY_EASY); break;
+            case 2: EnemyMovement.INSTANCE.SetEnemyDifficulty(EnemyDifficultySetting.EASY); break;
+            case 4: EnemyMovement.INSTANCE.SetEnemyDifficulty(EnemyDifficultySetting.MEDIUM); break;
+            case 6: EnemyMovement.INSTANCE.SetEnemyDifficulty(EnemyDifficultySetting.HARD); break;
+            case 8: EnemyMovement.INSTANCE.SetEnemyDifficulty(EnemyDifficultySetting.VERY_HARD); break;
+            default: break;
+        }
     }
     private void NextCondition()
     {
+        if(currentCond != null) currentCond.Deactivate();
         if (allMapConditions.Count <= 0) return;
-        Unity.Mathematics.Random rnd = new Unity.Mathematics.Random();
-        int index = rnd.NextInt(allMapConditions.Count);
-        allMapConditions[index].Initiate(this.phase);
+        
+        List<IMapCondition> possible = allMapConditions.Where(n => n.Difficulty() <= this.phase).ToList();
+        if(possible.Count <= 0) return;
+        Unity.Mathematics.Random rnd = new Unity.Mathematics.Random(0x6E624EB7u);
+        int index = rnd.NextInt(possible.Count);
+        possible[index].Initiate(this.phase);
+        currentCond = possible[index];
     }
     /// <summary>
     /// Increase the maxGridArea each round
@@ -360,11 +381,51 @@ public class GameManager : MonoBehaviour
                 break;
         }
         SetWeights(weights);
-        // SET ENEMY POSITION DYNAMICALLY
-        EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3, 3));
+        PlaceEnemy();
         this.round = (this.round + 1) % 3;
         Debug.Log(this.round);
 
+    }
+
+    private void PlaceEnemy()
+    {
+        Vector2Int enemyPos = new Vector2Int(0, 0);
+        Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        Debug.Log("player position: " + playerPos.x + ", " + playerPos.y);
+        if (playerPos.x > (this.grid.width / 2))
+        {
+            for (int i = 3; i >= 0; i--)
+            {
+                enemyPos.x = playerPos.x - i;
+                if (this.grid.IsInsideGrid(enemyPos)) break;
+            }
+        }
+        else
+        {
+            for (int i = 3; i >= 0; i--)
+            {
+                enemyPos.x = playerPos.x + i;
+                if (this.grid.IsInsideGrid(enemyPos)) break;
+            }
+        }
+        if (playerPos.y > (this.grid.height / 2))
+        {
+            for (int i = 3; i >= 0; i--)
+            {
+                enemyPos.y = playerPos.y - i;
+                if (this.grid.IsInsideGrid(enemyPos)) break;
+            }
+        }
+        else
+        {
+            for (int i = 3; i >= 0; i--)
+            {
+                enemyPos.y = playerPos.y + i;
+                if (this.grid.IsInsideGrid(enemyPos)) break;
+            }
+        }
+        Debug.Log("enemy pos:" + enemyPos.x + ", " + enemyPos.y);
+        EnemyMovement.INSTANCE.InstantiateEnemy(enemyPos);
     }
 
     private void RefreshFog()
