@@ -8,6 +8,7 @@ using UnityEngine.Events;
 /// </summary>
 public class GridObj
 {
+    private bool isActive = true;
     public static float PLACEMENT_FACTOR = 2f;
     public static float WALL_OFFSET = 1f;
     private bool isPlaceable = true;
@@ -658,6 +659,15 @@ public class GridObj
     /// If one WallStatus is none, it'll take the other one to set for both, else this gridObjs' wallstatus will be set for both
     /// </summary>
     /// <param name="neighbours"></param>
+    /// 
+    public bool IsActive()
+    {
+        return isActive;
+    }
+    public void SetActiveState(bool state)
+    {
+        isActive = state;
+    }
     public void UpdateWallStatus(Dictionary<WallPos, GridObj> neighbours)
     {
         foreach(WallPos wPos in Enum.GetValues(typeof(WallPos)))
@@ -673,6 +683,8 @@ public class GridObj
         }        
     }
 
+
+    
     /// <summary>
     /// Returns a makeshift name for this GridObj
     /// </summary>
@@ -780,9 +792,11 @@ public class GridObj
     public void SetGridPos(Vector2Int gridPos) { this.gridPos = gridPos; }
     public void SetWeight(int weight) { this.weight = weight; }
     public void SetFloorPrefab(GameObject prefab) { this.floorPrefab = prefab; }
+
 }
 
 public enum GridType
 {
     REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP, DESTROYED
 }
+

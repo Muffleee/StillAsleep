@@ -15,14 +15,26 @@ public class Movement : MonoBehaviour
     /// </summary>
     /// <param name="wallPos">Movement direction to be checked.</param>
     /// <returns></returns>
-    protected virtual MoveType IsValidMove(WallPos wallPos)
+   protected virtual MoveType IsValidMove(WallPos wallPos)
     {
         Grid cGrid = this.gameManager.GetCurrentGrid();
         Vector2Int next = this.GetNextGridPos(wallPos);
-        if (!cGrid.IsInsideGrid(next)) return MoveType.INVALID;
+
+        // Sicherheitschecks
+        if (!cGrid.IsInsideGrid(next))
+            return MoveType.INVALID;
 
         GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
         GridObj current = cGrid.GetGridArray()[gridPos.x, gridPos.y];
+
+        if (nextObj == null)
+            return MoveType.INVALID;
+
+        // 🔴 WICHTIG: Wenn Tile inactive ist → Bewegung blockieren
+        if (!nextObj.IsActive())
+            return MoveType.INVALID;
+
+        // normale Movement-Logik
         return current.GetInteract().IsValidMove(current, nextObj, wallPos);
     }
     /// <summary>
