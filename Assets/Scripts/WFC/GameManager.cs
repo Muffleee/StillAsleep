@@ -9,7 +9,7 @@ using UnityEngine;
 /// Main game manager class, handles game initialization, world generation, and move and click events
 /// </summary>
 public class GameManager : MonoBehaviour
-{   
+{
     [SerializeField] int generateAfter = 4;
     [SerializeField] int replaceExitAfter = 2;
     [SerializeField] private int width;
@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int manualReplacable = 0;
     [SerializeField] private int trap = 0;
     [SerializeField] private int hiddenTrap = 0;
+    [SerializeField] private int ice = 0;
+    [SerializeField] private int rotating = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private EnemyMovement enemyMovement;
@@ -39,6 +41,8 @@ public class GameManager : MonoBehaviour
     public static int manualReplacableWeight;
     public static int trapWeight;
     public static int hiddenTrapWeight;
+    public static int iceWeight;
+    public static int rotatingWeight;
     public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
@@ -96,20 +100,6 @@ public class GameManager : MonoBehaviour
         NewPhase();
     }
     /// <summary>
-    /// Sets starting weights so the initial grid is very open and no special tiles
-    /// </summary>
-    private void SetStartingWeights()
-    {
-        emptyWeight = 20;
-        corridorWeight = 5;
-        cornerWeight = 2;
-        oneWallWeight = 1;
-        jumpingWeight = 0;
-        manualReplacableWeight = 0;
-        trapWeight = 0;
-        hiddenTrapWeight = 0;
-    }
-    /// <summary>
     /// sets the static weights
     /// </summary>
     private void SetWeights(WeightType weightType)
@@ -125,6 +115,8 @@ public class GameManager : MonoBehaviour
                 manualReplacableWeight = this.manualReplacable;
                 trapWeight = this.trap;
                 hiddenTrapWeight = this.hiddenTrap;
+                iceWeight = this.ice;
+                rotatingWeight = this.rotating;
                 break;
             case WeightType.CLOSED:
                 corridorWeight = 10;
@@ -135,6 +127,8 @@ public class GameManager : MonoBehaviour
                 manualReplacableWeight = 4;
                 trapWeight = 3;
                 hiddenTrapWeight = 4;
+                iceWeight = 7;
+                rotatingWeight = 7;
                 break;
             case WeightType.OPEN:
                 corridorWeight = 2;
@@ -145,6 +139,8 @@ public class GameManager : MonoBehaviour
                 manualReplacableWeight = 10;
                 trapWeight = 8;
                 hiddenTrapWeight = 3;
+                iceWeight = 4;
+                rotatingWeight = 4;
                 break;
             case WeightType.START:
                 emptyWeight = 20;
@@ -155,6 +151,8 @@ public class GameManager : MonoBehaviour
                 manualReplacableWeight = 0;
                 trapWeight = 0;
                 hiddenTrapWeight = 0;
+                iceWeight = 0;
+                rotatingWeight = 0;
                 break;
         }
         
@@ -316,7 +314,7 @@ public class GameManager : MonoBehaviour
         this.grid.DestroyGrid();
         EnergyCrystal.DestroyAllCrystals();
         playerResources.ResetEnergy();
-        this.SetStartingWeights();
+        this.SetWeights(WeightType.START);
         this.grid.SetNewGrid(this.width, this.height);
         this.grid.CollapseWorld();
         this.SetWeights(WeightType.NORMAL);

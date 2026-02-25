@@ -256,26 +256,37 @@ public class Grid
         int JumpingBadChance = GameManager.jumpingWeight;
         int ManualReplaceableChance = GameManager.manualReplacableWeight;
         int HiddenTrapchance = GameManager.hiddenTrapWeight;
+        int IceChance = GameManager.iceWeight;
+        int RotatingChance = GameManager.rotatingWeight;
 
         int rand = UnityEngine.Random.Range(0, 100);
-        if(rand < Trapchance)
+        if (rand < Trapchance)
         {
             gridObj.SetGridType(GridType.TRAP);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabTrap);
         }
-        else if(rand > Trapchance && rand < (JumpingBadChance + Trapchance  ))
+        else if (rand > Trapchance && rand < (JumpingBadChance + Trapchance))
         {
             gridObj.SetGridType(GridType.JUMPINGPAD);
             gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad);
         }
-         else if(rand > (JumpingBadChance + Trapchance) && rand < (ManualReplaceableChance + JumpingBadChance + Trapchance))
+        else if (rand > (JumpingBadChance + Trapchance) && rand < (ManualReplaceableChance + JumpingBadChance + Trapchance))
         {
             gridObj.SetGridType(GridType.MANUAL_REPLACEABLE);
         }
-        else if(rand > (ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        else if (rand > (ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
         {
             gridObj.SetGridType(GridType.HIDDENTRAP);
-        } else
+        }
+        else if (rand > (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        {
+            gridObj.SetGridType(GridType.ICE);
+        }
+        else if (rand > (IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < ( RotatingChance + IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        {
+            gridObj.SetGridType(GridType.ROTATING);
+        }
+        else
         {
             gridObj.SetGridType(GridType.REGULAR);
         }

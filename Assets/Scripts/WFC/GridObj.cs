@@ -126,6 +126,15 @@ public class GridObj
             case GridType.HIDDENTRAP: 
                 this.interactable = new HiddenTrap(); 
                 break;
+            case GridType.ICE:
+                this.interactable = new Regular();
+                break;
+            case GridType.ROTATING:
+                this.interactable = new Regular();
+                break;
+            default: 
+                this.interactable = new Regular(); 
+                break;
         }
     }
 
@@ -312,6 +321,10 @@ public class GridObj
 
         this.floorObj.transform.SetParent(this.parentObj.transform);
         this.interactable.SetColor(this.floorObj);
+        if(this.gridType == GridType.ICE)
+        {
+            this.floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.black;
+        }
 
         if (this.wallStatus.HasWallAt(WallPos.FRONT))
         {
@@ -784,5 +797,5 @@ public class GridObj
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP, DESTROYED
+    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP, DESTROYED, ICE, ROTATING
 }

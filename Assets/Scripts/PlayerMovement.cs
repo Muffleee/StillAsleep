@@ -185,6 +185,10 @@ public class PlayerMovement : Movement
         GridObj destinationTile = cGrid.GetGridArray()[this.gridPos.x, this.gridPos.y];
 
         destinationTile.GetInteract().OnUse(destinationTile);
+        if(destinationTile.GetGridType() == GridType.ICE)
+        {
+            this.TryMove(wallPos);
+        }
         //if (destinationTile != null && destinationTile.IsTrap()) 
         //{
         //    // Call your dedicated static class to handle the effect
