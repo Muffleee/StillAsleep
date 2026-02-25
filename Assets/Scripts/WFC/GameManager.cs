@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
+using UnityEditor.Search;
 using UnityEngine;
 
 /// <summary>
@@ -348,7 +349,6 @@ public class GameManager : MonoBehaviour
     {
         if(currentCond != null) currentCond.Deactivate();
         if (allMapConditions.Count <= 0) return;
-        
         List<IMapCondition> possible = allMapConditions.Where(n => n.Difficulty() <= this.phase).ToList();
         if(possible.Count <= 0) return;
         Unity.Mathematics.Random rnd = new Unity.Mathematics.Random(0x6E624EB7u);
