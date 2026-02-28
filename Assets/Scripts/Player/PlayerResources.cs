@@ -39,4 +39,9 @@ public class PlayerResources : MonoBehaviour
     {
         this.currentEnergy = Mathf.Min(this.currentEnergy + amount, this.maxEnergy);
     }
+
+    public void ResetEnergy()
+    {
+        this.currentEnergy = 1;
+    }
 }

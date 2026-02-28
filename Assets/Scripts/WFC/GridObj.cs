@@ -16,6 +16,7 @@ public class GridObj
     private WallStatus wallStatus;
     private GameObject parentObj = null;
     private GameObject floorObj = null;
+    private GameObject fogObj = null;
     private Dictionary<WallPos, GameObject> wallObjs = new Dictionary<WallPos, GameObject>() { { WallPos.FRONT, null }, { WallPos.BACK, null }, { WallPos.LEFT, null }, { WallPos.RIGHT, null } };
     private UnityEvent<GridObj, WallPos>[] destructibleWallCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
     private UnityEvent<GridObj, WallPos>[] exitCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
@@ -23,6 +24,11 @@ public class GridObj
     private GridType gridType = GridType.REGULAR;
     private IInteractable interactable = null;
     private int weight = 0;
+
+    public bool isFogged   { get; private set; } = false;
+    public bool isRevealed { get; private set; } = false;
+
+    [SerializeField] private GameObject energyCrystalPrefab;
 
     [SerializeField] private int placementCost = 1;
     public int PlacementCost => this.placementCost;
@@ -332,7 +338,7 @@ public class GridObj
             GameManager.INSTANCE.TrySpawnItem(this, worldOffsetX, worldOffsetY); 
         }
 
-
+        //if(this.isFogged) this.SpawnFog();
     }
 
     /// <summary>
@@ -488,6 +494,7 @@ public class GridObj
     public void DestroyObj()
     {
         if (!this.isPlaceable) throw new System.Exception("Attempted to call DestroyObj() on non placeable GridObj");
+        this.DestroyFog();
         GameObject.Destroy(this.floorObj);
         this.floorObj = null;
         foreach(WallPos wallPos in Enum.GetValues(typeof(WallPos))){
@@ -495,7 +502,7 @@ public class GridObj
             GameObject.Destroy(this.wallObjs[wallPos]);
             this.wallObjs[wallPos] = null;
         }
-
+        this.DestroyFog();
         GameObject.Destroy(this.parentObj);
         this.parentObj = null;
     }
@@ -713,6 +720,37 @@ public class GridObj
         }
 
         return clone;
+    }
+
+    public void SpawnFog()
+    {   
+        this.isFogged = true;
+        if(this.IsInstantiated() && this.fogObj == null) {
+            this.fogObj = GameObject.Instantiate(GameManager.INSTANCE.GetPrefabLibrary().fogPrefab, this.GetWorldPos(GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY()), Quaternion.identity);
+            this.fogObj.transform.SetParent(this.parentObj.transform);
+        }
+    }
+
+    public void DestroyFog()
+    {
+        this.isFogged = false;
+        if(this.fogObj != null)
+        {
+            GameObject.Destroy(this.fogObj);
+            this.fogObj = null;
+        }
+    }
+
+    public void MarkRevealed()
+    {
+        this.isRevealed = true;
+        this.DestroyFog();
+    }
+
+    public void ResetFogState()
+    {
+        this.isRevealed = false;
+        this.DestroyFog();
     }
 
     // Generic getters

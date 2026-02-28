@@ -45,13 +45,14 @@ public class EnemyMovement : Movement
     /// <param name="pos"></param>
     public void InstantiateEnemy(Vector2Int pos)
     {
+        if (isInstantiated) { ResetFigure(pos); return; }
         if (!gameManager.GetCurrentGrid().IsInsideGrid(pos))
         {
             Debug.LogWarning("You are trying to instantiate the enemy outside of the grid! Don't do that");
             return;
         }
         this.gridPos = pos;
-        Vector3 newPosition = this.gameManager.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos();
+        Vector3 newPosition = this.gameManager.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos(this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         newPosition.y = 1;
         this.transform.position = newPosition;
         this.gameObject.SetActive(true);
@@ -256,9 +257,9 @@ public class EnemyDifficulty
             case EnemyDifficultySetting.MEDIUM:
                 return 4;
             case EnemyDifficultySetting.HARD:
-                return 2;
+                return 3;
             default:
-                return 1;
+                return 2;
         }
     }
 
