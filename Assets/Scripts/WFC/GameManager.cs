@@ -304,12 +304,15 @@ public class GameManager : MonoBehaviour
 
     public void OnWin(WeightType weightType)
     {
+        
         if(this.round % 3 == 0)
         {
             NewPhase();
+            ScoreManager.INSTANCE.ScoreRoundCompleted(true);
         } else
         {
             NewRound(weightType);
+            ScoreManager.INSTANCE.ScoreRoundCompleted(false);
         }
     }
     private void NewPhase()
