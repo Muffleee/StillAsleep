@@ -14,11 +14,26 @@ public class Inventory : MonoBehaviour
     /// </summary>
     private Dictionary<byte, IItem> inventory = new();
 
+    // Inside Inventory.cs
+    private void Start() // Ensure capital 'S' and no typos!
+    {
+        if (inventoryUI != null)
+        {
+            Debug.Log("Inventory Start: Initializing UI..."); // Add this to confirm it runs
+            inventoryUI.InitializeUI(maxInventorySize);
+        }
+        else 
+        {
+            Debug.LogError("Inventory UI reference is missing on the Inventory script!");
+        }
+    }
+
     public bool AddItem(IItem item, byte slot)
     {
         if (inventory.ContainsKey(slot)) return false;
 
         inventory.Add(slot, item);
+        if (inventoryUI != null) inventoryUI.UpdateSlot(slot, item); 
         return true;
     }
 
@@ -38,7 +53,11 @@ public class Inventory : MonoBehaviour
 
     public bool RemoveItem(byte slot)
     {
-        return inventory.Remove(slot);
+        bool success = inventory.Remove(slot);
+        
+        if (success && inventoryUI != null) inventoryUI.ClearSlot(slot); 
+        
+        return success;
     }
 
     public bool RemoveItem()
