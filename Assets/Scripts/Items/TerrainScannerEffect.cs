@@ -14,14 +14,6 @@ public class TerrainScannerEffect : MonoBehaviour
         INSTANCE = this;
     }
 
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            this.PlayTerrainScanner(3, 0.2f);
-        }
-    }
-
     /// <summary>
     /// Play the terrain scanner repetitions times with delay ms between scans 
     /// </summary>
