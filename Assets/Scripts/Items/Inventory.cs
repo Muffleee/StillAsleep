@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
@@ -7,15 +8,15 @@ public class Inventory : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private byte maxInventorySize;
     [SerializeField] private InventoryUI inventoryUI;
+    private int currentSelectedItem = 0;
 
     private List<IItem> inventory = new();
 
-    // Inside Inventory.cs
-    private void Start() // Ensure capital 'S' and no typos!
+    private void Start()
     {
         if (inventoryUI != null)
         {
-            Debug.Log("Inventory Start: Initializing UI..."); // Add this to confirm it runs
+            Debug.Log("Inventory Start: Initializing UI...");
             inventoryUI.InitializeUI(maxInventorySize);
         }
         else 
@@ -29,13 +30,13 @@ public class Inventory : MonoBehaviour
         if (inventory.Count >= maxInventorySize) return false;
 
         inventory.Insert(slot, item);
-        if (inventoryUI != null) inventoryUI?.UpdateSlot(slot, item); 
+        if (inventoryUI != null) inventoryUI.UpdateSlot(slot, item); 
         return true;
     }
 
     public bool AddItem(IItem item)
     {
-        return AddItem(item, 0);
+        return AddItem(item, currentSelectedItem);
     }
 
     public bool RemoveItem(int slot)
@@ -52,10 +53,10 @@ public class Inventory : MonoBehaviour
 
     public bool RemoveItem()
     {
-        return RemoveItem(0);
+        return RemoveItem(currentSelectedItem);
     }
 
-    public bool UseItem(byte slot)
+    public bool UseItem(int slot)
     {
         if (inventory.Count <= slot)
         {
@@ -68,6 +69,25 @@ public class Inventory : MonoBehaviour
     
     public bool UseItem()
     {
-        return UseItem(0);
+        return UseItem(currentSelectedItem);
+    }
+
+    public int GetSelectedItem()
+    {
+        return currentSelectedItem;
+    }
+
+    private void Update()
+    {
+        if (Input.mouseScrollDelta.y > 0)
+        {
+            currentSelectedItem = math.max(0, currentSelectedItem - 1);
+            Debug.Log(currentSelectedItem);
+        }
+        else if (Input.mouseScrollDelta.y < 0)
+        {
+            currentSelectedItem = math.min(inventory.Count, currentSelectedItem + 1);
+            Debug.Log(currentSelectedItem);
+        }
     }
 }
