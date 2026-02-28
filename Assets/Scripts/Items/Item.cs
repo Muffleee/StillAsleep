@@ -1,24 +1,45 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[Serializable]
-public struct Item
+[CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
+public class Item : ScriptableObject, IItem
 {
-    [SerializeField] private GameObject prefab;
-    [SerializeField] private Sprite sprite;
-    [SerializeField] private IItemBehaviour behaviour;
-    public byte weight;
+    [Header("Basic Info")]
+    public string itemName;
+    public Sprite icon;
+    public GameObject prefab;
+    
+    [Header("Mechanics")]
+    public int energyCost = 0;
+    
+    [Header("Spawning Setup")]
+    [Tooltip("Higher number = more common. Lower number = rarer.")]
+    public int spawnWeight = 10;
 
-    public bool Use()
+    // --- IItem Interface Methods ---
+    
+    public int GetEnergyCost()
     {
-        return behaviour.Use();
+        return energyCost;
     }
-}
 
-public abstract class IItemBehaviour : MonoBehaviour
-{
-    public abstract bool Use();
-        
+    public int GetSpawnWeight()
+    {
+        return spawnWeight;
+    }
+
+    public Sprite GetIcon()
+    {
+        return icon;
+    }
+
+    public GameObject GetPrefab()
+    {
+        return prefab;
+    }
+
+    public virtual void OnUse()
+    {
+        // This is what happens when the player clicks it in the inventory
+        Debug.Log($"Used item: {itemName}");
+    }
 }

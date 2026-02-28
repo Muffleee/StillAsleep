@@ -276,8 +276,19 @@ MonoBehaviour:
   playerMovement: {fileID: 6834562829543864870}
   enemyMovement: {fileID: 270545165}
   pathfinding: {fileID: 220377180}
+  inventory: {fileID: 0}
   Audio: {fileID: 7712494145165585650, guid: dcfaec5b534bece499f2638d66792c9c, type: 3}
   player: {fileID: 6834562829543864865}
+  enableEnergyCrystals: 1
+  crystalBaseChance: 0.05
+  crystalMinChance: 0.02
+  crystalMaxChance: 0.25
+  crystalEnergyBias: 1.5
+  crystalBaseMax: 6
+  crystalBonusMax: 10
+  enableItemSpawning: 1
+  itemSpawnChance: 0.05
+  spawnableItemPrefabs: []
 --- !u!4 &220377177
 Transform:
   m_ObjectHideFlags: 0
@@ -372,7 +383,6 @@ MonoBehaviour:
   gameManager: {fileID: 220377176}
   camFollow: {fileID: 330585548}
   pathfinding: {fileID: 220377180}
-  PathOnlyGoesAwayWhenZoomedOutANDMoving: 0
 --- !u!1 &231321110
 GameObject:
   m_ObjectHideFlags: 0
