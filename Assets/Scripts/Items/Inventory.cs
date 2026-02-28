@@ -4,6 +4,7 @@ using UnityEngine;
 public class Inventory : MonoBehaviour
 {
 
+    [SerializeField] private GameManager gameManager;
     [SerializeField] private byte maxInventorySize;
     [SerializeField] private InventoryUI inventoryUI;
 
