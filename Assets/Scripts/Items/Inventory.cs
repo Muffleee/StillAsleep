@@ -8,7 +8,7 @@ public class Inventory : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private byte maxInventorySize;
     [SerializeField] private InventoryUI inventoryUI;
-    private int currentSelectedItem = 0;
+    private int currentSelectedItem = -1;
 
     private List<IItem> inventory = new();
 
@@ -45,6 +45,7 @@ public class Inventory : MonoBehaviour
         {
             inventory.RemoveAt(slot);
             inventoryUI.ClearSlot(slot);
+            if (currentSelectedItem >= inventory.Count) currentSelectedItem = inventory.Count - 1;
             return true;
         }
         
@@ -72,21 +73,26 @@ public class Inventory : MonoBehaviour
         return UseItem(currentSelectedItem);
     }
 
-    public int GetSelectedItem()
+    public int GetSelectedSlot()
     {
         return currentSelectedItem;
     }
 
     private void Update()
     {
-        if (Input.mouseScrollDelta.y > 0)
+        float mouseScroll = Input.mouseScrollDelta.y;
+
+        if (mouseScroll == 0 && inventory.Count == 0) return;
+
+        if (mouseScroll > 0)
         {
             currentSelectedItem = math.max(0, currentSelectedItem - 1);
             Debug.Log(currentSelectedItem);
         }
-        else if (Input.mouseScrollDelta.y < 0)
+
+        else
         {
-            currentSelectedItem = math.min(inventory.Count, currentSelectedItem + 1);
+            currentSelectedItem = math.min(inventory.Count - 1, currentSelectedItem + 1);
             Debug.Log(currentSelectedItem);
         }
     }
