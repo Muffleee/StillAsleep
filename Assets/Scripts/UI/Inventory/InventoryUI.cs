@@ -13,7 +13,7 @@ public class InventoryUI : MonoBehaviour
     private InventorySlotUI[] slots;
 
     // Generates the empty slots when the game starts
-    public void InitializeUI(byte maxSlots)
+    public void InitializeUI(int maxSlots)
     {
         slots = new InventorySlotUI[maxSlots];
 
@@ -26,7 +26,7 @@ public class InventoryUI : MonoBehaviour
     }
 
     // Tells a specific slot to show an item's icon// Inside InventoryUI.cs
-    public void UpdateSlot(byte slotIndex, IItem item)
+    public void UpdateSlot(int slotIndex, IItem item)
     {
         // If Start() didn't run or InitializeUI failed, 'slots' will be null.
         // This check prevents the NullReferenceException.
@@ -43,7 +43,7 @@ public class InventoryUI : MonoBehaviour
     }
 
     // Tells a specific slot to hide its icon
-    public void ClearSlot(byte slotIndex)
+    public void ClearSlot(int slotIndex)
     {
         if (slotIndex < slots.Length)
         {

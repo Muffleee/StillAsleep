@@ -6,13 +6,8 @@ public class Inventory : MonoBehaviour
 
     [SerializeField] private byte maxInventorySize;
     [SerializeField] private InventoryUI inventoryUI;
-    private byte selectedInventorySlot = 0;
 
-    /// <summary>
-    /// Dictionary which maps the position of an item in the inventory to the item itself.
-    /// Example: ItemExample is in the 3rd inventory slot, so inventory[3] = ItemExample
-    /// </summary>
-    private Dictionary<byte, IItem> inventory = new();
+    private List<IItem> inventory = new();
 
     // Inside Inventory.cs
     private void Start() // Ensure capital 'S' and no typos!
@@ -28,49 +23,43 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    public bool AddItem(IItem item, byte slot)
+    public bool AddItem(IItem item, int slot)
     {
-        if (inventory.ContainsKey(slot)) return false;
+        if (inventory.Count >= maxInventorySize) return false;
 
-        inventory.Add(slot, item);
-        if (inventoryUI != null) inventoryUI.UpdateSlot(slot, item); 
+        inventory.Insert(slot, item);
+        if (inventoryUI != null) inventoryUI?.UpdateSlot(slot, item); 
         return true;
     }
 
     public bool AddItem(IItem item)
     {
-        if (inventory.Count >= maxInventorySize) return false;
-
-        if (AddItem(item, selectedInventorySlot)) return true;
-
-        for (byte i = 0; i < maxInventorySize; i++)
-        {
-            if (AddItem(item, i)) return true;
-        }
-
-        return false;
+        return AddItem(item, 0);
     }
 
-    public bool RemoveItem(byte slot)
+    public bool RemoveItem(int slot)
     {
-        bool success = inventory.Remove(slot);
+        if (inventory.Count <= slot && inventoryUI != null)
+        {
+            inventory.RemoveAt(slot);
+            inventoryUI.ClearSlot(slot);
+            return true;
+        }
         
-        if (success && inventoryUI != null) inventoryUI.ClearSlot(slot); 
-        
-        return success;
+        return false;
     }
 
     public bool RemoveItem()
     {
-        return RemoveItem(selectedInventorySlot);
+        return RemoveItem(0);
     }
 
     public bool UseItem(byte slot)
     {
-        // Added a safety check to prevent errors if the slot is empty
-        if (inventory.ContainsKey(slot))
+        if (inventory.Count <= slot)
         {
-            inventory[slot].OnUse(); // Changed from .Use() to .OnUse()
+            inventory[slot].OnUse();
+            inventory.RemoveAt(slot);
             return true;
         }
         return false;
@@ -78,6 +67,6 @@ public class Inventory : MonoBehaviour
     
     public bool UseItem()
     {
-        return UseItem(selectedInventorySlot);
+        return UseItem(0);
     }
 }
