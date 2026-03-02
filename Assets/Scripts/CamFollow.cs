@@ -29,7 +29,8 @@ public class CamFollow : MonoBehaviour
     private void HandleScroll()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if(scroll == 0f) return;
+        bool controlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        if(scroll == 0f || !controlDown) return;
         this.currentPos = this.MoveAlongLineByFraction(camOffsetClosest, camOffsetFurthest, currentPos, scroll);
     }
 
