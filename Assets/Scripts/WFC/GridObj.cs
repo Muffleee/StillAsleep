@@ -325,24 +325,12 @@ public class GridObj
         {
             this.floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.black;
         }
-
-        if (this.wallStatus.HasWallAt(WallPos.FRONT))
+        if (this.gridType == GridType.ROTATING)
         {
-            if (neighbors[WallPos.FRONT] == null || neighbors[WallPos.FRONT].GetWallObjs()[WallPos.BACK] == null) this.InstantiateWall(WallPos.FRONT, this.GetWallAt(WallPos.FRONT), worldOffsetX, worldOffsetY);
-        }
-        if (this.wallStatus.HasWallAt(WallPos.BACK))
-        {
-            if (neighbors[WallPos.BACK] == null || neighbors[WallPos.BACK].GetWallObjs()[WallPos.FRONT] == null) this.InstantiateWall(WallPos.BACK, this.GetWallAt(WallPos.BACK), worldOffsetX, worldOffsetY);
-        }
-        if (this.wallStatus.HasWallAt(WallPos.LEFT))
-        {
-            if (neighbors[WallPos.LEFT] == null || neighbors[WallPos.LEFT].GetWallObjs()[WallPos.RIGHT] == null) this.InstantiateWall(WallPos.LEFT, this.GetWallAt(WallPos.LEFT), worldOffsetX, worldOffsetY);
-        }
-        if (this.wallStatus.HasWallAt(WallPos.RIGHT))
-        {
-            if (neighbors[WallPos.RIGHT] == null || neighbors[WallPos.RIGHT].GetWallObjs()[WallPos.LEFT] == null) this.InstantiateWall(WallPos.RIGHT, this.GetWallAt(WallPos.RIGHT), worldOffsetX, worldOffsetY);
+            this.floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
         }
 
+        InstantiateAllWalls(worldOffsetX, worldOffsetY, neighbors);
         // Energy crystal spawning is centralized in GameManager (tunable like weights).
 
         if (GameManager.INSTANCE != null)
@@ -351,6 +339,37 @@ public class GridObj
         }
 
         //if(this.isFogged) this.SpawnFog();
+    }
+
+    public void InstantiateAllWalls(int worldOffsetX, int worldOffsetY, Dictionary<WallPos, GridObj> neighbors)
+    {
+        foreach(WallPos wallPos in Enum.GetValues(typeof(WallPos)))
+        {
+            if (this.wallStatus.HasWallAt(wallPos))
+            {
+                if (neighbors[wallPos] == null || neighbors[wallPos].GetWallObjs()[WallStatus.GetOppositePos(wallPos)] == null)
+                {
+                    if (neighbors[wallPos] != null && !neighbors[wallPos].HasWallAt(WallStatus.GetOppositePos(wallPos))) neighbors[wallPos].GetWallStatus().PlaceWallAt(WallStatus.GetOppositePos(wallPos));
+                    this.InstantiateWall(wallPos, this.GetWallAt(wallPos), worldOffsetX, worldOffsetY);
+                }
+            }
+        }
+        //if (this.wallStatus.HasWallAt(WallPos.FRONT))
+        //{
+        //    if (neighbors[WallPos.FRONT] == null || neighbors[WallPos.FRONT].GetWallObjs()[WallPos.BACK] == null) this.InstantiateWall(WallPos.FRONT, this.GetWallAt(WallPos.FRONT), worldOffsetX, worldOffsetY);
+        //}
+        //if (this.wallStatus.HasWallAt(WallPos.BACK))
+        //{
+        //    if (neighbors[WallPos.BACK] == null || neighbors[WallPos.BACK].GetWallObjs()[WallPos.FRONT] == null) this.InstantiateWall(WallPos.BACK, this.GetWallAt(WallPos.BACK), worldOffsetX, worldOffsetY);
+        //}
+        //if (this.wallStatus.HasWallAt(WallPos.LEFT))
+        //{
+        //    if (neighbors[WallPos.LEFT] == null || neighbors[WallPos.LEFT].GetWallObjs()[WallPos.RIGHT] == null) this.InstantiateWall(WallPos.LEFT, this.GetWallAt(WallPos.LEFT), worldOffsetX, worldOffsetY);
+        //}
+        //if (this.wallStatus.HasWallAt(WallPos.RIGHT))
+        //{
+        //    if (neighbors[WallPos.RIGHT] == null || neighbors[WallPos.RIGHT].GetWallObjs()[WallPos.LEFT] == null) this.InstantiateWall(WallPos.RIGHT, this.GetWallAt(WallPos.RIGHT), worldOffsetX, worldOffsetY);
+        //}
     }
 
     /// <summary>
@@ -438,6 +457,7 @@ public class GridObj
 
     /// <summary>
     /// Instantiate a wall and only change the data on the in-game object, helper method
+    /// ONLY CALL IF THE NEIGHBOR WALLSTATUS IS CHECKED AND UPDATED!!!
     /// </summary>
     /// <param name="wallPos"> The side to place the wall at </param>
     public void InstantiateWall(WallPos wallPos, WallType wallType, int worldOffsetX, int worldOffsetY)
@@ -619,6 +639,12 @@ public class GridObj
         this.wallStatus.PlaceWallAt(WallPos.LEFT, back);
     }
 
+    public void RotateObj(Dictionary<WallPos, GridObj> neighbours, int worldOffsetX, int worldOffsetY)
+    {
+        this.RotateClockwise();
+        this.Test(neighbours, worldOffsetX, worldOffsetY);
+    }
+    
     /// <summary>
     /// Returns true if GridObj has been instantiated and its main GameObject is still existing
     /// </summary>
@@ -684,6 +710,45 @@ public class GridObj
                 neighbours[wPos].GetWallStatus().PlaceWallAt(oppWPos, newWallType);
             }
         }        
+    }
+
+    public void Test(Dictionary<WallPos, GridObj> neighbours, int worldOffsetX, int worldOffsetY)
+    {
+        foreach(WallPos wPos in Enum.GetValues(typeof(WallPos)))
+        {
+            if (neighbours[wPos] == null)
+            {
+                this.InstantiateWall(wPos, this.wallStatus.GetWallAt(wPos), worldOffsetX, worldOffsetY);
+                continue;
+            }
+            WallPos oppWPos = WallStatus.GetOppositePos(wPos);
+            WallType wallType = this.GetWallTypeAt(wPos);
+            neighbours[wPos].GetWallStatus().PlaceWallAt(oppWPos, wallType);
+            this.InstantiateWall(wPos, wallType, worldOffsetX, worldOffsetY);
+            if (neighbours[wPos].wallObjs[oppWPos] != null) neighbours[wPos].RemoveWall(oppWPos);
+        }
+    }
+    public void UpdateWalls(Dictionary<WallPos, GridObj> neighbours, int worldOffsetX, int worldOffsetY)
+    {
+        foreach (WallPos wPos in Enum.GetValues(typeof(WallPos)))
+        {
+            WallPos oppWPos = WallStatus.GetOppositePos(wPos);
+            if (neighbours[wPos] == null)
+            {
+                this.InstantiateWall(wPos, this.wallStatus.GetWallAt(wPos), worldOffsetX, worldOffsetY);
+                continue;
+            }
+            if (this.wallStatus.GetWallAt(wPos) != neighbours[wPos].GetWallStatus().GetWallAt(oppWPos))
+            {
+                WallType newWallType;
+                if (neighbours[wPos].GetGridType() == GridType.ROTATING) newWallType = (this.wallStatus.GetWallAt(wPos) == WallType.NONE) ? neighbours[wPos].GetWallStatus().GetWallAt(oppWPos) : this.wallStatus.GetWallAt(wPos);
+                else newWallType = this.wallStatus.GetWallAt(wPos);
+                this.wallStatus.PlaceWallAt(wPos, newWallType);
+                if(neighbours[wPos].GetWallObjAt(oppWPos) != null) InstantiateWall(wPos, newWallType, worldOffsetX, worldOffsetY);
+                neighbours[wPos].GetWallStatus().PlaceWallAt(oppWPos, newWallType);
+                if (this.wallObjs[wPos] == null) neighbours[wPos].InstantiateWall(oppWPos, newWallType, worldOffsetX, worldOffsetY);
+            }
+        }
     }
 
     /// <summary>

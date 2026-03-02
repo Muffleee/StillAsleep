@@ -189,6 +189,7 @@ public class GameManager : MonoBehaviour
     {
         enemyMovement.MoveEnemy();
         this.RefreshFog();
+        this.grid.RotateTiles();
         GridObj toObj = this.grid.GetGridObj(to);
         if(toObj != null && toObj.GetGridType() == GridType.TRAP)
         {
@@ -379,7 +380,6 @@ public class GameManager : MonoBehaviour
         SetWeights(weights);
         PlaceEnemy();
         this.round = (this.round + 1) % 3;
-        Debug.Log("round: " + this.round);
 
     }
 

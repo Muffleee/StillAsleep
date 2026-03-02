@@ -13,6 +13,7 @@ public class Grid
     public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
     public UnityEvent<GridObj, string> tutorialUpdate = new UnityEvent<GridObj, string> ();
+    List<GridObj> rotatingTiles = new List<GridObj> ();
     /// <summary>
     /// Count the times the grid has grown so far.
     /// </summary>
@@ -284,7 +285,30 @@ public class Grid
         }
         else if (rand > (IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < ( RotatingChance + IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
         {
-            gridObj.SetGridType(GridType.ROTATING);
+            bool setRotating = true;
+            WallStatus wStat = gridObj.GetWallStatus();
+            if (wStat.front == WallType.NONE && wStat.back == WallType.NONE && wStat.left == WallType.NONE && wStat.right == WallType.NONE) setRotating = false;
+            if (setRotating)
+            {
+                Dictionary<WallPos, GridObj> neighbors = GetNeighbors(gridObj);
+                foreach (GridObj neighbor in neighbors.Values)
+                {
+                    if (neighbor == null) continue;
+                    if (neighbor.GetGridType() == GridType.ROTATING)
+                    {
+                        setRotating = false;
+                        break;
+                    }
+                }
+            }
+            if (setRotating)
+            {
+                gridObj.SetGridType(GridType.ROTATING);
+                rotatingTiles.Add(gridObj);
+            } else
+            {
+                gridObj.SetGridType(GridType.REGULAR);
+            }
         }
         else
         {
@@ -893,6 +917,13 @@ public class Grid
         return true;
     }
 
+    public void RotateTiles()
+    {
+        foreach(GridObj obj in rotatingTiles)
+        {
+            obj.RotateObj(GetNeighbors(obj), this.worldOffsetX, this.worldOffsetY);
+        }
+    }
     /// <summary>
     /// Calculates the Manhattan Distance between two points.
     /// </summary>
@@ -926,4 +957,6 @@ public class Grid
         this.worldOffsetX = 0;
         this.worldOffsetY = 0;
     }
+
+    public List<GridObj> GetAllRotatingTiles() { return rotatingTiles; }
 }
