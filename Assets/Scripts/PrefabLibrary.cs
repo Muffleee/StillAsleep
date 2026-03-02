@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PrefabLibrary : MonoBehaviour
@@ -15,6 +16,7 @@ public class PrefabLibrary : MonoBehaviour
     [SerializeField] public GameObject prefabJumppad;
     [SerializeField] public List<GameObject> torchPrefabs;
     [SerializeField] public GameObject fogPrefab;
+    [SerializeField] public TMP_Text countdownText;
 
 
     public GameObject GetRandomWallPrefab()
