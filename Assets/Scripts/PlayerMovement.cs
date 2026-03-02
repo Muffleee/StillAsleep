@@ -173,6 +173,7 @@ public class PlayerMovement : Movement
             yield return null;
         }
         this.stepCounter++;
+        ScoreManager.INSTANCE?.AddScore(-1, false, "Move");
 
         lastGridPos = this.gridPos;
         this.gridPos = this.GetNextGridPos(wallPos);

@@ -38,10 +38,16 @@ public class PlayerResources : MonoBehaviour
     public void AddEnergy(int amount)
     {
         this.currentEnergy = Mathf.Min(this.currentEnergy + amount, this.maxEnergy);
+        ScoreManager.INSTANCE?.AddScore(100, false, "Crystal collected");
     }
 
     public void ResetEnergy()
     {
         this.currentEnergy = 1;
+    }
+
+    public int getEnergy()
+    {
+        return this.currentEnergy;
     }
 }
