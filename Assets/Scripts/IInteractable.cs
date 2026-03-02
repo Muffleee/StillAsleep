@@ -110,9 +110,9 @@ public class Trap : IInteractable
         if (wouldGoNegative && PlayerMovement.INSTANCE != null)
         {
             PlayerMovement.INSTANCE.RespawnToSpawn();
-            ScoreManager.INSTANCE.AddBonusScore(-200, false, "Back to Spawn Trap");
+            ScoreManager.INSTANCE.AddScore(-200, false, "Back to Spawn Trap");
         }
-        ScoreManager.INSTANCE.AddBonusScore(-50, false, "Trap");
+        ScoreManager.INSTANCE.AddScore(-50, false, "Trap");
     }
 
     async Task ResetTrap(GridObj tile)
@@ -286,7 +286,7 @@ public class HiddenTrap : IInteractable
         {
             pr.RemoveEnergy(1);  
         }
-        ScoreManager.INSTANCE.AddBonusScore(-40, false, "Hidden Trap");
+        ScoreManager.INSTANCE.AddScore(-40, false, "Hidden Trap");
     }
 
     async Task ResetTrap(GridObj tile)

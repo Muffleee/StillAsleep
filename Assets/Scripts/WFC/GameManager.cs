@@ -308,11 +308,11 @@ public class GameManager : MonoBehaviour
         if(this.round % 3 == 0)
         {
             NewPhase();
-            ScoreManager.INSTANCE.ScoreRoundCompleted(true);
+            ScoreManager.INSTANCE.AddScore(this.phase * 500, true, "New Phase");
         } else
         {
             NewRound(weightType);
-            ScoreManager.INSTANCE.ScoreRoundCompleted(false);
+            ScoreManager.INSTANCE.AddScore(100, true, "New Round");
         }
     }
     private void NewPhase()

@@ -4,45 +4,29 @@ using UnityEngine;
 
 public class ScoreManager : MonoBehaviour
 {
-    [SerializeField] private int pointsPerRound = 100;
-    [SerializeField] private int phaseDoneBonus = 500;
+    [SerializeField] private ScoreDisplay scoreDisplay;
     public static ScoreManager INSTANCE { get; private set; }
     private int score = 0;
     private int highScore = 0;
-    private int crystalMultiplier = 10;
-
+    [SerializeField] private PlayerResources pr;
     private void Awake()
     {
         INSTANCE = this;
         highScore = PlayerPrefs.GetInt("Highscore", 0);
     }
-    public void ScoreRoundCompleted(bool phaseDone)
+    public void AddScore(int bonus, bool multiplier, string bonusname)
     {
-        score += pointsPerRound;
-        if(phaseDone){score += phaseDoneBonus;}
-
-        if (score > highScore)
-        {
-            highScore = score;
-            PlayerPrefs.SetInt("Highscore", highScore);
-            PlayerPrefs.Save();
-        }
-
-        Debug.Log($"[Score] {score} | Highscore: {highScore}");
-    }
-
-    public void AddBonusScore(int bonus, bool multiplier, string bonusname)
-    {
-        if(multiplier) bonus *= crystalMultiplier;
+        int crystalbonus = pr.getEnergy();
+        if(multiplier && crystalbonus > 0) bonus *= crystalbonus;
         score += bonus;
+        if (score < 0) score = 0;
         if (score > highScore)
         {
             highScore = score;
             PlayerPrefs.SetInt("Highscore", highScore);
             PlayerPrefs.Save();
         }
-        Debug.Log($"{bonusname}: {bonus}");
-        Debug.Log($"[Score] {score} | Highscore: {highScore}");
+        scoreDisplay.UpdateScore(score, bonus);
     }
 
     public int GetScore() { return score;}

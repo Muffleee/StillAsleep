@@ -21,13 +21,14 @@ public class PauseMenu : MonoBehaviour
         if(this.resumeButton != null) this.resumeButton.onClick.AddListener(this.hidePauseMenu);
     }
 
+    [SerializeField] private TMPro.TextMeshProUGUI highscoreText;
+
     public void ShowPauseMenu()
     {
         if (this.PauseMenuPanel != null)
         {
             this.PauseMenuPanel.SetActive(true);
-
-            //Pause Game
+            highscoreText.text = "Current Highscore: " + PlayerPrefs.GetInt("Highscore", 0);
             Time.timeScale = 0f;
         }
     }
