@@ -57,6 +57,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int crystalBaseMax = 6;
     [SerializeField] private int crystalBonusMax = 10;
 
+    [Header("Item Spawning")]
+    [SerializeField] private bool enableItemSpawning = true;
+    [SerializeField, Range(0f, 1f)] private float itemSpawnChance = 0.05f; 
+    [SerializeField] private GameObject[] spawnableItemPrefabs; 
+
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
@@ -286,6 +291,74 @@ public class GameManager : MonoBehaviour
         EnergyCrystal.PrepareSpawn(worldPos, maxCrystals);
         Instantiate(prefabLibrary.prefabEnergyCrystal, worldPos, Quaternion.identity);
     }
+    
+
+  public void TrySpawnItem(GridObj tile, int worldOffsetX, int worldOffsetY)
+    {
+        if (!enableItemSpawning) return;
+        if (tile == null || tile.GetGridType() != GridType.REGULAR) return;
+        if (spawnableItemPrefabs == null || spawnableItemPrefabs.Length == 0)
+        {
+            Debug.LogWarning("Item Spawning is enabled, but the prefab array is empty!");
+            return;
+        }
+
+        // 1. Check if ANY item should spawn on this tile
+        if (UnityEngine.Random.value > itemSpawnChance) return;
+
+        // 2. Calculate the total weight
+        int totalWeight = 0;
+        foreach (GameObject prefab in spawnableItemPrefabs)
+        {
+            if (prefab != null)
+            {
+                ItemPickup pickupComponent = prefab.GetComponent<ItemPickup>();
+                if (pickupComponent != null && pickupComponent.GetItemData() != null)
+                {
+                    totalWeight += pickupComponent.GetItemData().GetSpawnWeight();
+                }
+            }
+        }
+
+        if (totalWeight == 0)
+        {
+            Debug.LogWarning("Total item spawn weight is 0! Make sure prefabs have ItemPickup attached and Item Data assigned.");
+            return;
+        }
+
+        // 3. Roll the dice
+        int randomRoll = UnityEngine.Random.Range(0, totalWeight);
+        int cumulativeWeight = 0;
+        GameObject selectedPrefab = null;
+
+        // 4. Find the winner
+        foreach (GameObject prefab in spawnableItemPrefabs)
+        {
+            if (prefab != null)
+            {
+                ItemPickup pickupComponent = prefab.GetComponent<ItemPickup>();
+                if (pickupComponent != null && pickupComponent.GetItemData() != null)
+                {
+                    cumulativeWeight += pickupComponent.GetItemData().GetSpawnWeight();
+                    if (randomRoll < cumulativeWeight)
+                    {
+                        selectedPrefab = prefab;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 5. Spawn it!
+        if (selectedPrefab != null)
+        {
+            Vector3 worldPos = tile.GetWorldPos(worldOffsetX, worldOffsetY);
+            worldPos.y += 0.5f;
+            Instantiate(selectedPrefab, worldPos, Quaternion.identity);
+            Debug.Log($"Spawned a {selectedPrefab.name} at {worldPos}"); // Confirms it worked!
+        }
+    }
+
 
 
     /// <summary>

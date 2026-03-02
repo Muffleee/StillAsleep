@@ -335,6 +335,7 @@ public class GridObj
         if (GameManager.INSTANCE != null)
         {
             GameManager.INSTANCE.TrySpawnEnergyCrystal(this, worldOffsetX, worldOffsetY);
+            GameManager.INSTANCE.TrySpawnItem(this, worldOffsetX, worldOffsetY); 
         }
 
         //if(this.isFogged) this.SpawnFog();
