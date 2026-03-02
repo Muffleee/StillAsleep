@@ -282,9 +282,18 @@ public class HiddenTrap : IInteractable
     private void ActivateTrap()
     {
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
-        if (pr != null)
+        if (pr == null) return;
+
+        const int cost = 1;
+
+        AudioManager.Instance.PlayTrap();
+
+        bool wouldGoNegative = (pr.CurrentEnergy - cost) < 0;
+        pr.RemoveEnergy(cost);
+
+        if (wouldGoNegative && PlayerMovement.INSTANCE != null)
         {
-            pr.RemoveEnergy(1);  
+            PlayerMovement.INSTANCE.RespawnToSpawn();
         }
         ScoreManager.INSTANCE.AddScore(-40, false, "Hidden Trap");
     }
