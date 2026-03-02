@@ -20,7 +20,6 @@ public class Movement : MonoBehaviour
         Grid cGrid = this.gameManager.GetCurrentGrid();
         Vector2Int next = this.GetNextGridPos(wallPos);
 
-        // Sicherheitschecks
         if (!cGrid.IsInsideGrid(next))
             return MoveType.INVALID;
 
@@ -30,11 +29,9 @@ public class Movement : MonoBehaviour
         if (nextObj == null)
             return MoveType.INVALID;
 
-        // 🔴 WICHTIG: Wenn Tile inactive ist → Bewegung blockieren
         if (!nextObj.IsActive())
             return MoveType.INVALID;
 
-        // normale Movement-Logik
         return current.GetInteract().IsValidMove(current, nextObj, wallPos);
     }
     /// <summary>
