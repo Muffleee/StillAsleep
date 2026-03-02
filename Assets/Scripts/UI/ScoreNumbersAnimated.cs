@@ -5,14 +5,14 @@ using UnityEngine.UI;
 public class ScoreNumbersAnimated : MonoBehaviour
 {
     public float idleAmplitude = 1f;
-    public float idleSpeed = 2f;
-    public float wobbleSpeed = 2f;
+    public float idleSpeed = 1f;
+    public float wobbleSpeed = 1f;
     private Image image;
     private RectTransform rt;
     private Vector2 basePos;
     private float timeOffset;
     private float wobbleStrength;
-    private bool ready; // only animate after basePos is confirmed
+    private bool ready;
 
     void Awake()
     {
@@ -20,8 +20,6 @@ public class ScoreNumbersAnimated : MonoBehaviour
         rt = GetComponent<RectTransform>();
         timeOffset = Random.Range(0f, 100f);
     }
-
-    // Call this once from outside after positions are set
     public void Init()
     {
         basePos = rt.anchoredPosition;

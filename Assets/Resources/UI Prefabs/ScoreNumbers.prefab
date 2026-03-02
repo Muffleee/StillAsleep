@@ -88,4 +88,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d93c603fd449b3b459ca66cc5abbf01d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  image: {fileID: 1014259151186282493}
+  idleAmplitude: 2
+  idleSpeed: 2
+  wobbleSpeed: 10

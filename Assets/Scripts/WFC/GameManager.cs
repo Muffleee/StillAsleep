@@ -393,7 +393,7 @@ public class GameManager : MonoBehaviour
         } else
         {
             NewRound(weightType);
-            ScoreManager.INSTANCE.AddScore(100, true, "New Round");
+            ScoreManager.INSTANCE?.AddScore(100, true, "New Round");
         }
     }
     private void NewPhase()
