@@ -4,9 +4,9 @@ using UnityEngine.UI;
 
 public class ScoreNumbersAnimated : MonoBehaviour
 {
-    public float idleAmplitude = 5f;
-    public float idleSpeed = 10f;
-    public float wobbleSpeed = 8f;
+    public float idleAmplitude = 1f;
+    public float idleSpeed = 2f;
+    public float wobbleSpeed = 2f;
     private Image image;
     private RectTransform rt;
     private Vector2 basePos;
