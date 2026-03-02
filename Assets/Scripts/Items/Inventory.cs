@@ -79,8 +79,8 @@ public class Inventory : MonoBehaviour
     {
         // --- 1. SCROLLING LOGIC ---
         float mouseScroll = Input.mouseScrollDelta.y;
-        bool controlDown = Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl);
-        if (mouseScroll != 0 && controlDown)
+        bool controlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        if (mouseScroll != 0 && !controlDown)
         {
             int previousSelectedItem = currentSelectedItem;
             if (mouseScroll > 0) currentSelectedItem--;
