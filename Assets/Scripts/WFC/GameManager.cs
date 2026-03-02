@@ -236,6 +236,14 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Make the player lose the game
+    /// </summary>
+    public void LoseGame(string loseMessage)
+    {
+        // TODO implement this
+    }
+
+    /// <summary>
     /// Function to be called whenever the player clicks in the world, handles placing player-selected tiles
     /// </summary>
     /// <param name="clicked">Clicked game object</param>
