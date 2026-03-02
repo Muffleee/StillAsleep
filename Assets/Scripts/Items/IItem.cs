@@ -4,5 +4,9 @@ using UnityEngine;
 
 public interface IItem
 {
+    public int GetEnergyCost();
+    public int GetSpawnWeight();
+    public Sprite GetIcon();
+    public GameObject GetPrefab();
     public void OnUse();
 }

@@ -13,8 +13,37 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip trap;
     [SerializeField] private AudioClip intro;
     [SerializeField] private AudioClip loop;
-    void Awake()
+    private static float soundVolume = 1.0f; 
+    private static float musicVolume = 1.0f;
+
+    public static void SetSoundVolume(float volume)
+    {   
+        PlayerPrefs.SetFloat("SoundVolume", volume);
+        PlayerPrefs.Save();
+        soundVolume = volume;
+    }
+
+    public static void SetMusicVolume(float volume)
     {
+        PlayerPrefs.SetFloat("MusicVolume", volume);
+        PlayerPrefs.Save();
+        musicVolume = volume;
+    }
+
+    public static float GetSoundVolume()
+    {
+        return PlayerPrefs.GetFloat("SoundVolume", 1.0f);
+    }
+
+    public static float GetMusicVolume()
+    {
+        return PlayerPrefs.GetFloat("MusicVolume", 1.0f);
+    }
+
+    void Awake()
+    {   
+        AudioManager.soundVolume = AudioManager.GetSoundVolume();
+        AudioManager.musicVolume = AudioManager.GetMusicVolume();
         if(musicSource == null) musicSource = this.GetComponent<AudioSource>();
         if(Instance != null && Instance != this)
         {
@@ -24,7 +53,7 @@ public class AudioManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        musicSource.volume = 0.3f;
+        musicSource.volume = 0.3f * AudioManager.musicVolume;
     }
     private void Start()
     {
@@ -32,28 +61,36 @@ public class AudioManager : MonoBehaviour
         musicSource.Play();
         musicSource.PlayScheduled(AudioSettings.dspTime + intro.length);
         AudioSource loopSource = gameObject.AddComponent<AudioSource>();
-        loopSource.volume = 0.3f;
+        loopSource.volume = 0.3f * AudioManager.musicVolume;
         loopSource.clip = loop;
         loopSource.loop = true;
         loopSource.PlayScheduled(AudioSettings.dspTime + intro.length);
     }
+    private void Update()
+    {   
+        float currVol = (float) 0.3 * AudioManager.musicVolume;
+        if(musicSource.volume != currVol)
+        {
+            musicSource.volume = currVol;
+        }
+    }
     public void PlayTilePlacing()
     {
-        sfxSource.PlayOneShot(tilePlacing, 1.0f);
+        sfxSource.PlayOneShot(tilePlacing, AudioManager.soundVolume);
     }
     public void PlayJumping()
     {
-        sfxSource.PlayOneShot(jumping, 1.0f);
+        sfxSource.PlayOneShot(jumping, AudioManager.soundVolume);
     }
     public void PlayButtonClick()
     {
-        sfxSource.PlayOneShot(buttonClick, 1.0f);
+        sfxSource.PlayOneShot(buttonClick, AudioManager.soundVolume);
     }
     public void PlayTrap()
     {
         sfxSource.clip = trap;
         sfxSource.loop = false;
-        sfxSource.volume = 1.0f;
+        sfxSource.volume = AudioManager.soundVolume;
         sfxSource.PlayScheduled(AudioSettings.dspTime + 0.15f);
     }
 }

@@ -257,9 +257,9 @@ public class EnemyDifficulty
             case EnemyDifficultySetting.MEDIUM:
                 return 4;
             case EnemyDifficultySetting.HARD:
-                return 2;
+                return 3;
             default:
-                return 1;
+                return 2;
         }
     }
 
