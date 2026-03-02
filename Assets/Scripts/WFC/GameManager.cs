@@ -353,6 +353,7 @@ public class GameManager : MonoBehaviour
         if (selectedPrefab != null)
         {
             Vector3 worldPos = tile.GetWorldPos(worldOffsetX, worldOffsetY);
+            worldPos.y += 0.5f;
             Instantiate(selectedPrefab, worldPos, Quaternion.identity);
             Debug.Log($"Spawned a {selectedPrefab.name} at {worldPos}"); // Confirms it worked!
         }

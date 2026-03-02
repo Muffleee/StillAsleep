@@ -23,19 +23,10 @@ public class ItemPickup : MonoBehaviour
 
     private void PickUpItem()
     {
-        if (itemData == null)
-        {
-            Debug.LogError("This pickup has no Item Data assigned in the inspector!");
-            return;
-        }
+        if (itemData == null) return;
 
         Inventory playerInventory = Object.FindAnyObjectByType<Inventory>();
-        
-        if (playerInventory == null)
-        {
-            Debug.LogError("Player tried to pick up the item, but couldn't find an Inventory script!");
-            return;
-        }
+        if (playerInventory == null) return;
 
         if (playerInventory.AddItem(itemData))
         {
@@ -44,10 +35,13 @@ public class ItemPickup : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Inventory is full!");
+            Vector3 dropLocation = transform.position; 
+            
+            playerInventory.SwapWithSelected(itemData, dropLocation);
+            
+            Destroy(gameObject); 
         }
     }
-
     // Add this so the GameManager can read the weight!
     public IItem GetItemData() 
     { 

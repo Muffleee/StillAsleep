@@ -1,22 +1,16 @@
 using UnityEngine;
-using UnityEngine.UI; // Required for UI elements like Image and Button
+using UnityEngine.UI; 
 
 public class InventorySlotUI : MonoBehaviour
 {
     [SerializeField] private Image iconImage;
-    [SerializeField] private Button slotButton; 
+    [Tooltip("Drag the new Highlight child object here")]
+    [SerializeField] private GameObject highlightObject; 
     
-    private byte slotIndex;
-    private Inventory inventory;
-
-    public void Init(byte index, Inventory inv)
+    public void Init()
     {
-        slotIndex = index;
-        inventory = inv;
         ClearSlot();
-        
-        // Listen for clicks
-        slotButton.onClick.AddListener(OnSlotClicked);
+        SetHighlight(false);
     }
 
     public void UpdateSlot(IItem item)
@@ -25,7 +19,7 @@ public class InventorySlotUI : MonoBehaviour
         {
             iconImage.sprite = item.GetIcon();
             iconImage.enabled = true;
-            slotButton.interactable = true;
+            iconImage.preserveAspect = true; 
         }
         else
         {
@@ -37,11 +31,12 @@ public class InventorySlotUI : MonoBehaviour
     {
         iconImage.sprite = null;
         iconImage.enabled = false;
-        slotButton.interactable = false;
     }
-
-    private void OnSlotClicked()
+    public void SetHighlight(bool isHighlighted)
     {
-        inventory.UseItem(slotIndex);
+        if (highlightObject != null)
+        {
+            highlightObject.SetActive(isHighlighted);
+        }
     }
 }

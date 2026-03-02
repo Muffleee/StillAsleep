@@ -1,99 +1,178 @@
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-
     [SerializeField] private GameManager gameManager;
-    [SerializeField] private byte maxInventorySize;
+    [SerializeField] private byte maxInventorySize = 10; 
     [SerializeField] private InventoryUI inventoryUI;
-    private int currentSelectedItem = -1;
-
-    private List<IItem> inventory = new();
+    
+    private int currentSelectedItem = 0; 
+    private List<IItem> inventory = new List<IItem>();
 
     private void Start()
     {
+        for (int i = 0; i < maxInventorySize; i++)
+        {
+            inventory.Add(null);
+        }
+
         if (inventoryUI != null)
         {
-            Debug.Log("Inventory Start: Initializing UI...");
             inventoryUI.InitializeUI(maxInventorySize);
-        }
-        else 
-        {
-            Debug.LogError("Inventory UI reference is missing on the Inventory script!");
+            inventoryUI.SelectSlot(currentSelectedItem);
         }
     }
 
     public bool AddItem(IItem item, int slot)
     {
-        if (inventory.Count >= maxInventorySize) return false;
-
-        inventory.Insert(slot, item);
-        if (inventoryUI != null) inventoryUI.UpdateSlot(slot, item); 
-        return true;
+        if (slot < 0 || slot >= maxInventorySize) return false;
+        
+        if (inventory[slot] == null)
+        {
+            inventory[slot] = item;
+            if (inventoryUI != null) inventoryUI.UpdateSlot(slot, item); 
+            return true;
+        }
+        return false;
     }
 
     public bool AddItem(IItem item)
     {
-        return AddItem(item, currentSelectedItem);
+        for (int i = 0; i < maxInventorySize; i++)
+        {
+            if (inventory[i] == null) return AddItem(item, i);
+        }
+        return false; 
     }
 
     public bool RemoveItem(int slot)
     {
-        if (inventory.Count <= slot && inventoryUI != null)
+        if (slot >= 0 && slot < maxInventorySize && inventory[slot] != null)
         {
-            inventory.RemoveAt(slot);
-            inventoryUI.ClearSlot(slot);
-            if (currentSelectedItem >= inventory.Count) currentSelectedItem = inventory.Count - 1;
+            inventory[slot] = null;
+            if (inventoryUI != null) inventoryUI.ClearSlot(slot);
             return true;
         }
-        
         return false;
     }
 
-    public bool RemoveItem()
-    {
-        return RemoveItem(currentSelectedItem);
-    }
+    public bool RemoveItem() => RemoveItem(currentSelectedItem);
 
     public bool UseItem(int slot)
     {
-        if (inventory.Count <= slot)
+        if (slot >= 0 && slot < maxInventorySize && inventory[slot] != null)
         {
             inventory[slot].OnUse();
-            inventory.RemoveAt(slot);
+            inventory[slot] = null; 
+            if (inventoryUI != null) inventoryUI.ClearSlot(slot); 
             return true;
         }
         return false;
     }
     
-    public bool UseItem()
-    {
-        return UseItem(currentSelectedItem);
-    }
+    public bool UseItem() => UseItem(currentSelectedItem);
 
-    public int GetSelectedSlot()
-    {
-        return currentSelectedItem;
-    }
+    public int GetSelectedSlot() => currentSelectedItem;
 
     private void Update()
     {
+        // --- 1. SCROLLING LOGIC ---
         float mouseScroll = Input.mouseScrollDelta.y;
-
-        if (mouseScroll == 0 && inventory.Count == 0) return;
-
-        if (mouseScroll > 0)
+        if (mouseScroll != 0)
         {
-            currentSelectedItem = math.max(0, currentSelectedItem - 1);
-            Debug.Log(currentSelectedItem);
+            int previousSelectedItem = currentSelectedItem;
+            if (mouseScroll > 0) currentSelectedItem--;
+            else currentSelectedItem++;
+
+            currentSelectedItem = Mathf.Clamp(currentSelectedItem, 0, maxInventorySize - 1);
+
+            if (currentSelectedItem != previousSelectedItem && inventoryUI != null)
+            {
+                inventoryUI.SelectSlot(currentSelectedItem);
+            }
         }
 
-        else
+        // --- 2. USE SELECTED ITEM (F Key) ---
+        if (Input.GetKeyDown(KeyCode.F))
         {
-            currentSelectedItem = math.min(inventory.Count - 1, currentSelectedItem + 1);
-            Debug.Log(currentSelectedItem);
+            UseItem(); 
+        }
+
+        // --- 3. USE SPECIFIC ITEM (Number Keys 1-9, 0) ---
+        CheckNumberKeys();
+
+        // --- 4. DROP SELECTED ITEM (Q Key) ---
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            DropSelectedItem();
+        }
+    }
+
+    public void DropSelectedItem()
+    {
+        IItem itemToDrop = inventory[currentSelectedItem];
+
+        if (itemToDrop != null && PlayerMovement.INSTANCE != null)
+        {
+            Vector3 dropPosition = PlayerMovement.INSTANCE.transform.position;
+            
+            Collider[] colliders = Physics.OverlapSphere(dropPosition, 0.5f);
+            foreach (Collider col in colliders)
+            {
+                if (col.GetComponent<ItemPickup>() != null)
+                {
+                    Debug.LogWarning("Cannot drop! There is already an item right here.");
+                    return; 
+                }
+            }
+
+            GameObject dropPrefab = itemToDrop.GetPrefab();
+            if (dropPrefab != null)
+            {
+                Instantiate(dropPrefab, dropPosition, Quaternion.identity);
+                Debug.Log($"Dropped {itemToDrop.GetIcon().name} at your feet.");
+            }
+
+            inventory[currentSelectedItem] = null;
+            if (inventoryUI != null) 
+            {
+                inventoryUI.ClearSlot(currentSelectedItem);
+            }
+        }
+    }
+
+    public void SwapWithSelected(IItem newItem, Vector3 dropPosition)
+    {
+        IItem oldItem = inventory[currentSelectedItem];
+
+        // 1. Drop the item currently in your hand
+        if (oldItem != null)
+        {
+            GameObject dropPrefab = oldItem.GetPrefab();
+            if (dropPrefab != null)
+            {
+                Instantiate(dropPrefab, dropPosition, Quaternion.identity);
+            }
+        }
+
+        // 2. Put the new item into that same slot
+        inventory[currentSelectedItem] = newItem;
+        if (inventoryUI != null) 
+        {
+            inventoryUI.UpdateSlot(currentSelectedItem, newItem);
+        }
+    }
+
+    private void CheckNumberKeys()
+    {
+        for (int i = 0; i <= 9; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha0 + i))
+            {
+                int slotIndex = (i == 0) ? 9 : i - 1;
+                UseItem(slotIndex);
+            }
         }
     }
 }
