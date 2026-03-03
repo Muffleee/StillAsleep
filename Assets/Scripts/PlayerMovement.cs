@@ -71,7 +71,7 @@ public class PlayerMovement : Movement
         {
             if(this.pausescreen.IsPauseMenuActive())
             {
-                this.pausescreen.hidePauseMenu();
+                this.pausescreen.HidePauseMenu();
             }
             else
             {
