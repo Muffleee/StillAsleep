@@ -64,7 +64,7 @@ public class Menu_Character_anim : MonoBehaviour
     {
         float t = Time.unscaledTime;
 
-        transform.Rotate(0f, rotationSpeed * Time.unscaledDeltaTime, 0f);
+        transform.Rotate(rotationSpeed * Time.unscaledDeltaTime, rotationSpeed * Time.unscaledDeltaTime, rotationSpeed * Time.unscaledDeltaTime);
         float newY = startPosition.y + Mathf.Sin(t * floatSpeed) * floatHeight;
         float newX = startPosition.x + Mathf.Sin(t * swaySpeed * 0.7f) * swayAmountX;
         float newZ = startPosition.z + Mathf.Sin(t * swaySpeed * 0.5f) * swayAmountZ;

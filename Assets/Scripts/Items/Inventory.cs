@@ -176,4 +176,7 @@ public class Inventory : MonoBehaviour
             }
         }
     }
+
+    public List<IItem> GetItems() => inventory;
+    public int GetMaxSlots() => maxInventorySize;
 }

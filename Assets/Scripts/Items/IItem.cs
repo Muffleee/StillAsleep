@@ -9,4 +9,6 @@ public interface IItem
     public Sprite GetIcon();
     public GameObject GetPrefab();
     public void OnUse();
+    public string GetName();
+    public string GetDescription();
 }
