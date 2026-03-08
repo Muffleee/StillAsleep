@@ -19,6 +19,10 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] private PauseMenuInventory pauseInventoryUI;
     [SerializeField] private AudioManager AudioManager;
 
+    [SerializeField] private TMPro.TextMeshProUGUI highscoreText;
+    [SerializeField] private TMPro.TextMeshProUGUI currentPhaseText;
+    [SerializeField] private TMPro.TextMeshProUGUI currentRoundText;
+
     void Start()
     {
         if (this.pauseMenuPanel != null) this.pauseMenuPanel.SetActive(false);
@@ -30,8 +34,8 @@ public class PauseMenu : MonoBehaviour
         if(this.resumeButton != null) this.resumeButton.onClick.AddListener(this.HidePauseMenu);
         if(this.optionsButton != null) this.optionsButton.onClick.AddListener(ShowOptions);
         
-        if(this.backButton != null)
-            this.backButton.onClick.AddListener(HideOptions);
+        if(this.backButton != null) this.backButton.onClick.AddListener(HideOptions);
+
         if(this.soundSlider != null) 
         {
             this.soundSlider.onValueChanged.AddListener(delegate {OnSoundSliderChange();});
@@ -44,8 +48,6 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
-    [SerializeField] private TMPro.TextMeshProUGUI highscoreText;
-
     public void ShowPauseMenu()
     {
         if (this.pauseMenuPanel != null)
@@ -53,7 +55,10 @@ public class PauseMenu : MonoBehaviour
             this.pauseMenuPanel.SetActive(true);
             this.mainPanel.SetActive(true);
             this.optionsPanel.SetActive(false);
-            highscoreText.text = "CURRENT\nHIGHSCORE:\n" + PlayerPrefs.GetInt("Highscore", 0);
+            highscoreText.text = "CURRENT\nHIGHSCORE\n" + PlayerPrefs.GetInt("Highscore", 0);
+            currentPhaseText.text = "PHASE\n  " + GameManager.INSTANCE.GetPhase();
+            currentRoundText.text = "ROUND\n" + (GameManager.INSTANCE.GetRound() + 1)  + " / 3";
+
             Time.timeScale = 0f;
             pauseInventoryUI.Show();
         }
