@@ -314,12 +314,14 @@ public class GridObj
         }
 
         this.floorPrefab = this.interactable.GetPrefab();
+        
 
         Vector3 worldPos = this.GetWorldPos(worldOffsetX, worldOffsetY);
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
         this.floorObj = GameObject.Instantiate(this.floorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
 
         this.floorObj.transform.SetParent(this.parentObj.transform);
+        if (this.interactable is Spike spike) spike.InstantiateSpikes(this.floorObj);
         this.interactable.SetColor(this.floorObj);
 
         InstantiateAllWalls(worldOffsetX, worldOffsetY, neighbors);

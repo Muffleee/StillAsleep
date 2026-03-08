@@ -18,6 +18,7 @@ public class PrefabLibrary : MonoBehaviour
     [SerializeField] public GameObject fogPrefab;
     [SerializeField] public GameObject prefabIce;
     [SerializeField] public GameObject prefabRotating;
+    [SerializeField] public GameObject prefabSpike;
     [SerializeField] public TMP_Text countdownText;
 
 

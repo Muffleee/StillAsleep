@@ -408,9 +408,20 @@ public class Rotating : IInteractable
 public class Spike : IInteractable
 {
     bool spikesOut = false;
+    GameObject spikes;
 
-    public void ToggleSpike() {  spikesOut = !spikesOut; }
-    void IInteractable.SetColor(GameObject obj) { if(spikesOut) obj.GetComponentInChildren<MeshRenderer>().material.color = Color.black; else obj.GetComponentInChildren<MeshRenderer>().material.color = Color.white; }
+    public void ToggleSpike() 
+    {  
+        spikesOut = !spikesOut;
+        if (spikes == null) return;
+        if (spikesOut) spikes.SetActive(true); 
+        else spikes.SetActive(false); 
+    }
+    public void InstantiateSpikes(GameObject floor)
+    {
+        spikes = GameObject.Instantiate(GameManager.INSTANCE.GetPrefabLibrary().prefabSpike, floor.transform);
+    }
+    void IInteractable.SetColor(GameObject obj) { return; }
     void IInteractable.OnUse(GridObj obj) { if (!spikesOut) Debug.Log("YOU LOST :("); }
 
     /// <summary>
