@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
-    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon() };
+    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond() };
     private IMapCondition currentCond;
 
     [SerializeField] private bool enableEnergyCrystals = true;

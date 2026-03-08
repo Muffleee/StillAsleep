@@ -190,6 +190,12 @@ public class EnemyMovement : Movement
 
         if (nextObj.GetGridType() == GridType.REPLACEABLE) return MoveType.INVALID;
 
+        if (!cGrid.IsInsideGrid(gridPos.x, gridPos.y))
+        {
+            Debug.Log($"Enemy Movement: GridPos out of bounds: {gridPos.x}, {gridPos.y}");
+            return MoveType.INVALID;
+        }
+
         GridObj current = cGrid.GetGridArray()[gridPos.x, gridPos.y];
 
         if(current.HasWallAt(wallPos) || nextObj.HasWallAt(WallStatus.GetOppositePos(wallPos)))
