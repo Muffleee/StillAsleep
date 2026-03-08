@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PrefabLibrary : MonoBehaviour
@@ -17,6 +18,7 @@ public class PrefabLibrary : MonoBehaviour
     [SerializeField] public GameObject fogPrefab;
     [SerializeField] public GameObject prefabIce;
     [SerializeField] public GameObject prefabRotating;
+    [SerializeField] public TMP_Text countdownText;
 
 
     public GameObject GetRandomWallPrefab()

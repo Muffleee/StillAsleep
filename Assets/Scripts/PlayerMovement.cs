@@ -71,7 +71,7 @@ public class PlayerMovement : Movement
         {
             if(this.pausescreen.IsPauseMenuActive())
             {
-                this.pausescreen.hidePauseMenu();
+                this.pausescreen.HidePauseMenu();
             }
             else
             {
@@ -173,6 +173,7 @@ public class PlayerMovement : Movement
             yield return null;
         }
         this.stepCounter++;
+        ScoreManager.INSTANCE?.AddScore(-1, false, "Move");
 
         lastGridPos = this.gridPos;
         this.gridPos = this.GetNextGridPos(wallPos);
