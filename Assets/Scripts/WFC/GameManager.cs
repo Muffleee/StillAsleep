@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int hiddenTrap = 0;
     [SerializeField] private int ice = 0;
     [SerializeField] private int rotating = 0;
+    [SerializeField] private int spike = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private EnemyMovement enemyMovement;
@@ -44,6 +45,7 @@ public class GameManager : MonoBehaviour
     public static int hiddenTrapWeight;
     public static int iceWeight;
     public static int rotatingWeight;
+    public static int spikeWeight;
     public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
@@ -118,6 +120,7 @@ public class GameManager : MonoBehaviour
                 hiddenTrapWeight = this.hiddenTrap;
                 iceWeight = this.ice;
                 rotatingWeight = this.rotating;
+                spikeWeight = this.spike;
                 break;
             case WeightType.CLOSED:
                 corridorWeight = 10;
@@ -130,6 +133,7 @@ public class GameManager : MonoBehaviour
                 hiddenTrapWeight = 4;
                 iceWeight = 7;
                 rotatingWeight = 7;
+                spikeWeight = 7;
                 break;
             case WeightType.OPEN:
                 corridorWeight = 2;
@@ -142,6 +146,7 @@ public class GameManager : MonoBehaviour
                 hiddenTrapWeight = 3;
                 iceWeight = 4;
                 rotatingWeight = 4;
+                spikeWeight = 4;
                 break;
             case WeightType.START:
                 emptyWeight = 20;
@@ -191,6 +196,7 @@ public class GameManager : MonoBehaviour
         enemyMovement.MoveEnemy();
         this.RefreshFog();
         this.grid.RotateTiles();
+        this.grid.Spike();
         GridObj toObj = this.grid.GetGridObj(to);
         if(toObj != null && toObj.GetGridType() == GridType.TRAP)
         {

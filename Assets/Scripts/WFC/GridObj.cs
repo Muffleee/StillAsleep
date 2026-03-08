@@ -127,10 +127,13 @@ public class GridObj
                 this.interactable = new HiddenTrap(); 
                 break;
             case GridType.ICE:
-                this.interactable = new Regular();
+                this.interactable = new Ice();
                 break;
             case GridType.ROTATING:
-                this.interactable = new Regular();
+                this.interactable = new Rotating();
+                break;
+            case GridType.SPIKE:
+                this.interactable = new Spike();
                 break;
             default: 
                 this.interactable = new Regular(); 
@@ -310,10 +313,7 @@ public class GridObj
             return;
         }
 
-        if(this.gridType == GridType.REPLACEABLE || this.gridType == GridType.MANUAL_REPLACEABLE)
-        {
-            this.floorPrefab = GameManager.INSTANCE.GetPrefabLibrary().prefabReplaceable;
-        }
+        this.floorPrefab = this.interactable.GetPrefab();
 
         Vector3 worldPos = this.GetWorldPos(worldOffsetX, worldOffsetY);
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
@@ -321,14 +321,6 @@ public class GridObj
 
         this.floorObj.transform.SetParent(this.parentObj.transform);
         this.interactable.SetColor(this.floorObj);
-        if(this.gridType == GridType.ICE)
-        {
-            this.floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.black;
-        }
-        if (this.gridType == GridType.ROTATING)
-        {
-            this.floorObj.GetComponentInChildren<MeshRenderer>().material.color = Color.red;
-        }
 
         InstantiateAllWalls(worldOffsetX, worldOffsetY, neighbors);
         // Energy crystal spawning is centralized in GameManager (tunable like weights).
@@ -862,5 +854,5 @@ public class GridObj
 
 public enum GridType
 {
-    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP, DESTROYED, ICE, ROTATING
+    REGULAR, REPLACEABLE, MANUAL_REPLACEABLE, TRAP, JUMPINGPAD, HIDDENTRAP, DESTROYED, ICE, ROTATING, SPIKE
 }

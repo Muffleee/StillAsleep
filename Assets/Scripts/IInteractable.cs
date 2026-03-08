@@ -70,7 +70,7 @@ public class Regular : IInteractable
 
     GameObject IInteractable.GetPrefab()
     {
-        return null;
+        return GameManager.INSTANCE.GetPrefabLibrary().GetRandomFloorPrefab();
     }
 
     void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
@@ -223,7 +223,7 @@ public class Replaceable : IInteractable
 
     GameObject IInteractable.GetPrefab()
     {
-        return null;
+        return GameManager.INSTANCE.GetPrefabLibrary().prefabReplaceable;
     }
 
     void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
@@ -252,7 +252,7 @@ public class ManualReplaceable : IInteractable
     
     GameObject IInteractable.GetPrefab()
     {
-        return null;
+        return GameManager.INSTANCE.GetPrefabLibrary().prefabReplaceable;
     }
 
     void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
@@ -330,4 +330,108 @@ public class HiddenTrap : IInteractable
     }
 
     void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
+}
+
+/// <summary>
+/// Class describing a regular tile with no special functionality.
+/// </summary>
+public class Ice : IInteractable
+{
+    void IInteractable.SetColor(GameObject obj) { return; }
+    void IInteractable.OnUse(GridObj obj) { return; }
+
+    /// <summary>
+    /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.
+    /// </summary>
+    /// <param name="curr">Origin GridObj</param>
+    /// <param name="nextObj">Destination GridObj</param>
+    /// <param name="wPos">Direction</param>
+    /// <returns></returns>
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    {
+        if (!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
+        {
+            if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
+            if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            return MoveType.WALK;
+        }
+        return MoveType.INVALID;
+    }
+
+    GameObject IInteractable.GetPrefab()
+    {
+        return GameManager.INSTANCE.GetPrefabLibrary().prefabIce;
+    }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) { }
+}
+/// <summary>
+/// Class describing a regular tile with no special functionality.
+/// </summary>
+public class Rotating : IInteractable
+{
+    void IInteractable.SetColor(GameObject obj) { return; }
+    void IInteractable.OnUse(GridObj obj) { return; }
+
+    /// <summary>
+    /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.
+    /// </summary>
+    /// <param name="curr">Origin GridObj</param>
+    /// <param name="nextObj">Destination GridObj</param>
+    /// <param name="wPos">Direction</param>
+    /// <returns></returns>
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    {
+        if (!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
+        {
+            if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
+            if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            return MoveType.WALK;
+        }
+        return MoveType.INVALID;
+    }
+
+    GameObject IInteractable.GetPrefab()
+    {
+        return GameManager.INSTANCE.GetPrefabLibrary().prefabRotating;
+    }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) { }
+}
+
+/// <summary>
+/// Class describing a regular tile with no special functionality.
+/// </summary>
+public class Spike : IInteractable
+{
+    bool spikesOut = false;
+
+    public void ToggleSpike() {  spikesOut = !spikesOut; }
+    void IInteractable.SetColor(GameObject obj) { if(spikesOut) obj.GetComponentInChildren<MeshRenderer>().material.color = Color.black; else obj.GetComponentInChildren<MeshRenderer>().material.color = Color.white; }
+    void IInteractable.OnUse(GridObj obj) { if (!spikesOut) Debug.Log("YOU LOST :("); }
+
+    /// <summary>
+    /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.
+    /// </summary>
+    /// <param name="curr">Origin GridObj</param>
+    /// <param name="nextObj">Destination GridObj</param>
+    /// <param name="wPos">Direction</param>
+    /// <returns></returns>
+    MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
+    {
+        if (!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
+        {
+            if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
+            if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            return MoveType.WALK;
+        }
+        return MoveType.INVALID;
+    }
+
+    GameObject IInteractable.GetPrefab()
+    {
+        return GameManager.INSTANCE.GetPrefabLibrary().GetRandomFloorPrefab();
+    }
+
+    void IInteractable.TriggerAnimation(Animator animator, MoveType mt) { }
 }

@@ -15,6 +15,8 @@ public class PrefabLibrary : MonoBehaviour
     [SerializeField] public GameObject prefabJumppad;
     [SerializeField] public List<GameObject> torchPrefabs;
     [SerializeField] public GameObject fogPrefab;
+    [SerializeField] public GameObject prefabIce;
+    [SerializeField] public GameObject prefabRotating;
 
 
     public GameObject GetRandomWallPrefab()
