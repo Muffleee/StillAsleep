@@ -13,8 +13,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip trap;
     [SerializeField] private AudioClip intro;
     [SerializeField] private AudioClip loop;
-    private static float soundVolume = AudioManager.GetSoundVolume(); 
-    private static float musicVolume => AudioManager.GetMusicVolume();
+    private static float soundVolume = 1.0f; 
+    private static float musicVolume = 1.0f;
 
     public static void SetSoundVolume(float volume)
     {   
@@ -40,6 +40,7 @@ public class AudioManager : MonoBehaviour
 
     void Awake()
     {   
+        AudioManager.musicVolume = AudioManager.GetMusicVolume();
         AudioManager.soundVolume = AudioManager.GetSoundVolume();
         if(musicSource == null) musicSource = this.GetComponent<AudioSource>();
         if(Instance != null && Instance != this)
