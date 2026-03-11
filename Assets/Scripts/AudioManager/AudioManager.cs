@@ -13,21 +13,19 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip trap;
     [SerializeField] private AudioClip intro;
     [SerializeField] private AudioClip loop;
-    private static float soundVolume = 1.0f; 
-    private static float musicVolume = 1.0f;
+    private static float soundVolume = AudioManager.GetSoundVolume(); 
+    private static float musicVolume => AudioManager.GetMusicVolume();
 
     public static void SetSoundVolume(float volume)
     {   
         PlayerPrefs.SetFloat("SoundVolume", volume);
         PlayerPrefs.Save();
-        soundVolume = volume;
     }
 
     public static void SetMusicVolume(float volume)
     {
         PlayerPrefs.SetFloat("MusicVolume", volume);
         PlayerPrefs.Save();
-        musicVolume = volume;
     }
 
     public static float GetSoundVolume()
@@ -43,7 +41,6 @@ public class AudioManager : MonoBehaviour
     void Awake()
     {   
         AudioManager.soundVolume = AudioManager.GetSoundVolume();
-        AudioManager.musicVolume = AudioManager.GetMusicVolume();
         if(musicSource == null) musicSource = this.GetComponent<AudioSource>();
         if(Instance != null && Instance != this)
         {
