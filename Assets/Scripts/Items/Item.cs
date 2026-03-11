@@ -5,6 +5,7 @@ public class Item : ScriptableObject, IItem
 {
     [Header("Basic Info")]
     public string itemName;
+    public string description;
     public Sprite icon;
     public GameObject prefab;
     
@@ -41,5 +42,15 @@ public class Item : ScriptableObject, IItem
     {
         // This is what happens when the player clicks it in the inventory
         Debug.Log($"Used item: {itemName}");
+    }
+
+    public string GetName()
+    {
+        return itemName;
+    }
+
+    public string GetDescription()
+    {
+        return description;
     }
 }
