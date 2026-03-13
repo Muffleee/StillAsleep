@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Item2
   m_EditorClassIdentifier: 
   itemName: item 2
+  description: "Die PIlle gegen Schmerzen, es tut so als w\xFCrde es dir helfen."
   icon: {fileID: 21300000, guid: 0b86f24ade37c11498c182d9154350dc, type: 3}
   prefab: {fileID: 5714447126237544670, guid: 969fce7480425d547812f3008868a84c, type: 3}
   energyCost: 3

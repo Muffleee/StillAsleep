@@ -39,6 +39,15 @@ public class Grid
         this.grid = new GridObj[width, height];
     }
 
+    public static void DestroyAllItems()
+    {
+        ItemPickup[] objects = UnityEngine.Object.FindObjectsOfType<ItemPickup>();
+        foreach (ItemPickup obj in objects)
+        {
+            GameObject.Destroy(obj.gameObject);
+        }
+    }
+
     /// <summary>
     /// Gets all GridObjs adjacent to the given one.
     /// </summary>
@@ -909,6 +918,7 @@ public class Grid
 
     public void DestroyGrid()
     {
+        Grid.DestroyAllItems();
         for(int x = 0; x < this.width; x++)
         {
             for(int y = 0; y < this.height; y++)

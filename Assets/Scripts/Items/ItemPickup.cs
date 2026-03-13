@@ -31,7 +31,7 @@ public class ItemPickup : MonoBehaviour
         if (playerInventory.AddItem(itemData))
         {
             Debug.Log($"{itemData.itemName} picked up successfully!");
-            Destroy(gameObject); 
+            Destroy(gameObject);
         }
         else
         {

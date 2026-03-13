@@ -329,11 +329,11 @@ public class GridObj
 
         if (GameManager.INSTANCE != null)
         {
-            GameManager.INSTANCE.TrySpawnEnergyCrystal(this, worldOffsetX, worldOffsetY);
-            GameManager.INSTANCE.TrySpawnItem(this, worldOffsetX, worldOffsetY); 
+            if(!GameManager.INSTANCE.TrySpawnEnergyCrystal(this, worldOffsetX, worldOffsetY))
+                GameManager.INSTANCE.TrySpawnItem(this, worldOffsetX, worldOffsetY);
         }
 
-        //if(this.isFogged) this.SpawnFog();
+        if(this.isFogged) this.SpawnFog();
     }
 
     public void InstantiateAllWalls(int worldOffsetX, int worldOffsetY, Dictionary<WallPos, GridObj> neighbors)

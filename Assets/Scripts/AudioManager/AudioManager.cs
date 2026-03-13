@@ -20,14 +20,12 @@ public class AudioManager : MonoBehaviour
     {   
         PlayerPrefs.SetFloat("SoundVolume", volume);
         PlayerPrefs.Save();
-        soundVolume = volume;
     }
 
     public static void SetMusicVolume(float volume)
     {
         PlayerPrefs.SetFloat("MusicVolume", volume);
         PlayerPrefs.Save();
-        musicVolume = volume;
     }
 
     public static float GetSoundVolume()
@@ -42,8 +40,8 @@ public class AudioManager : MonoBehaviour
 
     void Awake()
     {   
-        AudioManager.soundVolume = AudioManager.GetSoundVolume();
         AudioManager.musicVolume = AudioManager.GetMusicVolume();
+        AudioManager.soundVolume = AudioManager.GetSoundVolume();
         if(musicSource == null) musicSource = this.GetComponent<AudioSource>();
         if(Instance != null && Instance != this)
         {
