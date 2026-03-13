@@ -1481,6 +1481,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 513369558}
   m_CullTransparentMesh: 1
+--- !u!1 &611587147 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7025662813137177652, guid: ca18ff33c432f5748b559a5be89f404f,
+    type: 3}
+  m_PrefabInstance: {fileID: 760168614}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &760168614
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1589,15 +1595,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5657021602071950220, guid: ca18ff33c432f5748b559a5be89f404f,
+        type: 3}
+      propertyPath: loseText
+      value: 
+      objectReference: {fileID: 865299217}
+    - target: {fileID: 5657021602071950220, guid: ca18ff33c432f5748b559a5be89f404f,
+        type: 3}
+      propertyPath: loseQuitButton
+      value: 
+      objectReference: {fileID: 2080749743}
+    - target: {fileID: 5657021602071950220, guid: ca18ff33c432f5748b559a5be89f404f,
+        type: 3}
+      propertyPath: loseScreenPanel
+      value: 
+      objectReference: {fileID: 611587147}
+    - target: {fileID: 5657021602071950220, guid: ca18ff33c432f5748b559a5be89f404f,
+        type: 3}
+      propertyPath: loseRestartButton
+      value: 
+      objectReference: {fileID: 971035683}
     - target: {fileID: 5996764935407970224, guid: ca18ff33c432f5748b559a5be89f404f,
         type: 3}
       propertyPath: m_Name
       value: WinScreenCanvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 5996764935407970224, guid: ca18ff33c432f5748b559a5be89f404f,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1733,6 +1754,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &865299217 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3030069956975947183, guid: ca18ff33c432f5748b559a5be89f404f,
+    type: 3}
+  m_PrefabInstance: {fileID: 760168614}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &897299085 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4627620772621547998, guid: 220c7dec9ee469541a1aa4ec393fa355,
@@ -1889,6 +1922,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: be81d5859149785468028c1000dd1285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &971035683 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9059028025963367589, guid: ca18ff33c432f5748b559a5be89f404f,
+    type: 3}
+  m_PrefabInstance: {fileID: 760168614}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &1185083563 stripped
@@ -3282,6 +3327,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2080749743 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3977869018188789801, guid: ca18ff33c432f5748b559a5be89f404f,
+    type: 3}
+  m_PrefabInstance: {fileID: 760168614}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6834562829543864864
 PrefabInstance:
   m_ObjectHideFlags: 0
