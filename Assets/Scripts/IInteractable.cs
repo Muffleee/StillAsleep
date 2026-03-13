@@ -408,21 +408,21 @@ public class Rotating : IInteractable
 public class Spike : IInteractable
 {
     bool spikesOut = false;
-    GameObject spikes;
-
+    SpikeTrap spikes;
+    public SpikeTrap GetSpikes() { return spikes; }
     public void ToggleSpike() 
-    {  
+    {
         spikesOut = !spikesOut;
-        if (spikes == null) return;
-        if (spikesOut) spikes.SetActive(true); 
-        else spikes.SetActive(false); 
+        spikes.Extend(spikesOut);
     }
     public void InstantiateSpikes(GameObject floor)
     {
-        spikes = GameObject.Instantiate(GameManager.INSTANCE.GetPrefabLibrary().prefabSpike, floor.transform);
+        Vector3 pos = floor.transform.position;
+        pos.y = 0.1f;
+        spikes = GameObject.Instantiate(GameManager.INSTANCE.GetPrefabLibrary().prefabSpike, pos, Quaternion.identity, floor.transform);
     }
     void IInteractable.SetColor(GameObject obj) { return; }
-    void IInteractable.OnUse(GridObj obj) { if (!spikesOut) Debug.Log("YOU LOST :("); }
+    void IInteractable.OnUse(GridObj obj) { if (!spikesOut) GameManager.INSTANCE.LoseGame("The spikes pierced through your body..."); }
 
     /// <summary>
     /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.
