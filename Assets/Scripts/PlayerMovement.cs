@@ -147,6 +147,7 @@ public class PlayerMovement : Movement
         float moveDuration = totalDuration - chargeDuration;
         float elapsed = 0f;
         this.isMoving = true;
+        GameManager.INSTANCE.WhileMove(this.gridPos, this.GetNextGridPos(wallPos), wallPos, stepCounter);
         Vector3 startPos = this.transform.position;
         Vector3 endPos = startPos + this.GetMoveDir(wallPos);
 

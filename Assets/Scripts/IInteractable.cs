@@ -424,7 +424,7 @@ public class Spike : IInteractable
         spikes = GameObject.Instantiate(GameManager.INSTANCE.GetPrefabLibrary().prefabSpike, pos, Quaternion.identity, floor.transform);
     }
     void IInteractable.SetColor(GameObject obj) { return; }
-    void IInteractable.OnUse(GridObj obj) { if (!spikesOut) GameManager.INSTANCE.LoseGame("The spikes pierced through your body..."); }
+    void IInteractable.OnUse(GridObj obj) { if (spikesOut) GameManager.INSTANCE.LoseGame("The spikes pierced through your body..."); }
 
     /// <summary>
     /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.

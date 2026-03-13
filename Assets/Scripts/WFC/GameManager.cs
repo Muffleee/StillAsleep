@@ -138,7 +138,7 @@ public class GameManager : MonoBehaviour
                 hiddenTrapWeight = 4;
                 iceWeight = 7;
                 rotatingWeight = 7;
-                spikeWeight = 7;
+                spikeWeight = 8;
                 break;
             case WeightType.OPEN:
                 corridorWeight = 2;
@@ -164,6 +164,7 @@ public class GameManager : MonoBehaviour
                 hiddenTrapWeight = 0;
                 iceWeight = 0;
                 rotatingWeight = 0;
+                spikeWeight = 0;
                 break;
         }
         
@@ -189,6 +190,14 @@ public class GameManager : MonoBehaviour
         }
         
     }
+
+    public void WhileMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
+    {
+        if (step % 2 == 0)
+        {
+            this.grid.Spike();
+        }
+    }
     /// <summary>
     /// Function to be called on player movement, handles dynamic map generation and movement of the exit
     /// </summary>
@@ -201,7 +210,6 @@ public class GameManager : MonoBehaviour
         enemyMovement.MoveEnemy();
         this.RefreshFog();
         this.grid.RotateTiles();
-        this.grid.Spike();
         GridObj toObj = this.grid.GetGridObj(to);
         if(toObj != null && toObj.GetGridType() == GridType.TRAP)
         {
