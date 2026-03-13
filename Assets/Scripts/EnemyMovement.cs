@@ -18,7 +18,11 @@ public class EnemyMovement : Movement
     private bool isInstantiated = false;
     int stepCounter = 0;
     private EnemyDifficulty difficulty = new EnemyDifficulty(EnemyDifficultySetting.VERY_EASY);
-    
+    private readonly List<Vector2Int> positionHistory = new List<Vector2Int>();
+    private Vector2Int? stickyTrapGridPos = null;
+    private int stickyTrapTurnsLeft = 0;
+    private const int MAX_HISTORY_SIZE = 20;
+
     private void Awake()
     {
         INSTANCE = this;
@@ -51,12 +55,36 @@ public class EnemyMovement : Movement
             Debug.LogWarning("You are trying to instantiate the enemy outside of the grid! Don't do that");
             return;
         }
+        positionHistory.Clear();
+        stickyTrapGridPos = null;
+        stickyTrapTurnsLeft = 0;
         this.gridPos = pos;
         Vector3 newPosition = this.gameManager.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos(this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         newPosition.y = 1;
         this.transform.position = newPosition;
         this.gameObject.SetActive(true);
         isInstantiated = true;
+    }
+    public void PlaceStickyTrap(Vector2Int trapGridPos, int stuckTurns)
+    {
+        stickyTrapGridPos = trapGridPos;
+        stickyTrapTurnsLeft = Mathf.Max(1, stuckTurns);
+    }
+
+    public void Rewind(int steps)
+    {
+        if (!isInstantiated) return;
+        if (steps <= 0) return;
+        if (positionHistory.Count == 0) return;
+
+        StopAllCoroutines();
+
+        int targetIndex = Mathf.Max(positionHistory.Count - steps, 0);
+        Vector2Int rewindTarget = positionHistory[targetIndex];
+
+        positionHistory.RemoveRange(targetIndex, positionHistory.Count - targetIndex);
+        this.lastGridPos = rewindTarget;
+        this.ResetFigure(rewindTarget);
     }
 
     public Vector2Int GetEnemyGridPos()
@@ -74,10 +102,26 @@ public class EnemyMovement : Movement
     public void MoveEnemy()
     {
         if (!isInstantiated) return;
+
+        if (stickyTrapGridPos.HasValue && this.gridPos == stickyTrapGridPos.Value && stickyTrapTurnsLeft > 0)
+        {
+            stickyTrapTurnsLeft--;
+            if (stickyTrapTurnsLeft <= 0)
+            {
+                stickyTrapGridPos = null;
+            }
+            return;
+        }
+
         stepCounter++;
         WallPos? direction = GetNextEnemyDir();
         if (direction != null)
-        {   
+        {
+            positionHistory.Add(this.gridPos);
+            if (positionHistory.Count > MAX_HISTORY_SIZE)
+            {
+                positionHistory.RemoveAt(0);
+            }
             this.RotateModel(direction.Value);
             this.StartMovement(direction.Value, MoveType.WALK);
         }
@@ -189,6 +233,12 @@ public class EnemyMovement : Movement
         GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
 
         if (nextObj.GetGridType() == GridType.REPLACEABLE) return MoveType.INVALID;
+
+        if (!cGrid.IsInsideGrid(gridPos.x, gridPos.y))
+        {
+            Debug.Log($"Enemy Movement: GridPos out of bounds: {gridPos.x}, {gridPos.y}");
+            return MoveType.INVALID;
+        }
 
         GridObj current = cGrid.GetGridArray()[gridPos.x, gridPos.y];
 

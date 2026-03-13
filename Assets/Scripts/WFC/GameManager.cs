@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
-    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon() };
+    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond() };
     private IMapCondition currentCond;
 
     [SerializeField] private bool enableEnergyCrystals = true;
@@ -241,6 +241,7 @@ public class GameManager : MonoBehaviour
     public void LoseGame(string loseMessage)
     {
         // TODO implement this
+        Debug.Log("LOSER HAHAHAHA: " + loseMessage);
     }
 
     /// <summary>
@@ -276,13 +277,13 @@ public class GameManager : MonoBehaviour
     /// Spawns an Energy Crystal on a freshly instantiated REGULAR tile based on player energy.
     /// Centralized here so tuning happens in one place (like WFC weights).
     /// </summary>
-    public void TrySpawnEnergyCrystal(GridObj tile, int worldOffsetX, int worldOffsetY)
+    public bool TrySpawnEnergyCrystal(GridObj tile, int worldOffsetX, int worldOffsetY)
     {
-        if (!enableEnergyCrystals) return;
-        if (tile == null) return;
-        if (prefabLibrary == null || prefabLibrary.prefabEnergyCrystal == null) return;
-        if (playerResources == null) return;
-        if (tile.GetGridType() != GridType.REGULAR) return;
+        if (!enableEnergyCrystals) return false;
+        if (tile == null) return false;
+        if (prefabLibrary == null || prefabLibrary.prefabEnergyCrystal == null) return false;
+        if (playerResources == null) return false;
+        if (tile.GetGridType() != GridType.REGULAR) return false;
 
         float denom = Mathf.Max(1, playerResources.MaxEnergy);
         float energyRatio = playerResources.CurrentEnergy / denom; // 0..1
@@ -293,26 +294,27 @@ public class GameManager : MonoBehaviour
         int maxCrystals = crystalBaseMax + Mathf.FloorToInt((1f - energyRatio) * crystalBonusMax);
         maxCrystals = Mathf.Max(0, maxCrystals);
 
-        if (UnityEngine.Random.value >= spawnChance) return;
+        if (UnityEngine.Random.value >= spawnChance) return false;
 
         Vector3 worldPos = tile.GetWorldPos(worldOffsetX, worldOffsetY);
         EnergyCrystal.PrepareSpawn(worldPos, maxCrystals);
         Instantiate(prefabLibrary.prefabEnergyCrystal, worldPos, Quaternion.identity);
+        return true;
     }
     
 
-  public void TrySpawnItem(GridObj tile, int worldOffsetX, int worldOffsetY)
+  public bool TrySpawnItem(GridObj tile, int worldOffsetX, int worldOffsetY)
     {
-        if (!enableItemSpawning) return;
-        if (tile == null || tile.GetGridType() != GridType.REGULAR) return;
+        if (!enableItemSpawning) return false;
+        if (tile == null || tile.GetGridType() != GridType.REGULAR) return false;
         if (spawnableItemPrefabs == null || spawnableItemPrefabs.Length == 0)
         {
             Debug.LogWarning("Item Spawning is enabled, but the prefab array is empty!");
-            return;
+            return false;
         }
 
         // 1. Check if ANY item should spawn on this tile
-        if (UnityEngine.Random.value > itemSpawnChance) return;
+        if (UnityEngine.Random.value > itemSpawnChance) return false;
 
         // 2. Calculate the total weight
         int totalWeight = 0;
@@ -331,7 +333,7 @@ public class GameManager : MonoBehaviour
         if (totalWeight == 0)
         {
             Debug.LogWarning("Total item spawn weight is 0! Make sure prefabs have ItemPickup attached and Item Data assigned.");
-            return;
+            return false;
         }
 
         // 3. Roll the dice
@@ -364,7 +366,9 @@ public class GameManager : MonoBehaviour
             worldPos.y += 0.5f;
             Instantiate(selectedPrefab, worldPos, Quaternion.identity);
             Debug.Log($"Spawned a {selectedPrefab.name} at {worldPos}"); // Confirms it worked!
+            return true;
         }
+        return false;
     }
 
 
