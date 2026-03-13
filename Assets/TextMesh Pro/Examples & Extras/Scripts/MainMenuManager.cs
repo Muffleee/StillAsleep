@@ -71,13 +71,15 @@ public class MainMenu : MonoBehaviour
     }
 
     private void ShowOptions()
-    {   
+    {
+        AudioManager.Instance.PlayButtonClick();
         this.mainMenuPanel.SetActive(false);
         this.optionsPanel.SetActive(true);
     }
 
     private void HideOptions()
     {
+        AudioManager.Instance.PlayButtonClick();
         this.optionsPanel.SetActive(false);
         this.mainMenuPanel.SetActive(true);
     }

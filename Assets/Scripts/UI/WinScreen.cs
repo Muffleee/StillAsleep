@@ -17,6 +17,8 @@ public class WinScreen : MonoBehaviour
     [SerializeField] private Button nextRoundButton;
     [SerializeField] private Button nextRoundQuit;
     [SerializeField] private ToggleGroup wfcChoice;
+    [SerializeField] private GameObject StatsPanel;
+    [SerializeField] private ScoreManager scoreManager;
 
     void Start()
     {
@@ -40,7 +42,7 @@ public class WinScreen : MonoBehaviour
             this.nextRoundQuit.onClick.AddListener(this.QuitGame);
     }
 
-    public void ShowWinScreen(string message = "You Win!")
+    public void ShowWinScreen()
     {
         //if (this.winScreenPanel != null)
         //{
@@ -55,10 +57,30 @@ public class WinScreen : MonoBehaviour
         if(this.nextRoundPanel != null)
         {
             this.nextRoundPanel.SetActive(true);
-            if (GameManager.INSTANCE.GetRound() % 3 == 0) this.wfcChoice.gameObject.SetActive(false);
-            else this.wfcChoice.gameObject.SetActive(true);
+            if (GameManager.INSTANCE.GetRound() % 3 == 0) ShowStats();
+            else
+            {   
+                this.winText.text = "ROUND COMPLETED";
+                this.StatsPanel.SetActive(false);
+                this.wfcChoice.gameObject.SetActive(true);
+            }
+
         }
         Time.timeScale = 0f;
+    }
+
+    private void ShowStats()
+    {
+        this.wfcChoice.gameObject.SetActive(false);
+        this.StatsPanel.SetActive(true);
+        this.winText.text = "PHASE COMPLETED";
+
+        TMP_Text statsText = this.StatsPanel.GetComponentInChildren<TMP_Text>();
+        if(statsText != null)
+        {
+            statsText.text = "STATS\n\n";
+            statsText.text += "Current Score: " + scoreManager.GetScore() + "\n";
+        }
     }
 
     private void StartNextRound()
@@ -70,7 +92,6 @@ public class WinScreen : MonoBehaviour
         }
         else
         {
-
             switch (wfcChoice.GetFirstActiveToggle().name)
             {
                 case "OPEN": weight = WeightType.OPEN; break;
