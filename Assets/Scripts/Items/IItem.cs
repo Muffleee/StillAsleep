@@ -12,3 +12,271 @@ public interface IItem
     public string GetName();
     public string GetDescription();
 }
+
+public static class ItemHelper
+{
+    public static WallPos GetPlayerFacingDirection()
+    {
+        if (PlayerMovement.INSTANCE == null)
+        {
+            return WallPos.FRONT;
+        }
+
+        Vector2Int current = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        Vector2Int last = PlayerMovement.INSTANCE.GetLastGridPos();
+        Vector2Int delta = current - last;
+
+        if (delta == Vector2Int.right) return WallPos.RIGHT;
+        if (delta == Vector2Int.left) return WallPos.LEFT;
+        if (delta == new Vector2Int(0, 1)) return WallPos.BACK;
+        if (delta == new Vector2Int(0, -1)) return WallPos.FRONT;
+
+        return WallPos.FRONT;
+    }
+}
+
+/// <summary>
+/// Zeitumkehrmodul -> Setzt den Gegner um einige Schritte zurueck.
+/// </summary>
+public class TimeReversalItem : IItem
+{
+    private const int ENERGY_COST = 2;
+    private const int SPAWN_WEIGHT = 5;
+    private const int REWIND_STEPS = 4;
+
+    int IItem.GetEnergyCost() => ENERGY_COST;
+    int IItem.GetSpawnWeight() => SPAWN_WEIGHT;
+
+    Sprite IItem.GetIcon()
+    {
+        if (GameManager.INSTANCE == null) return null;
+        PrefabLibrary library = GameManager.INSTANCE.GetPrefabLibrary();
+        if (library == null) return null;
+        return library.iconItemClock;
+    }
+
+    GameObject IItem.GetPrefab()
+    {
+        if (GameManager.INSTANCE == null) return null;
+        PrefabLibrary library = GameManager.INSTANCE.GetPrefabLibrary();
+        if (library == null) return null;
+        return library.prefabItemClock;
+    }
+
+    string IItem.GetName() => "Zeitumkehrmodul";
+    string IItem.GetDescription() => $"Setzt den Gegner um {REWIND_STEPS} Schritte zurueck.";
+
+    void IItem.OnUse()
+    {
+        if (EnemyMovement.INSTANCE == null) return;
+        EnemyMovement.INSTANCE.Rewind(REWIND_STEPS);
+    }
+}
+
+/// <summary>
+/// Spitzhacke -> Zerstoert die Wand in Blickrichtung des Spielers.
+/// </summary>
+public class WallBreakerItem : IItem
+{
+    private const int ENERGY_COST = 2;
+    private const int SPAWN_WEIGHT = 4;
+
+    int IItem.GetEnergyCost() => ENERGY_COST;
+    int IItem.GetSpawnWeight() => SPAWN_WEIGHT;
+
+    Sprite IItem.GetIcon()
+    {
+        if (GameManager.INSTANCE == null) return null;
+        PrefabLibrary library = GameManager.INSTANCE.GetPrefabLibrary();
+        if (library == null) return null;
+        return library.iconItemPickaxe;
+    }
+
+    GameObject IItem.GetPrefab()
+    {
+        if (GameManager.INSTANCE == null) return null;
+        PrefabLibrary library = GameManager.INSTANCE.GetPrefabLibrary();
+        if (library == null) return null;
+        return library.prefabItemPickaxe;
+    }
+
+    string IItem.GetName() => "Spitzhacke";
+    string IItem.GetDescription() => "Zerstoert die Wand in deiner Blickrichtung.";
+
+    void IItem.OnUse()
+    {
+        if (GameManager.INSTANCE == null) return;
+        if (PlayerMovement.INSTANCE == null) return;
+
+        Grid grid = GameManager.INSTANCE.GetCurrentGrid();
+        if (grid == null) return;
+
+        Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        WallPos direction = ItemHelper.GetPlayerFacingDirection();
+
+        GridObj current = grid.GetGridObj(playerPos);
+        GridObj next = grid.GetAdjacentGridObj(playerPos, direction);
+
+        if (current == null || next == null) return;
+
+        WallPos opposite = WallStatus.GetOppositePos(direction);
+        bool hasWallToBreak = current.HasWallAt(direction) || next.HasWallAt(opposite);
+
+        if (!hasWallToBreak) return;
+
+        current.RemoveWall(direction);
+        next.RemoveWall(opposite);
+    }
+}
+
+/// <summary>
+/// Klebefalle -> Markiert das Feld vor dem Spieler. Wenn der Gegner dieses Feld betritt,
+/// bleibt er dort fuer kurze Zeit stehen.
+/// </summary>
+public class SludgeItem : IItem
+{
+    private const int ENERGY_COST = 2;
+    private const int SPAWN_WEIGHT = 4;
+    private const int STUCK_TURNS = 2;
+
+    int IItem.GetEnergyCost() => ENERGY_COST;
+    int IItem.GetSpawnWeight() => SPAWN_WEIGHT;
+
+    Sprite IItem.GetIcon()
+    {
+        if (GameManager.INSTANCE == null) return null;
+        PrefabLibrary library = GameManager.INSTANCE.GetPrefabLibrary();
+        if (library == null) return null;
+        return library.iconItemTrapForcefield;
+    }
+
+    GameObject IItem.GetPrefab()
+    {
+        if (GameManager.INSTANCE == null) return null;
+        PrefabLibrary library = GameManager.INSTANCE.GetPrefabLibrary();
+        if (library == null) return null;
+        return library.prefabItemTrapForcefield;
+    }
+
+    string IItem.GetName() => "Klebefalle";
+    string IItem.GetDescription() => "Blockiert den Gegner kurz auf dem Feld vor dir.";
+
+    void IItem.OnUse()
+    {
+        if (GameManager.INSTANCE == null) return;
+        if (PlayerMovement.INSTANCE == null) return;
+        if (EnemyMovement.INSTANCE == null) return;
+
+        Grid grid = GameManager.INSTANCE.GetCurrentGrid();
+        if (grid == null) return;
+
+        Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        WallPos direction = ItemHelper.GetPlayerFacingDirection();
+
+        GridObj target = grid.GetAdjacentGridObj(playerPos, direction);
+        if (target == null) return;
+
+        GridType targetType = target.GetGridType();
+        if (targetType == GridType.REPLACEABLE || targetType == GridType.MANUAL_REPLACEABLE)
+        {
+            return;
+        }
+
+        EnemyMovement.INSTANCE.PlaceStickyTrap(target.GetGridPos(), STUCK_TURNS);
+    }
+}
+
+/// <summary>
+/// Scanner -> Macht Hidden Traps fuer einige Sekunden sichtbar.
+/// </summary>
+public class ScannerItem : IItem
+{
+    private const int ENERGY_COST = 1;
+    private const int SPAWN_WEIGHT = 4;
+    private const float REVEAL_SECONDS = 4f;
+
+    private class RendererColorSnapshot
+    {
+        public Renderer renderer;
+        public Color color;
+
+        public RendererColorSnapshot(Renderer renderer, Color color)
+        {
+            this.renderer = renderer;
+            this.color = color;
+        }
+    }
+
+    int IItem.GetEnergyCost() => ENERGY_COST;
+    int IItem.GetSpawnWeight() => SPAWN_WEIGHT;
+
+    Sprite IItem.GetIcon()
+    {
+        if (GameManager.INSTANCE == null) return null;
+        PrefabLibrary library = GameManager.INSTANCE.GetPrefabLibrary();
+        if (library == null) return null;
+        return library.iconItemScanner;
+    }
+
+    GameObject IItem.GetPrefab()
+    {
+        if (GameManager.INSTANCE == null) return null;
+        PrefabLibrary library = GameManager.INSTANCE.GetPrefabLibrary();
+        if (library == null) return null;
+        return library.prefabItemTerrainScanner;
+    }
+
+    string IItem.GetName() => "Scanner";
+    string IItem.GetDescription() => $"Macht Hidden Traps fuer {REVEAL_SECONDS:0} Sekunden sichtbar.";
+
+    void IItem.OnUse()
+    {
+        if (GameManager.INSTANCE == null) return;
+
+        if (TerrainScannerEffect.INSTANCE != null)
+        {
+            TerrainScannerEffect.INSTANCE.PlayTerrainScanner(1, 0f);
+        }
+
+        GameManager.INSTANCE.StartCoroutine(RevealHiddenTrapsCoroutine(REVEAL_SECONDS));
+    }
+
+    private IEnumerator RevealHiddenTrapsCoroutine(float revealDuration)
+    {
+        if (GameManager.INSTANCE == null) yield break;
+
+        Grid grid = GameManager.INSTANCE.GetCurrentGrid();
+        if (grid == null) yield break;
+
+        GridObj[,] gridArray = grid.GetGridArray();
+        List<RendererColorSnapshot> snapshots = new List<RendererColorSnapshot>();
+
+        foreach (GridObj tile in gridArray)
+        {
+            if (tile == null || tile.GetGridType() != GridType.HIDDENTRAP) continue;
+
+            GameObject floorObj = tile.GetFloorObj();
+            if (floorObj == null) continue;
+
+            Renderer[] renderers = floorObj.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer currentRenderer in renderers)
+            {
+                if (currentRenderer == null || currentRenderer.material == null) continue;
+                if (!currentRenderer.material.HasProperty("_Color")) continue;
+
+                snapshots.Add(new RendererColorSnapshot(currentRenderer, currentRenderer.material.color));
+                currentRenderer.material.color = Color.red;
+            }
+        }
+
+        yield return new WaitForSeconds(revealDuration);
+
+        foreach (RendererColorSnapshot snapshot in snapshots)
+        {
+            if (snapshot == null || snapshot.renderer == null || snapshot.renderer.material == null) continue;
+            if (!snapshot.renderer.material.HasProperty("_Color")) continue;
+
+            snapshot.renderer.material.color = snapshot.color;
+        }
+    }
+}

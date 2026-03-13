@@ -18,6 +18,16 @@ public class PrefabLibrary : MonoBehaviour
     [SerializeField] public GameObject fogPrefab;
     [SerializeField] public TMP_Text countdownText;
 
+    [SerializeField] public GameObject prefabItemClock;
+    [SerializeField] public GameObject prefabItemPickaxe;
+    [SerializeField] public GameObject prefabItemTrapForcefield;
+    [SerializeField] public GameObject prefabItemTerrainScanner;
+
+    [SerializeField] public Sprite iconItemClock;
+    [SerializeField] public Sprite iconItemPickaxe;
+    [SerializeField] public Sprite iconItemTrapForcefield;
+    [SerializeField] public Sprite iconItemScanner;
+
 
     public GameObject GetRandomWallPrefab()
     {

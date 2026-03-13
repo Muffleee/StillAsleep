@@ -4,30 +4,47 @@ using UnityEngine.UI;
 
 public class TileDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    private GameObject ghostObject; // This is now a 3D object, not UI
+    private GameObject ghostObject; 
     private Toggle myToggle;
     private IngameUI uiController;
+    
+    [Header("UI Elements")]
+    [SerializeField] private GameObject highlightFrame; 
 
     void Start()
     {
         myToggle = GetComponent<Toggle>();
         uiController = Object.FindAnyObjectByType<IngameUI>();
+        
+        // Ensure the highlight starts turned off
+        if (highlightFrame != null) 
+        {
+            highlightFrame.SetActive(myToggle.isOn);
+        }
+
+        if (myToggle != null)
+        {
+            // Listen for toggle clicks
+            myToggle.onValueChanged.AddListener(UpdateHighlight);
+        }
+    }
+
+    private void UpdateHighlight(bool isOn)
+    {
+        if (highlightFrame != null)
+        {
+            highlightFrame.SetActive(isOn);
+        }
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        // 1. Get the name of the tile from the UI text
         string tileName = GetComponentInChildren<Text>().text;
-
-        // 2. Get the 3D Prefab from the UI Controller
         GameObject prefab = uiController.GetPrefabByName(tileName);
 
         if (prefab != null)
         {
-            // 3. Spawn the 3D Prefab into the world
             ghostObject = Instantiate(prefab);
-            
-            // 4. Disable collisions on the ghost so it doesn't bump things
             if (ghostObject.TryGetComponent<Collider>(out Collider col)) col.enabled = false;
         }
 
@@ -46,7 +63,6 @@ public class TileDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
                 Vector3 newPos = hit.point;
                 ghostObject.transform.position = newPos;
                 return;
-                
             }
         }
     }
@@ -55,7 +71,6 @@ public class TileDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     {
         if (ghostObject != null) Destroy(ghostObject);
 
-        // Place the real object via GameManager
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] allHits = Physics.RaycastAll(ray);
         foreach (var hit in allHits)

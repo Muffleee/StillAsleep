@@ -109,8 +109,9 @@ public class Trap : IInteractable
         pr.RemoveEnergy(cost);
         if (wouldGoNegative && PlayerMovement.INSTANCE != null)
         {
-            PlayerMovement.INSTANCE.RespawnToSpawn();
-            ScoreManager.INSTANCE.AddScore(-200, false, "Back to Spawn Trap");
+            GameManager.INSTANCE?.LoseGame("You ran out of energy in a trap!");
+            ScoreManager.INSTANCE.AddScore(-200, false, "LOSE");
+            return;
         }
         ScoreManager.INSTANCE.AddScore(-50, false, "Trap");
     }
@@ -293,7 +294,8 @@ public class HiddenTrap : IInteractable
 
         if (wouldGoNegative && PlayerMovement.INSTANCE != null)
         {
-            PlayerMovement.INSTANCE.RespawnToSpawn();
+            GameManager.INSTANCE?.LoseGame("You ran out of energy in a hidden trap!");
+            ScoreManager.INSTANCE?.AddScore(-150, false, "LOSE");
         }
         ScoreManager.INSTANCE.AddScore(-40, false, "Hidden Trap");
     }
