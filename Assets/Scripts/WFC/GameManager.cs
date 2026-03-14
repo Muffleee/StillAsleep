@@ -209,7 +209,7 @@ public class GameManager : MonoBehaviour
     {
         enemyMovement.MoveEnemy();
         this.RefreshFog();
-        this.grid.RotateTiles();
+        
         GridObj toObj = this.grid.GetGridObj(to);
         if(toObj != null && toObj.GetGridType() == GridType.TRAP)
         {
@@ -248,6 +248,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void AfterEnemyMove()
+    {
+        this.grid.RotateTiles();
+    }
     /// <summary>
     /// Make the player lose the game
     /// </summary>

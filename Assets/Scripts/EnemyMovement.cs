@@ -125,6 +125,7 @@ public class EnemyMovement : Movement
             this.RotateModel(direction.Value);
             this.StartMovement(direction.Value, MoveType.WALK);
         }
+        GameManager.INSTANCE.AfterEnemyMove();
     }
 
     /// <summary>

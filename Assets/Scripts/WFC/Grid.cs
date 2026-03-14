@@ -927,6 +927,8 @@ public class Grid
             }
         }
         this.grid = null;
+        this.spikeTiles.Clear();
+        this.rotatingTiles.Clear();
     }
     public void SetNewGrid(int width, int height)
     {
