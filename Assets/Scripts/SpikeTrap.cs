@@ -9,7 +9,7 @@ public class SpikeTrap : MonoBehaviour
     [SerializeField] private bool isExtended = true;
     [SerializeField] private GameObject spikeObj;
     private const float retractDistance = -1f;
-    private const float duration = 1.5f;
+    private const float duration = 0.3f;
 
     private void Awake()
     {

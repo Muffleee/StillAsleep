@@ -13,6 +13,8 @@ public class Grid
     public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
     public UnityEvent<GridObj, string> tutorialUpdate = new UnityEvent<GridObj, string> ();
+    List<GridObj> rotatingTiles = new List<GridObj> ();
+    List<GridObj> spikeTiles = new List<GridObj> ();
     /// <summary>
     /// Count the times the grid has grown so far.
     /// </summary>
@@ -265,26 +267,64 @@ public class Grid
         int JumpingBadChance = GameManager.jumpingWeight;
         int ManualReplaceableChance = GameManager.manualReplacableWeight;
         int HiddenTrapchance = GameManager.hiddenTrapWeight;
+        int IceChance = GameManager.iceWeight;
+        int RotatingChance = GameManager.rotatingWeight;
+        int SpikeChance = GameManager.spikeWeight;
 
         int rand = UnityEngine.Random.Range(0, 100);
-        if(rand < Trapchance)
+        if (rand < Trapchance)
         {
             gridObj.SetGridType(GridType.TRAP);
-            gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabTrap);
         }
-        else if(rand > Trapchance && rand < (JumpingBadChance + Trapchance  ))
+        else if (rand > Trapchance && rand < (JumpingBadChance + Trapchance))
         {
             gridObj.SetGridType(GridType.JUMPINGPAD);
-            gridObj.SetFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabJumppad);
         }
-         else if(rand > (JumpingBadChance + Trapchance) && rand < (ManualReplaceableChance + JumpingBadChance + Trapchance))
+        else if (rand > (JumpingBadChance + Trapchance) && rand < (ManualReplaceableChance + JumpingBadChance + Trapchance))
         {
             gridObj.SetGridType(GridType.MANUAL_REPLACEABLE);
         }
-        else if(rand > (ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        else if (rand > (ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
         {
             gridObj.SetGridType(GridType.HIDDENTRAP);
-        } else
+        }
+        else if (rand > (HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        {
+            gridObj.SetGridType(GridType.ICE);
+        }
+        else if (rand > (IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < ( RotatingChance + IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        {
+            bool setRotating = true;
+            WallStatus wStat = gridObj.GetWallStatus();
+            if (wStat.front == WallType.NONE && wStat.back == WallType.NONE && wStat.left == WallType.NONE && wStat.right == WallType.NONE) setRotating = false;
+            if (setRotating)
+            {
+                Dictionary<WallPos, GridObj> neighbors = GetNeighbors(gridObj);
+                foreach (GridObj neighbor in neighbors.Values)
+                {
+                    if (neighbor == null) continue;
+                    if (neighbor.GetGridType() == GridType.ROTATING)
+                    {
+                        setRotating = false;
+                        break;
+                    }
+                }
+            }
+            if (setRotating)
+            {
+                gridObj.SetGridType(GridType.ROTATING);
+                rotatingTiles.Add(gridObj);
+            } else
+            {
+                gridObj.SetGridType(GridType.REGULAR);
+            }
+        }
+        else if (rand > (RotatingChance + IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance) && rand < (SpikeChance + RotatingChance + IceChance + HiddenTrapchance + ManualReplaceableChance + JumpingBadChance + Trapchance))
+        {
+            gridObj.SetGridType(GridType.SPIKE);
+            spikeTiles.Add(gridObj);
+        }
+        else
         {
             gridObj.SetGridType(GridType.REGULAR);
         }
@@ -381,55 +421,6 @@ public class Grid
         }
         if (jumpingIntro && replaceableIntro && manReplaceableIntro && trapIntro) MainMenu.tutorial = false;
     }
-    /// <summary>
-    /// Increase the size of the grid by 1 in each direction.
-    /// </summary>
-    /*
-    public void IncreaseGrid()
-    {
-        int newW = width + 2;
-        int newH = height + 2;
-        growthIndex++;
-
-        GridObj[,] newGrid = new GridObj[newW, newH];
-        
-        if(exit != null && growthIndex == exit.growthIndex)
-        {
-            Vector2Int exitPos = exit.gridObj.GetGridPos();
-            newGrid[exitPos.x, exitPos.y] = exit.gridObj;
-        }
-
-        // Copy old objects into the middle.
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                GridObj oldObj = grid[x, y];
-                if (oldObj == null) continue;
-                oldObj.SetGridPos(new Vector2Int(x + 1, y + 1)); // update position
-                newGrid[x + 1, y + 1] = oldObj;
-            }
-        }
-
-        // Create new REPLACEABLE border objects.
-        for (int x = 0; x < newW; x++)
-        {
-            if(newGrid[x, 0] == null) newGrid[x, 0] = MakeReplaceable(new Vector2Int(x, 0));
-            if(newGrid[x, newH - 1] == null) newGrid[x, newH - 1] = MakeReplaceable(new Vector2Int(x, newH - 1));
-        }
-
-        for (int y = 1; y < newH - 1; y++)
-        {
-            if(newGrid[0, y] == null) newGrid[0, y] = MakeReplaceable(new Vector2Int(0, y));
-            if(newGrid[newW - 1, y] == null) newGrid[newW - 1, y] = MakeReplaceable(new Vector2Int(newW - 1, y));
-        }
-
-        // Adjustment for the grid array growing by 2 in the positive direction while the actual grid grows by 1 in both directions.
-        PlayerMovement.currentGridPos = new Vector2Int(PlayerMovement.currentGridPos.x + 1, PlayerMovement.currentGridPos.y + 1);
-
-        grid = newGrid;
-    }
-    */
 
     public void IncreaseGrid(WallPos direction,long MaxGridArea)
     {
@@ -891,6 +882,24 @@ public class Grid
         return true;
     }
 
+    public void RotateTiles()
+    {
+        foreach(GridObj obj in rotatingTiles)
+        {
+            obj.RotateObj(GetNeighbors(obj), this.worldOffsetX, this.worldOffsetY);
+        }
+    }
+    public void Spike()
+    {
+        foreach(GridObj obj in spikeTiles)
+        {
+            if(obj.GetInteract() is Spike spike)
+            {
+                spike.ToggleSpike();
+                obj.GetInteract().SetColor(obj.GetFloorObj());
+            }
+        }
+    }
     /// <summary>
     /// Calculates the Manhattan Distance between two points.
     /// </summary>
@@ -918,6 +927,8 @@ public class Grid
             }
         }
         this.grid = null;
+        this.spikeTiles.Clear();
+        this.rotatingTiles.Clear();
     }
     public void SetNewGrid(int width, int height)
     {
@@ -925,4 +936,6 @@ public class Grid
         this.worldOffsetX = 0;
         this.worldOffsetY = 0;
     }
+
+    public List<GridObj> GetAllRotatingTiles() { return rotatingTiles; }
 }
