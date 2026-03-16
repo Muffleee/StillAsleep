@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Pathfinding pathfinding;
     [SerializeField] private FogOfWarScript fogCondition;
     [SerializeField] private GameObject Audio;
+    [SerializeField] private WinScreen WinScreen;
 
     public static int emptyWeight;
     public static int corridorWeight;
@@ -258,6 +259,7 @@ public class GameManager : MonoBehaviour
     public void LoseGame(string loseMessage)
     {
         // TODO implement this
+        WinScreen.ShowLoseScreen(loseMessage);
         Debug.Log("LOSER HAHAHAHA: " + loseMessage);
     }
 
