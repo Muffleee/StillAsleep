@@ -4,28 +4,64 @@ using UnityEngine;
 
 public class ItemBoxTrap : MonoBehaviour
 {   
-    [SerializeField] Animator animR;
-    [SerializeField] Animator animL;
-    void Start()
-    {
-        this.Open();
-    }
+    [SerializeField] private float speed = 200f;
+    [SerializeField] private GameObject vfx;
+    [SerializeField] private Transform lidR;
+    [SerializeField] private Transform lidL;
+    private bool isOpen = false;
+    private bool isRotating = false;
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if(Input.GetKey(KeyCode.B)) this.ToggleOpen();
+    }
+
+    public void ToggleOpen()
+    {
+        if(this.isOpen) this.Close();
+        else this.Open();
     }
 
     private void Open()
-    {
-        animR.SetTrigger("OpenBox");
-        animL.SetTrigger("OpenBox");
+    {   
+        if(isOpen || isRotating) return;
+        isOpen = true;
+        isRotating = true;
+        StartCoroutine(RotateLocalZCoroutine(this.lidR, 160f, this.speed));
+        StartCoroutine(RotateLocalZCoroutine(this.lidL, -160f, this.speed));
     }
 
     private void Close()
+    {   
+        if(!isOpen || isRotating) return;
+        isOpen = false;
+        isRotating = true;
+        StartCoroutine(RotateLocalZCoroutine(this.lidR, -160f, this.speed));
+        StartCoroutine(RotateLocalZCoroutine(this.lidL, 160f, this.speed));
+    }
+
+    private void ToggleVfx()
     {
-        animR.SetTrigger("CloseBox");
-        animL.SetTrigger("CloseBox");
+        this.vfx.SetActive(this.isOpen);
+    }
+
+    private IEnumerator RotateLocalZCoroutine(Transform target, float angle, float speed)
+    {
+        float rotated = 0f;
+        float direction = Mathf.Sign(angle);
+        float targetAmount = Mathf.Abs(angle);
+        if(!this.isOpen) this.ToggleVfx();
+        while (rotated < targetAmount)
+        {
+            float step = speed * Time.deltaTime;
+            step = Mathf.Min(step, targetAmount - rotated);
+
+            target.Rotate(0f, 0f, step * direction, Space.Self);
+
+            rotated += step;
+            yield return null;
+        }
+        if(this.isOpen) this.ToggleVfx();
+        this.isRotating = false;
     }
 }
