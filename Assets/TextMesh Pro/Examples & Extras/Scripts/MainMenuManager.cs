@@ -22,6 +22,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private Slider soundSlider;
     [SerializeField] private Slider musicSlider;
     [SerializeField] private Animator playerAnimator;
+    [SerializeField] private Button HighScoreReset;
 
     [SerializeField] private string gameSceneName;
 
@@ -48,6 +49,8 @@ public class MainMenu : MonoBehaviour
             this.musicSlider.onValueChanged.AddListener(delegate {OnMusicSliderChange();});
             this.musicSlider.value = AudioManager.GetMusicVolume();
         }
+        if(this.HighScoreReset != null)
+            this.HighScoreReset.onClick.AddListener(delegate {PlayerPrefs.SetInt("Highscore", 0);});
 
         this.playerAnimator.SetTrigger("TriggerIdle");
     }
@@ -68,13 +71,15 @@ public class MainMenu : MonoBehaviour
     }
 
     private void ShowOptions()
-    {   
+    {
+        AudioManager.Instance.PlayButtonClick();
         this.mainMenuPanel.SetActive(false);
         this.optionsPanel.SetActive(true);
     }
 
     private void HideOptions()
     {
+        AudioManager.Instance.PlayButtonClick();
         this.optionsPanel.SetActive(false);
         this.mainMenuPanel.SetActive(true);
     }

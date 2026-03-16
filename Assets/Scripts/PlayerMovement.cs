@@ -78,8 +78,11 @@ public class PlayerMovement : Movement
             }
             return;
         }
-            
 
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            this.winScreen.ShowWinScreen();
+        }
         if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK); }
         else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT); }
         else if (Input.GetKeyDown(KeyCode.A)) { this.TryMove(WallPos.LEFT); }
@@ -146,6 +149,7 @@ public class PlayerMovement : Movement
         float moveDuration = totalDuration - chargeDuration;
         float elapsed = 0f;
         this.isMoving = true;
+        GameManager.INSTANCE.WhileMove(this.gridPos, this.GetNextGridPos(wallPos), wallPos, stepCounter);
         Vector3 startPos = this.transform.position;
         Vector3 endPos = startPos + this.GetMoveDir(wallPos);
 
@@ -185,6 +189,10 @@ public class PlayerMovement : Movement
         GridObj destinationTile = cGrid.GetGridArray()[this.gridPos.x, this.gridPos.y];
 
         destinationTile.GetInteract().OnUse(destinationTile);
+        if(destinationTile.GetGridType() == GridType.ICE)
+        {
+            this.TryMove(wallPos);
+        }
         //if (destinationTile != null && destinationTile.IsTrap()) 
         //{
         //    // Call your dedicated static class to handle the effect

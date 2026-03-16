@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class PauseMenu : MonoBehaviour
 {
     [SerializeField] private GameObject pauseMenuPanel;
+    [SerializeField] private GameObject mainPanel;
     [SerializeField] private GameObject optionsPanel;
     [SerializeField] private Button resumeButton;
     [SerializeField] private Button restartButton;
@@ -15,7 +16,13 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] private Button backButton;
     [SerializeField] private Slider soundSlider;
     [SerializeField] private Slider musicSlider;
-    
+    [SerializeField] private PauseMenuInventory pauseInventoryUI;
+    [SerializeField] private AudioManager AudioManager;
+
+    [SerializeField] private TMPro.TextMeshProUGUI highscoreText;
+    [SerializeField] private TMPro.TextMeshProUGUI currentPhaseText;
+    [SerializeField] private TMPro.TextMeshProUGUI currentRoundText;
+
     void Start()
     {
         if (this.pauseMenuPanel != null) this.pauseMenuPanel.SetActive(false);
@@ -27,8 +34,8 @@ public class PauseMenu : MonoBehaviour
         if(this.resumeButton != null) this.resumeButton.onClick.AddListener(this.HidePauseMenu);
         if(this.optionsButton != null) this.optionsButton.onClick.AddListener(ShowOptions);
         
-        if(this.backButton != null)
-            this.backButton.onClick.AddListener(HideOptions);
+        if(this.backButton != null) this.backButton.onClick.AddListener(HideOptions);
+
         if(this.soundSlider != null) 
         {
             this.soundSlider.onValueChanged.AddListener(delegate {OnSoundSliderChange();});
@@ -41,15 +48,19 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
-    [SerializeField] private TMPro.TextMeshProUGUI highscoreText;
-
     public void ShowPauseMenu()
     {
         if (this.pauseMenuPanel != null)
         {
             this.pauseMenuPanel.SetActive(true);
-            highscoreText.text = "Current Highscore: " + PlayerPrefs.GetInt("Highscore", 0);
+            this.mainPanel.SetActive(true);
+            this.optionsPanel.SetActive(false);
+            highscoreText.text = "CURRENT\nHIGHSCORE\n" + PlayerPrefs.GetInt("Highscore", 0);
+            currentPhaseText.text = "PHASE\n  " + GameManager.INSTANCE.GetPhase();
+            currentRoundText.text = "ROUND\n" + (GameManager.INSTANCE.GetRound() + 1)  + " / 3";
+
             Time.timeScale = 0f;
+            pauseInventoryUI.Show();
         }
     }
 
@@ -66,7 +77,6 @@ public class PauseMenu : MonoBehaviour
     private void RestartGame()
     {
         AudioManager.Instance.PlayButtonClick();
-        //Unpause Game
         Time.timeScale = 1f;
         PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(0, 0));
         PlayerMovement.INSTANCE.SetLastGridPos(new Vector2Int(0, 0));
@@ -76,10 +86,9 @@ public class PauseMenu : MonoBehaviour
     private void QuitGame()
     {
         AudioManager.Instance.PlayButtonClick();
-        //Unpause Game
         Time.timeScale = 1f;
 
-        SceneManager.LoadScene("Menu"); // Start Menu
+        SceneManager.LoadScene("Menu");
     }
 
     public bool IsPauseMenuActive()
@@ -88,15 +97,17 @@ public class PauseMenu : MonoBehaviour
     }
 
     private void ShowOptions()
-    {   
-        this.pauseMenuPanel.SetActive(false);
+    {
+        AudioManager.Instance.PlayButtonClick();
+        this.mainPanel.SetActive(false);
         this.optionsPanel.SetActive(true);
     }
 
     private void HideOptions()
     {
+        AudioManager.Instance.PlayButtonClick();
         this.optionsPanel.SetActive(false);
-        this.pauseMenuPanel.SetActive(true);
+        this.mainPanel.SetActive(true);
     }
 
     private void OnSoundSliderChange()

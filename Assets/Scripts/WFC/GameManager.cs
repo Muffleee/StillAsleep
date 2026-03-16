@@ -10,7 +10,7 @@ using UnityEngine;
 /// Main game manager class, handles game initialization, world generation, and move and click events
 /// </summary>
 public class GameManager : MonoBehaviour
-{   
+{
     [SerializeField] int generateAfter = 4;
     [SerializeField] int replaceExitAfter = 2;
     [SerializeField] private int width;
@@ -27,6 +27,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int manualReplacable = 0;
     [SerializeField] private int trap = 0;
     [SerializeField] private int hiddenTrap = 0;
+    [SerializeField] private int ice = 0;
+    [SerializeField] private int rotating = 0;
+    [SerializeField] private int spike = 0;
     [SerializeField] private PrefabLibrary prefabLibrary;
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private EnemyMovement enemyMovement;
@@ -42,11 +45,14 @@ public class GameManager : MonoBehaviour
     public static int manualReplacableWeight;
     public static int trapWeight;
     public static int hiddenTrapWeight;
+    public static int iceWeight;
+    public static int rotatingWeight;
+    public static int spikeWeight;
     public static GameManager INSTANCE;
 
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
-    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new OpponentCon()};
+    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
     private IMapCondition currentCond;
 
     [SerializeField] private bool enableEnergyCrystals = true;
@@ -104,20 +110,6 @@ public class GameManager : MonoBehaviour
         NewPhase();
     }
     /// <summary>
-    /// Sets starting weights so the initial grid is very open and no special tiles
-    /// </summary>
-    private void SetStartingWeights()
-    {
-        emptyWeight = 20;
-        corridorWeight = 5;
-        cornerWeight = 2;
-        oneWallWeight = 1;
-        jumpingWeight = 0;
-        manualReplacableWeight = 0;
-        trapWeight = 0;
-        hiddenTrapWeight = 0;
-    }
-    /// <summary>
     /// sets the static weights
     /// </summary>
     private void SetWeights(WeightType weightType)
@@ -133,6 +125,9 @@ public class GameManager : MonoBehaviour
                 manualReplacableWeight = this.manualReplacable;
                 trapWeight = this.trap;
                 hiddenTrapWeight = this.hiddenTrap;
+                iceWeight = this.ice;
+                rotatingWeight = this.rotating;
+                spikeWeight = this.spike;
                 break;
             case WeightType.CLOSED:
                 corridorWeight = 10;
@@ -143,6 +138,9 @@ public class GameManager : MonoBehaviour
                 manualReplacableWeight = 4;
                 trapWeight = 3;
                 hiddenTrapWeight = 4;
+                iceWeight = 7;
+                rotatingWeight = 7;
+                spikeWeight = 8;
                 break;
             case WeightType.OPEN:
                 corridorWeight = 2;
@@ -153,6 +151,9 @@ public class GameManager : MonoBehaviour
                 manualReplacableWeight = 10;
                 trapWeight = 8;
                 hiddenTrapWeight = 3;
+                iceWeight = 4;
+                rotatingWeight = 4;
+                spikeWeight = 4;
                 break;
             case WeightType.START:
                 emptyWeight = 20;
@@ -163,6 +164,9 @@ public class GameManager : MonoBehaviour
                 manualReplacableWeight = 0;
                 trapWeight = 0;
                 hiddenTrapWeight = 0;
+                iceWeight = 0;
+                rotatingWeight = 0;
+                spikeWeight = 0;
                 break;
         }
         
@@ -188,6 +192,14 @@ public class GameManager : MonoBehaviour
         }
         
     }
+
+    public void WhileMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
+    {
+        if (step % 2 == 0)
+        {
+            this.grid.Spike();
+        }
+    }
     /// <summary>
     /// Function to be called on player movement, handles dynamic map generation and movement of the exit
     /// </summary>
@@ -199,6 +211,7 @@ public class GameManager : MonoBehaviour
     {
         enemyMovement.MoveEnemy();
         this.RefreshFog();
+        
         GridObj toObj = this.grid.GetGridObj(to);
         if(toObj != null && toObj.GetGridType() == GridType.TRAP)
         {
@@ -237,6 +250,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void AfterEnemyMove()
+    {
+        this.grid.RotateTiles();
+    }
     /// <summary>
     /// Make the player lose the game
     /// </summary>
@@ -244,6 +261,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log(loseMessage);
         // TODO implement this
+        Debug.Log("LOSER HAHAHAHA: " + loseMessage);
     }
 
     /// <summary>
@@ -279,13 +297,13 @@ public class GameManager : MonoBehaviour
     /// Spawns an Energy Crystal on a freshly instantiated REGULAR tile based on player energy.
     /// Centralized here so tuning happens in one place (like WFC weights).
     /// </summary>
-    public void TrySpawnEnergyCrystal(GridObj tile, int worldOffsetX, int worldOffsetY)
+    public bool TrySpawnEnergyCrystal(GridObj tile, int worldOffsetX, int worldOffsetY)
     {
-        if (!enableEnergyCrystals) return;
-        if (tile == null) return;
-        if (prefabLibrary == null || prefabLibrary.prefabEnergyCrystal == null) return;
-        if (playerResources == null) return;
-        if (tile.GetGridType() != GridType.REGULAR) return;
+        if (!enableEnergyCrystals) return false;
+        if (tile == null) return false;
+        if (prefabLibrary == null || prefabLibrary.prefabEnergyCrystal == null) return false;
+        if (playerResources == null) return false;
+        if (tile.GetGridType() != GridType.REGULAR) return false;
 
         float denom = Mathf.Max(1, playerResources.MaxEnergy);
         float energyRatio = playerResources.CurrentEnergy / denom; // 0..1
@@ -296,26 +314,27 @@ public class GameManager : MonoBehaviour
         int maxCrystals = crystalBaseMax + Mathf.FloorToInt((1f - energyRatio) * crystalBonusMax);
         maxCrystals = Mathf.Max(0, maxCrystals);
 
-        if (UnityEngine.Random.value >= spawnChance) return;
+        if (UnityEngine.Random.value >= spawnChance) return false;
 
         Vector3 worldPos = tile.GetWorldPos(worldOffsetX, worldOffsetY);
         EnergyCrystal.PrepareSpawn(worldPos, maxCrystals);
         Instantiate(prefabLibrary.prefabEnergyCrystal, worldPos, Quaternion.identity);
+        return true;
     }
     
 
-  public void TrySpawnItem(GridObj tile, int worldOffsetX, int worldOffsetY)
+  public bool TrySpawnItem(GridObj tile, int worldOffsetX, int worldOffsetY)
     {
-        if (!enableItemSpawning) return;
-        if (tile == null || tile.GetGridType() != GridType.REGULAR) return;
+        if (!enableItemSpawning) return false;
+        if (tile == null || tile.GetGridType() != GridType.REGULAR) return false;
         if (spawnableItemPrefabs == null || spawnableItemPrefabs.Length == 0)
         {
             Debug.LogWarning("Item Spawning is enabled, but the prefab array is empty!");
-            return;
+            return false;
         }
 
         // 1. Check if ANY item should spawn on this tile
-        if (UnityEngine.Random.value > itemSpawnChance) return;
+        if (UnityEngine.Random.value > itemSpawnChance) return false;
 
         // 2. Calculate the total weight
         int totalWeight = 0;
@@ -334,7 +353,7 @@ public class GameManager : MonoBehaviour
         if (totalWeight == 0)
         {
             Debug.LogWarning("Total item spawn weight is 0! Make sure prefabs have ItemPickup attached and Item Data assigned.");
-            return;
+            return false;
         }
 
         // 3. Roll the dice
@@ -367,7 +386,9 @@ public class GameManager : MonoBehaviour
             worldPos.y += 0.5f;
             Instantiate(selectedPrefab, worldPos, Quaternion.identity);
             Debug.Log($"Spawned a {selectedPrefab.name} at {worldPos}"); // Confirms it worked!
+            return true;
         }
+        return false;
     }
 
 
@@ -404,7 +425,7 @@ public class GameManager : MonoBehaviour
         this.grid.DestroyGrid();
         EnergyCrystal.DestroyAllCrystals();
         playerResources.ResetEnergy();
-        this.SetStartingWeights();
+        this.SetWeights(WeightType.START);
         this.grid.SetNewGrid(this.width, this.height);
         this.grid.CollapseWorld();
         this.SetWeights(WeightType.NORMAL);
@@ -469,7 +490,6 @@ public class GameManager : MonoBehaviour
         SetWeights(weights);
         PlaceEnemy();
         this.round = (this.round + 1) % 3;
-        Debug.Log("round: " + this.round);
 
     }
 

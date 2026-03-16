@@ -71,6 +71,10 @@ public GameObject prefabLR;
     /// Remove the selected GridObj from the selectable GridObj list, deselect it, and fill the respective spot with a new selectable GridObj if desired.
     /// </summary>
     /// <param name="regenerate"></param>
+    /// <summary>
+    /// Remove the selected GridObj from the selectable GridObj list, deselect it, and fill the respective spot with a new selectable GridObj if desired.
+    /// </summary>
+    /// <param name="regenerate"></param>
     public void RemoveSelected(bool regenerate)
     {
         if (this.selectedIndex >= 0 && this.selectedIndex < this.gridObjs.Count)
@@ -81,10 +85,11 @@ public GameObject prefabLR;
             if(regenerate)
             {
                 // Replace it with a new random GridObj so toggle stays filled
-                List<GridObj> all = GridObj.GetPossiblePlaceables();
-                if (all.Count > 0)
+                List<GridObj> validPlaceables = GetValidPlaceables(); 
+                
+                if (validPlaceables.Count > 0)
                 {
-                    GridObj replacement = all[Random.Range(0, all.Count)];
+                    GridObj replacement = validPlaceables[Random.Range(0, validPlaceables.Count)];
                     this.gridObjs.Insert(this.selectedIndex, replacement);
                 }
             }
@@ -110,15 +115,43 @@ public GameObject prefabLR;
     /// </summary>
     public void FillList()
     {
-        List<GridObj> all = GridObj.GetPossiblePlaceables();
+        // Get only the objects that have prefabs
+        List<GridObj> validPlaceables = GetValidPlaceables();
+
+        // Safety check to prevent an infinite loop if no prefabs are assigned in the Inspector
+        if (validPlaceables.Count == 0)
+        {
+            Debug.LogError("No valid GridObjs found! Please ensure 3D prefabs are assigned in the IngameUI Inspector.");
+            return;
+        }
 
         while (this.gridObjs.Count < 3)
         {
-            GridObj randomObj = all[Random.Range(0, all.Count)];
+            GridObj randomObj = validPlaceables[Random.Range(0, validPlaceables.Count)];
             this.gridObjs.Add(randomObj);
         }
 
         this.UpdateToggles();
+    }
+
+    /// <summary>
+    /// Returns a list of all GridObjs that currently have an assigned 3D prefab.
+    /// </summary>
+    private List<GridObj> GetValidPlaceables()
+    {
+        List<GridObj> all = GridObj.GetPossiblePlaceables();
+        List<GridObj> validPlaceables = new List<GridObj>();
+
+        foreach (GridObj obj in all)
+        {
+            // Only add it to our valid list if the prefab actually exists
+            if (GetPrefabByName(obj.GetName()) != null)
+            {
+                validPlaceables.Add(obj);
+            }
+        }
+
+        return validPlaceables;
     }
 
     /// <summary>
