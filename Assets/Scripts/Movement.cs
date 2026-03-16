@@ -5,10 +5,10 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     
-    [SerializeField] protected GameManager gameManager;
     [SerializeField] protected GameObject model;
     protected Vector2Int lastGridPos;
     protected Vector2Int gridPos;
+    protected int stepCounter;
     /// <summary>
     /// Check if a movement in a given direction is valid.
     /// Validity is based on the tile type.
@@ -17,7 +17,7 @@ public class Movement : MonoBehaviour
     /// <returns></returns>
     protected virtual MoveType IsValidMove(WallPos wallPos)
     {
-        Grid cGrid = this.gameManager.GetCurrentGrid();
+        Grid cGrid = GameManager.INSTANCE.GetCurrentGrid();
         Vector2Int next = this.GetNextGridPos(wallPos);
         if (!cGrid.IsInsideGrid(next)) return MoveType.INVALID;
 
@@ -66,7 +66,7 @@ public class Movement : MonoBehaviour
     /// <returns></returns>
     protected Vector2Int GetNextGridPos(WallPos wallPos)
     {
-        if (this.gameManager.GetCurrentGrid() == null || !this.gameManager.GetCurrentGrid().IsInstantiated())
+        if (GameManager.INSTANCE.GetCurrentGrid() == null || !GameManager.INSTANCE.GetCurrentGrid().IsInstantiated())
         {
             Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
             return new Vector2Int(0, 0);
@@ -144,7 +144,7 @@ public class Movement : MonoBehaviour
     internal void ResetFigure(Vector2Int pos)
     {
         this.gridPos = pos;
-        Vector3 newPosition = GridObj.GridPosToWorldPos(pos, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+        Vector3 newPosition = GridObj.GridPosToWorldPos(pos, GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
         newPosition.y = 1;
         this.gameObject.transform.position = newPosition;
     }

@@ -16,7 +16,6 @@ public class EnemyMovement : Movement
     public UnityEvent lose = new UnityEvent();
     public static EnemyMovement INSTANCE;
     private bool isInstantiated = false;
-    int stepCounter = 0;
     private EnemyDifficulty difficulty = new EnemyDifficulty(EnemyDifficultySetting.VERY_EASY);
     
     private void Awake()
@@ -31,7 +30,7 @@ public class EnemyMovement : Movement
     private void Start()
     {
 
-        this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+        this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
         foreach (var wall in FindObjectsOfType<DestructibleWall>())
         {
             wall.onDestroy.AddListener(this.OnWallDestroyed);
@@ -46,13 +45,13 @@ public class EnemyMovement : Movement
     public void InstantiateEnemy(Vector2Int pos)
     {
         if (isInstantiated) { ResetFigure(pos); return; }
-        if (!gameManager.GetCurrentGrid().IsInsideGrid(pos))
+        if (!GameManager.INSTANCE.GetCurrentGrid().IsInsideGrid(pos))
         {
             Debug.LogWarning("You are trying to instantiate the enemy outside of the grid! Don't do that");
             return;
         }
         this.gridPos = pos;
-        Vector3 newPosition = this.gameManager.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos(this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+        Vector3 newPosition = GameManager.INSTANCE.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos(GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
         newPosition.y = 1;
         this.transform.position = newPosition;
         this.gameObject.SetActive(true);
@@ -97,7 +96,7 @@ public class EnemyMovement : Movement
         int diffX = playerPos.x - this.gridPos.x;
         int diffY = playerPos.y - this.gridPos.y;
 
-        Grid thisGrid = this.gameManager.GetCurrentGrid();
+        Grid thisGrid = GameManager.INSTANCE.GetCurrentGrid();
         bool found = false;
         WallPos bestDir = new WallPos();
 
@@ -174,14 +173,14 @@ public class EnemyMovement : Movement
     private void DestroyWallHelper(WallPos wPos)
     {
         Vector2Int nextPos = GetNextGridPos(wPos);
-            
-        this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(wPos);
-        this.gameManager.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallStatus.GetOppositePos(wPos));
+
+        GameManager.INSTANCE.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y].RemoveWall(wPos);
+        GameManager.INSTANCE.GetCurrentGrid().GetGridArray()[nextPos.x, nextPos.y].RemoveWall(WallStatus.GetOppositePos(wPos));
     }
 
     protected override MoveType IsValidMove(WallPos wallPos)
     {
-        Grid cGrid = this.gameManager.GetCurrentGrid();
+        Grid cGrid = GameManager.INSTANCE.GetCurrentGrid();
         Vector2Int next = this.GetNextGridPos(wallPos);
 
         if (!cGrid.IsInsideGrid(next) || next == PlayerMovement.INSTANCE.GetCurrentGridPos() || next == lastGridPos) return MoveType.INVALID;

@@ -18,7 +18,6 @@ public class PlayerMovement : Movement
     [SerializeField] private float respawnTrapVisualYOffset = 0.01f;
     public UnityEvent<Vector2Int, Vector2Int, WallPos, long> onPlayerMoved = new UnityEvent<Vector2Int, Vector2Int, WallPos, long>();
     private readonly bool DEBUG = false;
-    private int stepCounter = 0;
     private bool isMoving = false;
     private GameObject respawnTrapVisualObj = null;
     private GameObject respawnHiddenFloorObj = null;
@@ -37,12 +36,12 @@ public class PlayerMovement : Movement
     /// </summary>
     private void Start()
     {
-        this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+        this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
         foreach(var wall in FindObjectsOfType< DestructibleWall >())
         {
             wall.onDestroy.AddListener(this.OnWallDestroyed);
         }
-        Grid g = gameManager.GetCurrentGrid();
+        Grid g = GameManager.INSTANCE.GetCurrentGrid();
         Vector3 tileWorld = GridObj.GridPosToWorldPos(gridPos, g.GetWorldOffsetX(), g.GetWorldOffsetY());
         playerGroundOffsetY = transform.position.y - tileWorld.y;
         RotateModel(WallPos.FRONT);
@@ -52,7 +51,7 @@ public class PlayerMovement : Movement
     {
         yield return null;
         spawnWorldPos = transform.position;
-        Grid g = gameManager.GetCurrentGrid();
+        Grid g = GameManager.INSTANCE.GetCurrentGrid();
         spawnGridPos = GridObj.WorldPosToGridPos(
             this.transform.position,
             g.GetWorldOffsetX(),
@@ -65,7 +64,7 @@ public class PlayerMovement : Movement
     /// </summary>
     private void Update()
     {   
-        if(this.isLocked || gameManager.IsTutorialOpen()) return;
+        if(this.isLocked || GameManager.INSTANCE.IsTutorialOpen()) return;
 
         if(Input.GetKeyDown(KeyCode.Escape)) 
         {
@@ -116,13 +115,13 @@ public class PlayerMovement : Movement
     // Not used right now
     private void FindNearestGridObj()
     {
-        if (this.gameManager.GetCurrentGrid() == null || !this.gameManager.GetCurrentGrid().IsInstantiated())
+        if (GameManager.INSTANCE.GetCurrentGrid() == null || !GameManager.INSTANCE.GetCurrentGrid().IsInstantiated())
         {
             if(this.DEBUG) Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
             return;
         }
 
-        GridObj nearest = this.gameManager.GetCurrentGrid().GetNearestGridObj(this.transform.position);
+        GridObj nearest = GameManager.INSTANCE.GetCurrentGrid().GetNearestGridObj(this.transform.position);
 
         if (nearest != null)
         {
@@ -153,7 +152,7 @@ public class PlayerMovement : Movement
         RotateModel(wallPos);
         anim.TriggerMoveAnim(mt);
 
-        GridObj currentTile = this.gameManager.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y];
+        GridObj currentTile = GameManager.INSTANCE.GetCurrentGrid().GetGridArray()[this.gridPos.x, this.gridPos.y];
         Animator animator = currentTile.GetFloorObj().GetComponentInChildren<Animator>();
         if(animator != null) currentTile.GetInteract().TriggerAnimation(animator, mt);
 
@@ -180,7 +179,7 @@ public class PlayerMovement : Movement
         
         this.transform.position = endPos;
         //traps detection on movment 
-        Grid cGrid = this.gameManager.GetCurrentGrid();
+        Grid cGrid = GameManager.INSTANCE.GetCurrentGrid();
     
         // Look up the GridObj using the array accessor method already used in IsValidMove
         GridObj destinationTile = cGrid.GetGridArray()[this.gridPos.x, this.gridPos.y];
@@ -196,7 +195,7 @@ public class PlayerMovement : Movement
         //this.CheckForExit(destinationTile);
 
         this.onPlayerMoved?.Invoke(lastGridPos, this.gridPos, wallPos, this.stepCounter);
-        this.gameManager.OnMove(lastGridPos, this.gridPos, wallPos, this.stepCounter);
+        GameManager.INSTANCE.OnMove(lastGridPos, this.gridPos, wallPos, this.stepCounter);
         if(this.DEBUG) Debug.Log("Event fired");
         this.isMoving = false;
         if(this.DEBUG) Debug.Log(this.stepCounter);
@@ -254,7 +253,7 @@ public class PlayerMovement : Movement
 
         transform.position = spawnWorldPos;
 
-        Grid g = gameManager.GetCurrentGrid();
+        Grid g = GameManager.INSTANCE.GetCurrentGrid();
         gridPos = GridObj.WorldPosToGridPos(transform.position, g.GetWorldOffsetX(), g.GetWorldOffsetY());
         ShowRespawnTrapVisualAtPlayer();
     }
@@ -279,7 +278,7 @@ public class PlayerMovement : Movement
     {
         CleanupRespawnTrapVisual();
 
-        Grid g = gameManager.GetCurrentGrid();
+        Grid g = GameManager.INSTANCE.GetCurrentGrid();
         if (g != null)
         {
             GridObj tile = g.GetGridObj(gridPos);
@@ -294,7 +293,7 @@ public class PlayerMovement : Movement
             }
         }
 
-        GameObject trapPrefab = gameManager.GetPrefabLibrary().prefabTrap;
+        GameObject trapPrefab = GameManager.INSTANCE.GetPrefabLibrary().prefabTrap;
         if (trapPrefab == null) return;
 
         Vector3 spawnPos = transform.position;
@@ -323,7 +322,7 @@ public class PlayerMovement : Movement
         lastGridPos = gridPos;
         gridPos = targetGridPos;
 
-        Grid g = gameManager.GetCurrentGrid();
+        Grid g = GameManager.INSTANCE.GetCurrentGrid();
         Vector3 basePos = GridObj.GridPosToWorldPos(targetGridPos, g.GetWorldOffsetX(), g.GetWorldOffsetY());
 
         transform.position = basePos + new Vector3(0f, playerGroundOffsetY, 0f);
@@ -344,7 +343,7 @@ public class PlayerMovement : Movement
     public Vector2Int GetCurrentGridPos()
     {
         if (this.gridPos == null)
-            this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
+            this.gridPos = GridObj.WorldPosToGridPos(this.transform.position, GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
         return this.gridPos;
     }
     public void SetCurrentGridPos(Vector2Int newGridPos)

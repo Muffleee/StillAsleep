@@ -497,6 +497,9 @@ public class Grid
         PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(currentGridPos.x + addLeft, currentGridPos.y + addFront));
         Vector2Int enemyGridPos = EnemyMovement.INSTANCE.GetEnemyGridPos();
         EnemyMovement.INSTANCE.SetEnemyGridPos(new Vector2Int(enemyGridPos.x + addLeft, enemyGridPos.y + addFront));
+        Vector2Int otherEnemyGridPos = Opponent.INSTANCE.GetGridPos();
+        Opponent.INSTANCE.SetGridPos(new Vector2Int(otherEnemyGridPos.x + addLeft, otherEnemyGridPos.y + addFront));
+
         this.grid = newGrid;
     }
 

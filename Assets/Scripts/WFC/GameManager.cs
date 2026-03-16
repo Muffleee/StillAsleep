@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int height;
     [SerializeField] private long MaxGridArea = 50;
     [SerializeField] private IngameUI gui;
+
+    [Header("Weight Balancing")]
     [SerializeField] private int corridor = 0;
     [SerializeField] private int corner = 0;
     [SerializeField] private int oneWall = 0;
@@ -44,7 +46,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
-    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon() };
+    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new OpponentCon()};
     private IMapCondition currentCond;
 
     [SerializeField] private bool enableEnergyCrystals = true;
@@ -240,6 +242,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void LoseGame(string loseMessage)
     {
+        Debug.Log(loseMessage);
         // TODO implement this
     }
 
@@ -413,7 +416,8 @@ public class GameManager : MonoBehaviour
         this.grid.InstantiateMissing();
         this.gui.FillList();
         ChangeEnemyMovement();
-        if(this.phase != 0) NextCondition();
+        //if(this.phase != 0) 
+            NextCondition();
         this.phase++;
         NewRound(WeightType.START);
     }
