@@ -384,6 +384,8 @@ MonoBehaviour:
   - {fileID: 5365367703789444965, guid: f17a422dad59262409f46efbd9d548fc, type: 3}
   - {fileID: 5365367703789444965, guid: df3ed19a93e972f4a85d9835901ec08f, type: 3}
   - {fileID: 5365367703789444965, guid: 872b7659ae6c1564dbf71f454e5bf153, type: 3}
+  prefabFloorsUnderside:
+  - {fileID: 6768897904415531364, guid: a337aefb4f467f84099f983fabf3c63d, type: 3}
   prefabReplaceable: {fileID: 5365367703789444965, guid: 03741992903a35148bbfca60e9108b1a,
     type: 3}
   prefabTrap: {fileID: 7963245411701999052, guid: 9a4e1b7c5502d5b4c8c2cab355155f71,
@@ -395,14 +397,21 @@ MonoBehaviour:
   - {fileID: 5441399533277537789, guid: b3bb23bf7ef24f04a8230dc745766e8a, type: 3}
   fogPrefab: {fileID: 5239380601058934888, guid: 57b0c78c9f0ff2c42915c67bdaaa809f,
     type: 3}
-  prefabIce: {fileID: 0}
-  prefabRotating: {fileID: 0}
-  prefabSpike: {fileID: 0}
+  prefabIce: {fileID: 1042199177246920834, guid: 083a80984a8fb5847988e435dd78c6c6,
+    type: 3}
+  prefabRotating: {fileID: 67430043894280791, guid: 15e7398bc3d0f8b40a8592185258cfb9,
+    type: 3}
+  prefabSpike: {fileID: 960423842509520024, guid: 1c5c56b66450c5149a329a93e7037574,
+    type: 3}
   countdownText: {fileID: 1355855199}
-  prefabItemClock: {fileID: 0}
-  prefabItemPickaxe: {fileID: 0}
-  prefabItemTrapForcefield: {fileID: 0}
-  prefabItemTerrainScanner: {fileID: 0}
+  prefabItemClock: {fileID: 4164902247873927100, guid: f5643e4bb32f915409a68433711c1e2a,
+    type: 3}
+  prefabItemPickaxe: {fileID: 7291365165085134826, guid: a432f799c717f644f8de33c29a99ee4f,
+    type: 3}
+  prefabItemTrapForcefield: {fileID: 2536640785500377010, guid: 189e4efb7249c304daa5a52d45ab1215,
+    type: 3}
+  prefabItemTerrainScanner: {fileID: 932056728395071911, guid: e972fc1089999434494657606c84d55e,
+    type: 3}
   iconItemClock: {fileID: 0}
   iconItemPickaxe: {fileID: 0}
   iconItemTrapForcefield: {fileID: 0}
