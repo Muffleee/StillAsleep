@@ -11,11 +11,6 @@ public class ItemBoxTrap : MonoBehaviour
     private bool isOpen = false;
     private bool isRotating = false;
 
-    void Update()
-    {
-        if(Input.GetKey(KeyCode.B)) this.ToggleOpen();
-    }
-
     public void ToggleOpen()
     {
         if(this.isOpen) this.Close();
