@@ -15,15 +15,18 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip loop;
     private static float soundVolume = 1.0f; 
     private static float musicVolume = 1.0f;
+    private AudioSource loopSource;
 
     public static void SetSoundVolume(float volume)
     {   
+        soundVolume = volume;
         PlayerPrefs.SetFloat("SoundVolume", volume);
         PlayerPrefs.Save();
     }
 
     public static void SetMusicVolume(float volume)
     {
+        musicVolume = volume;
         PlayerPrefs.SetFloat("MusicVolume", volume);
         PlayerPrefs.Save();
     }
@@ -55,10 +58,11 @@ public class AudioManager : MonoBehaviour
     }
     private void Start()
     {
+        if(loopSource != null) return;
         musicSource.clip = intro;
         musicSource.Play();
         musicSource.PlayScheduled(AudioSettings.dspTime + intro.length);
-        AudioSource loopSource = gameObject.AddComponent<AudioSource>();
+        loopSource = gameObject.AddComponent<AudioSource>();
         loopSource.volume = 0.3f * AudioManager.musicVolume;
         loopSource.clip = loop;
         loopSource.loop = true;
@@ -70,6 +74,11 @@ public class AudioManager : MonoBehaviour
         if(musicSource.volume != currVol)
         {
             musicSource.volume = currVol;
+        }
+
+        if(loopSource != null && loopSource.volume != currVol)
+        {
+            loopSource.volume = currVol;
         }
     }
     public void PlayTilePlacing()
