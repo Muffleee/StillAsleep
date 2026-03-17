@@ -11,9 +11,10 @@ public class OpponentCon : IMapCondition
         return 0;
     }
 
-    public void Initiate(int _)
+    public void Initiate(int phase)
     {
         Opponent.INSTANCE.gameObject.SetActive(true);
+        Opponent.INSTANCE.SetDifficulty(phase);
         Opponent.INSTANCE.StartCondition();
     }
 
@@ -21,5 +22,6 @@ public class OpponentCon : IMapCondition
     {
         Opponent.INSTANCE.EndCondition();
         Opponent.INSTANCE.gameObject.SetActive(false);
+        Debug.Log("Deactivate");
     }
 }

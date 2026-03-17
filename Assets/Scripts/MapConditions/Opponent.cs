@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,18 @@ public class Opponent : Movement
         INSTANCE = this;
         this.gameObject.SetActive(false);
     }
+
+    public void SetDifficulty(int phase)
+    {
+        switch (phase)
+        {
+            case < 3: stuckMax = 5; break;
+            case < 5: stuckMax = 3; break;
+            case < 7: stuckMax = 2; break;
+            case < 8: stuckMax = 1; break;
+            default: stuckMax = 1; break;
+        }
+    }
     public void StartCondition()
     {
         StartEnemy();
@@ -23,6 +36,7 @@ public class Opponent : Movement
     public void EndCondition()
     {
         PlayerMovement.INSTANCE.onPlayerMoved.RemoveListener(OnPlayerMove);
+        this.transform.root.gameObject.SetActive(false);
     }
     private void StartEnemy()
     {
@@ -49,7 +63,6 @@ public class Opponent : Movement
         WallPos? direction = EasyStep(playerPos);
         if (direction != null)
         {
-            this.RotateModel(direction.Value);
             this.StartMovement(direction.Value, MoveType.WALK);
             PlayerLose();
         }
@@ -81,7 +94,8 @@ public class Opponent : Movement
         WallPos? direction = null;
         int diffX = playerPos.x - this.gridPos.x;
         int diffY = playerPos.y - this.gridPos.y;
-        if(diffX > diffY)
+        Debug.Log("diff X: " + diffX + "diff Y: " + diffY);
+        if(Math.Abs(diffX) > Math.Abs(diffY))
         {
             direction = CheckX(playerPos, enemyPos, (stuckFor >= stuckMax));
             if(direction == null) direction = CheckY(playerPos, enemyPos, (stuckFor >= stuckMax));
@@ -97,32 +111,34 @@ public class Opponent : Movement
     private WallPos? CheckX(Vector2Int playerPos, Vector2Int enemyPos)
     {
         WallPos? direction = null;
-        if (this.gridPos.x < playerPos.x && IsValidMove(WallPos.RIGHT) == MoveType.WALK && this.GetNextGridPos(WallPos.RIGHT).x != enemyPos.x)
+        if (this.gridPos.x < playerPos.x && IsValidMove(WallPos.RIGHT) is (MoveType.WALK or MoveType.TRAP) && this.GetNextGridPos(WallPos.RIGHT).x != enemyPos.x)
         {
             direction = WallPos.RIGHT;
             stuckFor = 0;
         }
-        else if (this.gridPos.x > playerPos.x && IsValidMove(WallPos.LEFT) == MoveType.WALK && this.GetNextGridPos(WallPos.LEFT).x != enemyPos.x)
+        else if (this.gridPos.x > playerPos.x && IsValidMove(WallPos.LEFT) is (MoveType.WALK or MoveType.TRAP) && this.GetNextGridPos(WallPos.LEFT).x != enemyPos.x)
         {
             direction = WallPos.LEFT;
             stuckFor = 0;
         }
+        Debug.Log("X: " + direction);
         return direction;
     }
 
     private WallPos? CheckY(Vector2Int playerPos, Vector2Int enemyPos)
     {
         WallPos? direction = null;
-        if (this.gridPos.y < playerPos.y && IsValidMove(WallPos.BACK) == MoveType.WALK && this.GetNextGridPos(WallPos.BACK).y != enemyPos.y)
+        if (this.gridPos.y < playerPos.y && IsValidMove(WallPos.BACK) is (MoveType.WALK or MoveType.TRAP) && this.GetNextGridPos(WallPos.BACK).y != enemyPos.y)
         {
             direction = WallPos.BACK;
             stuckFor = 0;
         }
-        else if (this.gridPos.y > playerPos.y && IsValidMove(WallPos.FRONT) == MoveType.WALK && this.GetNextGridPos(WallPos.FRONT).y != enemyPos.y)
+        else if (this.gridPos.y > playerPos.y && IsValidMove(WallPos.FRONT) is (MoveType.WALK or MoveType.TRAP) && this.GetNextGridPos(WallPos.FRONT).y != enemyPos.y)
         {
             direction = WallPos.FRONT;
             stuckFor = 0;
         }
+        Debug.Log("Y: " + direction);
         return direction;
     }
     private WallPos? CheckX(Vector2Int playerPos, Vector2Int enemyPos, bool destroyWall)
@@ -168,5 +184,53 @@ public class Opponent : Movement
             stuckFor = 0;
         }
         return direction;
+    }
+    private Quaternion GetNextRot(WallPos wPos)
+    {
+        switch (wPos)
+        {
+            case WallPos.FRONT:
+                return Quaternion.AngleAxis(-90f, Vector3.right) * this.transform.rotation;
+            case WallPos.BACK:
+                return Quaternion.AngleAxis(90f, Vector3.right) * this.transform.rotation;
+            case WallPos.RIGHT:
+                return Quaternion.AngleAxis(-90f, Vector3.forward) * this.transform.rotation;
+            case WallPos.LEFT:
+                return Quaternion.AngleAxis(90f, Vector3.forward) * this.transform.rotation;
+            default: return Quaternion.identity;
+        }
+    }
+    protected override IEnumerator MovementCoroutine(WallPos wallPos, MoveType mt)
+    {
+        float totalDuration = 0.3f;
+        float chargeDuration = mt == MoveType.JUMP ? 0.1f : 0f;
+        float moveDuration = totalDuration - chargeDuration;
+        float elapsed = 0f;
+        Vector3 startPos = this.transform.position;
+        Vector3 endPos = startPos + this.GetMoveDir(wallPos);
+        Quaternion startRot = this.transform.rotation;
+        Quaternion endRot = this.GetNextRot(wallPos);
+
+        this.lastGridPos = this.gridPos;
+        this.gridPos = this.GetNextGridPos(wallPos);
+
+        yield return null; // use this to get less sliding with the animations
+
+        while (elapsed < totalDuration)
+        {
+            elapsed += Time.deltaTime;
+            if (elapsed < chargeDuration)
+            {
+                yield return null;
+                continue;
+            }
+            float time = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / moveDuration));
+            this.transform.position = Vector3.Lerp(startPos, endPos, time);
+            this.transform.rotation = Quaternion.Slerp(startRot, endRot, time);
+
+            yield return null;
+        }
+        this.transform.position = endPos;
+
     }
 }

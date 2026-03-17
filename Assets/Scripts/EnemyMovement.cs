@@ -123,8 +123,11 @@ public class EnemyMovement : Movement
             }
             this.RotateModel(direction.Value);
             this.StartMovement(direction.Value, MoveType.WALK);
+        } else
+        {
+            GameManager.INSTANCE.AfterEnemyMove();
         }
-        GameManager.INSTANCE.AfterEnemyMove();
+
     }
 
     /// <summary>
@@ -248,6 +251,11 @@ public class EnemyMovement : Movement
             return MoveType.WALK;
     }
 
+    protected override IEnumerator MovementCoroutine(WallPos wallPos, MoveType mt)
+    {
+        yield return base.MovementCoroutine(wallPos, mt);
+        GameManager.INSTANCE.AfterEnemyMove();
+    }
     /// <summary>
     /// Called whenever a wall gets destroyed. Removes the respective wall at the WallPos of the GridObj.
     /// </summary>

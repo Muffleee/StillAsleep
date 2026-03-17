@@ -259,8 +259,6 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void LoseGame(string loseMessage)
     {
-        Debug.Log(loseMessage);
-        // TODO implement this
         Debug.Log("LOSER HAHAHAHA: " + loseMessage);
     }
 
