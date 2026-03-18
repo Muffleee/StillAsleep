@@ -1,60 +1,24 @@
 using System.Collections;
-using System.Collections.Generic;
-using UnityEngine.EventSystems;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class ButtonFog : MonoBehaviour
+public class ButtonFog : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Fog Particles")]
-    [SerializeField] private ParticleSystem fogParticles;
-    [SerializeField] private float fadeSpeed = 3f;
+    [SerializeField] private Image fogImage;
+    [SerializeField] private float targetAlpha = 0.6f;
+    [SerializeField] private float fadeSpeed = 5f;
+    private float currentAlpha = 0f;
+    private bool hovering = false;
 
-    private CanvasGroup fogGroup;
-
-    void Start()
+    void Update()
     {
-        if (fogParticles != null)
-        {
-            fogParticles.Stop();
-            fogGroup = fogParticles.GetComponent<CanvasGroup>();
-            if (fogGroup == null)
-                fogGroup = fogParticles.gameObject.AddComponent<CanvasGroup>();
-            fogGroup.alpha = 0f;
-        }
+        currentAlpha = Mathf.Lerp(currentAlpha, hovering ? targetAlpha : 0f, fadeSpeed * Time.unscaledDeltaTime);
+        Color color = fogImage.color;
+        color.a = currentAlpha;
+        fogImage.color = color;
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        if (fogParticles != null)
-        {
-            fogParticles.Play();
-            StopAllCoroutines();
-            StartCoroutine(FadeFog(1f));
-        }
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        StopAllCoroutines();
-        StartCoroutine(FadeFogOut());
-    }
-
-    IEnumerator FadeFog(float target)
-    {
-        while (fogGroup.alpha < target)
-        {
-            fogGroup.alpha += Time.unscaledDeltaTime * fadeSpeed;
-            yield return null;
-        }
-    }
-
-    IEnumerator FadeFogOut()
-    {
-        while (fogGroup.alpha > 0f)
-        {
-            fogGroup.alpha -= Time.unscaledDeltaTime * fadeSpeed;
-            yield return null;
-        }
-        fogParticles.Stop();
-    }
+    public void OnPointerEnter(PointerEventData eventData) => hovering = true;
+    public void OnPointerExit(PointerEventData eventData) => hovering = false;
 }
