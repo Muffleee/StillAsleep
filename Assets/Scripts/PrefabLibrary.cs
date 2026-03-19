@@ -25,6 +25,7 @@ public class PrefabLibrary : MonoBehaviour
     [SerializeField] public GameObject prefabItemClock;
     [SerializeField] public GameObject prefabItemPickaxe;
     [SerializeField] public GameObject prefabItemTrapForcefield;
+    [SerializeField] public GameObject prefabItemBoxTrap; 
     [SerializeField] public GameObject prefabItemTerrainScanner;
 
     [SerializeField] public Sprite iconItemClock;

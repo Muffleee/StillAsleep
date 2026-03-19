@@ -163,26 +163,46 @@ public class SludgeItem : IItem
 
     void IItem.OnUse()
     {
-        if (GameManager.INSTANCE == null) return;
-        if (PlayerMovement.INSTANCE == null) return;
-        if (EnemyMovement.INSTANCE == null) return;
+        if (GameManager.INSTANCE == null || EnemyMovement.INSTANCE == null) return;
 
         Grid grid = GameManager.INSTANCE.GetCurrentGrid();
         if (grid == null) return;
 
-        Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
-        WallPos direction = ItemHelper.GetPlayerFacingDirection();
+        //RAYCAST FROM MOUSE TO FIND TARGET TILE ---
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit[] hits = Physics.RaycastAll(ray);
+        GridObj target = null;
 
-        GridObj target = grid.GetAdjacentGridObj(playerPos, direction);
-        if (target == null) return;
-
-        GridType targetType = target.GetGridType();
-        if (targetType == GridType.REPLACEABLE || targetType == GridType.MANUAL_REPLACEABLE)
+        // Find the specific tile we clicked on
+        foreach (var hit in hits)
         {
-            return;
+            GridObj obj = grid.GetGridObjFromGameObj(hit.collider.transform.root.gameObject);
+            if (obj != null && obj.GetGridType() != GridType.REPLACEABLE && obj.GetGridType() != GridType.MANUAL_REPLACEABLE)
+            {
+                target = obj;
+                break;
+            }
         }
 
-        EnemyMovement.INSTANCE.PlaceStickyTrap(target.GetGridPos(), STUCK_TURNS);
+        // Fallback: If mouse is not over a valid tile, place under player
+        if (target == null && PlayerMovement.INSTANCE != null)
+        {
+            target = grid.GetGridObj(PlayerMovement.INSTANCE.GetCurrentGridPos());
+        }
+
+        if (target == null) return;
+
+        // SPAWN THE TRAPBOX AT MOUSE LOCATION
+        Vector3 spawnPos = target.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY());
+        GameObject boxPrefab = GameManager.INSTANCE.GetPrefabLibrary().prefabItemBoxTrap; 
+
+        if (boxPrefab != null)
+        {
+            GameObject trapVisual = GameObject.Instantiate(boxPrefab, spawnPos, Quaternion.identity);
+            ItemBoxTrap boxTrapScript = trapVisual.GetComponent<ItemBoxTrap>();
+
+            EnemyMovement.INSTANCE.PlaceStickyTrap(target.GetGridPos(), STUCK_TURNS, boxTrapScript);
+        }
     }
 }
 
