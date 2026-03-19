@@ -6,7 +6,7 @@ public class Inventory : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private byte maxInventorySize = 10; 
     [SerializeField] private InventoryUI inventoryUI;
-    private const bool DEBUG = false;
+    private const bool DEBUG = true;
     
     private int currentSelectedItem = 0; 
     private List<IItem> inventory = new List<IItem>();
@@ -93,45 +93,8 @@ public class Inventory : MonoBehaviour
         }
         return false;
     }
-    
+
     public bool UseItem() => UseItem(currentSelectedItem);
-
-    public int GetSelectedSlot() => currentSelectedItem;
-
-    private void Update()
-    {
-        // --- 1. SCROLLING LOGIC ---
-        float mouseScroll = Input.mouseScrollDelta.y;
-        bool controlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-        if (mouseScroll != 0 && !controlDown)
-        {
-            int previousSelectedItem = currentSelectedItem;
-            if (mouseScroll > 0) currentSelectedItem--;
-            else currentSelectedItem++;
-
-            currentSelectedItem = Mathf.Clamp(currentSelectedItem, 0, maxInventorySize - 1);
-
-            if (currentSelectedItem != previousSelectedItem && inventoryUI != null)
-            {
-                inventoryUI.SelectSlot(currentSelectedItem);
-            }
-        }
-
-        // --- 2. USE SELECTED ITEM (F Key) ---
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            UseItem(); 
-        }
-
-        // --- 3. USE SPECIFIC ITEM (Number Keys 1-9, 0) ---
-        CheckNumberKeys();
-
-        // --- 4. DROP SELECTED ITEM (Q Key) ---
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            DropSelectedItem();
-        }
-    }
 
     public void DropSelectedItem()
     {
@@ -140,6 +103,7 @@ public class Inventory : MonoBehaviour
         if (itemToDrop != null && PlayerMovement.INSTANCE != null)
         {
             Vector3 dropPosition = PlayerMovement.INSTANCE.transform.position;
+            dropPosition.y = 0.5f;
             
             Collider[] colliders = Physics.OverlapSphere(dropPosition, 0.5f);
             foreach (Collider col in colliders)
@@ -169,6 +133,7 @@ public class Inventory : MonoBehaviour
     public void SwapWithSelected(IItem newItem, Vector3 dropPosition)
     {
         IItem oldItem = inventory[currentSelectedItem];
+        dropPosition.y = 0.5f;
 
         // 1. Drop the item currently in your hand
         if (oldItem != null)
@@ -188,18 +153,49 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    private void CheckNumberKeys()
+    public List<IItem> GetItems() => inventory;
+    public int GetSelectedSlot() => currentSelectedItem;
+    public int GetMaxSlots() => maxInventorySize;
+
+    private void Update()
     {
+        // Scroll between slots
+        float mouseScroll = Input.mouseScrollDelta.y;
+        bool controlDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        if (mouseScroll != 0 && !controlDown)
+        {
+            int previousSelectedItem = currentSelectedItem;
+            if (mouseScroll > 0) currentSelectedItem--;
+            else currentSelectedItem++;
+
+            currentSelectedItem = Mathf.Clamp(currentSelectedItem, 0, maxInventorySize - 1);
+
+            if (currentSelectedItem != previousSelectedItem && inventoryUI != null)
+            {
+                inventoryUI.SelectSlot(currentSelectedItem);
+            }
+        }
+
+        // Use item in selected slot
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            UseItem(); 
+        }
+
+        // Select specific slot and use item within
         for (int i = 0; i <= 9; i++)
         {
             if (Input.GetKeyDown(KeyCode.Alpha0 + i))
             {
-                int slotIndex = (i == 0) ? 9 : i - 1;
-                UseItem(slotIndex);
+                currentSelectedItem = (i == 0) ? 9 : i - 1;
+                UseItem();
             }
         }
-    }
 
-    public List<IItem> GetItems() => inventory;
-    public int GetMaxSlots() => maxInventorySize;
+        // Drop selected item
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            DropSelectedItem();
+        }
+    }
 }
