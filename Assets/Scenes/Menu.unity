@@ -1833,7 +1833,7 @@ MonoBehaviour:
   musicSlider: {fileID: 1367402828}
   playerAnimator: {fileID: 625457457}
   HighScoreReset: {fileID: 1777229415}
-  gameSceneName: SampleScene
+  gameSceneName: MainScene
 --- !u!4 &724011662 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 30045433182033027, guid: 872b7659ae6c1564dbf71f454e5bf153,
@@ -1871,7 +1871,6 @@ Transform:
   m_Children:
   - {fileID: 1435732456}
   - {fileID: 2032224274}
-  - {fileID: 1558539216}
   - {fileID: 1174572536}
   - {fileID: 621359928}
   - {fileID: 1833374564}
@@ -3375,7 +3374,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 769533651}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1276655708680176380, guid: dcfaec5b534bece499f2638d66792c9c,
         type: 3}
@@ -3599,12 +3598,6 @@ MonoBehaviour:
   fogImage: {fileID: 1091062011}
   targetAlpha: 0.6
   fadeSpeed: 5
---- !u!4 &1558539216 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1276655708680176380, guid: dcfaec5b534bece499f2638d66792c9c,
-    type: 3}
-  m_PrefabInstance: {fileID: 1403507385}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1593630200
 GameObject:
   m_ObjectHideFlags: 0
@@ -5847,3 +5840,4 @@ SceneRoots:
   - {fileID: 769533651}
   - {fileID: 283446702}
   - {fileID: 2036881473261495685}
+  - {fileID: 1403507385}

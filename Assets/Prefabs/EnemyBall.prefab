@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7389557282248630623}
-  - component: {fileID: 6032541693424868652}
+  - component: {fileID: 3348909802670461443}
   m_Layer: 0
   m_Name: EnemyBall
   m_TagString: Untagged
@@ -33,7 +33,7 @@ Transform:
   - {fileID: 5156416095325456398}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6032541693424868652
+--- !u!114 &3348909802670461443
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,10 +42,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 929486989153830007}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb854f8c5d935f241ae5dd3df536e767, type: 3}
+  m_Script: {fileID: 11500000, guid: 3666c49ad9042d24aaa63bf3913f1649, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  model: {fileID: 929486989153830007}
+  model: {fileID: 5531710838102774452}
 --- !u!1001 &4613370895799840741
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -137,6 +137,12 @@ PrefabInstance:
 --- !u!4 &5156416095325456398 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0e6b0daa78362cd4484324c3f810e027,
+    type: 3}
+  m_PrefabInstance: {fileID: 4613370895799840741}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5531710838102774452 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 0e6b0daa78362cd4484324c3f810e027,
     type: 3}
   m_PrefabInstance: {fileID: 4613370895799840741}
   m_PrefabAsset: {fileID: 0}

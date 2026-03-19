@@ -41,7 +41,6 @@ public class Item : ScriptableObject, IItem
     public virtual void OnUse()
     {
         // This is what happens when the player clicks it in the inventory
-        Debug.Log($"Used item: {itemName}");
     }
 
     public string GetName()

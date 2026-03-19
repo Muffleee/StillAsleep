@@ -6,6 +6,7 @@ public class Inventory : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private byte maxInventorySize = 10; 
     [SerializeField] private InventoryUI inventoryUI;
+    private const bool DEBUG = false;
     
     private int currentSelectedItem = 0; 
     private List<IItem> inventory = new List<IItem>();
@@ -85,7 +86,7 @@ public class Inventory : MonoBehaviour
                 else
                 {
                     // Not enough energy
-                    Debug.LogWarning($"Not enough energy! {itemToUse.GetName()} costs {cost} energy.");
+                    if(DEBUG) Debug.LogWarning($"Not enough energy! {itemToUse.GetName()} costs {cost} energy."); // TODO play sound
                     return false; 
                 }
             }
@@ -145,7 +146,7 @@ public class Inventory : MonoBehaviour
             {
                 if (col.GetComponent<ItemPickup>() != null)
                 {
-                    Debug.LogWarning("Cannot drop! There is already an item right here.");
+                    if(DEBUG) Debug.LogWarning("Cannot drop! There is already an item right here.");
                     return; 
                 }
             }
@@ -154,7 +155,7 @@ public class Inventory : MonoBehaviour
             if (dropPrefab != null)
             {
                 Instantiate(dropPrefab, dropPosition, Quaternion.identity);
-                Debug.Log($"Dropped {itemToDrop.GetIcon().name} at your feet.");
+                if(DEBUG) Debug.Log($"Dropped {itemToDrop.GetIcon().name} at your feet.");
             }
 
             inventory[currentSelectedItem] = null;

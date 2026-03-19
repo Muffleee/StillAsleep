@@ -10,7 +10,21 @@ using UnityEngine;
 /// Main game manager class, handles game initialization, world generation, and move and click events
 /// </summary>
 public class GameManager : MonoBehaviour
-{
+{   
+    public static int emptyWeight;
+    public static int corridorWeight;
+    public static int cornerWeight;
+    public static int oneWallWeight;
+    public static int jumpingWeight;
+    public static int manualReplacableWeight;
+    public static int trapWeight;
+    public static int hiddenTrapWeight;
+    public static int iceWeight;
+    public static int rotatingWeight;
+    public static int spikeWeight;
+    public static GameManager INSTANCE;
+
+    [Header("General Settings")]
     [SerializeField] int generateAfter = 4;
     [SerializeField] int replaceExitAfter = 2;
     [SerializeField] private int width;
@@ -30,39 +44,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int ice = 0;
     [SerializeField] private int rotating = 0;
     [SerializeField] private int spike = 0;
-    [SerializeField] private PrefabLibrary prefabLibrary;
-    [SerializeField] private PlayerMovement playerMovement;
-    [SerializeField] private EnemyMovement enemyMovement;
-    [SerializeField] private Pathfinding pathfinding;
-    [SerializeField] private FogOfWarScript fogCondition;
-    [SerializeField] private GameObject Audio;
-    [SerializeField] private WinScreen WinScreen;
-
-    public static int emptyWeight;
-    public static int corridorWeight;
-    public static int cornerWeight;
-    public static int oneWallWeight;
-    public static int jumpingWeight;
-    public static int manualReplacableWeight;
-    public static int trapWeight;
-    public static int hiddenTrapWeight;
-    public static int iceWeight;
-    public static int rotatingWeight;
-    public static int spikeWeight;
-    public static GameManager INSTANCE;
-
-    [SerializeField] private GameObject player;
-    private PlayerResources playerResources;
-    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
-    private IMapCondition currentCond;
-
     [SerializeField] private bool enableEnergyCrystals = true;
     [SerializeField, Range(0f, 1f)] private float crystalBaseChance = 0.05f;
     [SerializeField, Range(0f, 1f)] private float crystalMinChance = 0.02f;
     [SerializeField, Range(0f, 1f)] private float crystalMaxChance = 0.25f;
-
     [SerializeField] private float crystalEnergyBias = 1.5f;
-
     [SerializeField] private int crystalBaseMax = 6;
     [SerializeField] private int crystalBonusMax = 10;
 
@@ -70,6 +56,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool enableItemSpawning = true;
     [SerializeField, Range(0f, 1f)] private float itemSpawnChance = 0.05f; 
     [SerializeField] private GameObject[] spawnableItemPrefabs; 
+    
+    [Header("References")]
+    [SerializeField] private PrefabLibrary prefabLibrary;
+    [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private EnemyMovement enemyMovement;
+    [SerializeField] private Pathfinding pathfinding;
+    [SerializeField] private FogOfWarScript fogCondition;
+    [SerializeField] private GameObject Audio;
+    [SerializeField] private WinScreen WinScreen;
+    [SerializeField] private GameObject player;
+
+    private PlayerResources playerResources;
+    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
+    private IMapCondition currentCond;
 
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
@@ -78,16 +78,8 @@ public class GameManager : MonoBehaviour
 
     private int phase;
     private int round;
-    /*
-    public GameObject wallPrefab;
-    public GameObject floorPrefab;
-    public GameObject destructibleWallPrefab;
-    public GameObject exitPrefab;
-
-    public GameObject energyCrystalPrefab;
-    */
-
-    Grid grid;
+    private Grid grid;
+    private const bool DEBUG = false;
 
     private void Awake()
     {
@@ -279,7 +271,7 @@ public class GameManager : MonoBehaviour
 
         if (!this.playerResources.CanAfford(cost))
         {
-            Debug.Log("Nicht genug Energie!");
+            if(DEBUG) Debug.Log("Nicht genug Energie!");
             return;
         }
         this.playerResources.Spend(cost);
@@ -389,7 +381,7 @@ public class GameManager : MonoBehaviour
             Vector3 worldPos = tile.GetWorldPos(worldOffsetX, worldOffsetY);
             worldPos.y += 0.5f;
             Instantiate(selectedPrefab, worldPos, Quaternion.identity);
-            Debug.Log($"Spawned a {selectedPrefab.name} at {worldPos}"); // Confirms it worked!
+            if(DEBUG) Debug.Log($"Spawned a {selectedPrefab.name} at {worldPos}"); // Confirms it worked!
             return true;
         }
         return false;

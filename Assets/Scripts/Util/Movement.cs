@@ -1,0 +1,151 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Movement : MonoBehaviour
+{
+    
+    [SerializeField] protected GameObject model;
+    protected Vector2Int lastGridPos;
+    protected Vector2Int gridPos;
+    protected int stepCounter;
+    /// <summary>
+    /// Check if a movement in a given direction is valid.
+    /// Validity is based on the tile type.
+    /// </summary>
+    /// <param name="wallPos">Movement direction to be checked.</param>
+    /// <returns></returns>
+    protected virtual MoveType IsValidMove(WallPos wallPos)
+    {
+        Grid cGrid = GameManager.INSTANCE.GetCurrentGrid();
+        Vector2Int next = this.GetNextGridPos(wallPos);
+        if (!cGrid.IsInsideGrid(next)) return MoveType.INVALID;
+
+        GridObj nextObj = cGrid.GetGridArray()[next.x, next.y];
+        GridObj current = cGrid.GetGridArray()[gridPos.x, gridPos.y];
+        return current.GetInteract().IsValidMove(current, nextObj, wallPos);
+    }
+    /// <summary>
+    /// Get the movement vector in world space for a given direction.
+    /// </summary>
+    /// <param name="wallPos">Direction for which the vector shall be calculated.</param>
+    /// <returns></returns>
+    protected Vector3 GetMoveDir(WallPos wallPos)
+    {
+        return wallPos switch
+        {
+            WallPos.BACK => new Vector3(0, 0, GridObj.PLACEMENT_FACTOR),
+            WallPos.FRONT => new Vector3(0, 0, -GridObj.PLACEMENT_FACTOR),
+            WallPos.LEFT => new Vector3(-GridObj.PLACEMENT_FACTOR, 0, 0),
+            WallPos.RIGHT => new Vector3(GridObj.PLACEMENT_FACTOR, 0, 0),
+            _ => Vector3.zero
+        };
+    }
+
+    /// <summary>
+    /// Get the movement vector in grid space for a given direction.
+    /// </summary>
+    /// <param name="wallPos">Direction for which the vector shall be calculated.</param>
+    /// <returns></returns>
+    protected Vector2Int GetMoveDirGrid(WallPos wallPos)
+    {
+        return wallPos switch
+        {
+            WallPos.BACK => new Vector2Int(0, 1),
+            WallPos.FRONT => new Vector2Int(0, -1),
+            WallPos.LEFT => new Vector2Int(-1, 0),
+            WallPos.RIGHT => new Vector2Int(1, 0),
+            _ => Vector2Int.zero
+        };
+    }
+
+    /// <summary>
+    /// Get the grid position after a move in a given direction.
+    /// </summary>
+    /// <param name="wallPos">Direction to be checked.</param>
+    /// <returns></returns>
+    protected Vector2Int GetNextGridPos(WallPos wallPos)
+    {
+        if (GameManager.INSTANCE.GetCurrentGrid() == null || !GameManager.INSTANCE.GetCurrentGrid().IsInstantiated())
+        {
+            Debug.LogWarning("Keine GridObjekte gefunden. Ist das Level schon generiert?");
+            return new Vector2Int(0, 0);
+        }
+        Vector2Int next = gridPos + this.GetMoveDirGrid(wallPos);
+        return next;
+    }
+    /// <summary>
+    /// Move the player in a given direction if they aren't already in motion.
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <param name="wallPos"></param>
+    protected void StartMovement(WallPos wallPos, MoveType mt)
+    {
+        this.StartCoroutine(this.MovementCoroutine(wallPos, mt));
+    }
+    /// <summary>
+    /// Move the player in a given direction. Set the new currentGridPos and the lastGridPos.
+    /// Invoke UnityEvent onPlayerMoved
+    /// </summary>
+    /// <param name="wallPos">Direction of movement</param>
+    /// <returns></returns>
+    protected virtual IEnumerator MovementCoroutine(WallPos wallPos, MoveType mt)
+    {
+        float totalDuration = 0.3f;
+        float chargeDuration = mt == MoveType.JUMP ? 0.1f : 0f;
+        float moveDuration = totalDuration - chargeDuration;
+        float elapsed = 0f;
+        Vector3 startPos = this.transform.position;
+        Vector3 endPos = startPos + this.GetMoveDir(wallPos);
+
+        this.lastGridPos = this.gridPos;
+        this.gridPos = this.GetNextGridPos(wallPos);
+
+        yield return null; // use this to get less sliding with the animations
+
+        while (elapsed < totalDuration)
+        {
+            elapsed += Time.deltaTime;
+            if (elapsed < chargeDuration)
+            {
+                yield return null;
+                continue;
+            }
+            float time = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / moveDuration));
+            this.transform.position = Vector3.Lerp(startPos, endPos, time);
+
+            yield return null;
+        }
+        this.transform.position = endPos;
+
+    }
+
+    protected void RotateModel(WallPos dir)
+    {
+        int rotation;
+        switch (dir)
+        {
+            case WallPos.FRONT:
+                rotation = 180;
+                break;
+            case WallPos.LEFT:
+                rotation = -90;
+                break;
+            case WallPos.RIGHT:
+                rotation = 90;
+                break;
+            default:
+                rotation = 0;
+                break;
+        }
+        this.model.transform.rotation = Quaternion.Euler(new Vector3(0, rotation, 0));
+    }
+
+    internal void ResetFigure(Vector2Int pos)
+    {
+        this.gridPos = pos;
+        Vector3 newPosition = GridObj.GridPosToWorldPos(pos, GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
+        newPosition.y = 1;
+        this.gameObject.transform.position = newPosition;
+    }
+}
