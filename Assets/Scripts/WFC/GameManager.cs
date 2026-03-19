@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int height;
     [SerializeField] private long MaxGridArea = 50;
     [SerializeField] private IngameUI gui;
+
+    [Header("Weight Balancing")]
     [SerializeField] private int corridor = 0;
     [SerializeField] private int corner = 0;
     [SerializeField] private int oneWall = 0;
@@ -51,7 +53,7 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private GameObject player;
     private PlayerResources playerResources;
-    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond() };
+    private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
     private IMapCondition currentCond;
 
     [SerializeField] private bool enableEnergyCrystals = true;
@@ -258,9 +260,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void LoseGame(string loseMessage)
     {
-        // TODO implement this
         WinScreen.ShowLoseScreen(loseMessage);
-        Debug.Log("LOSER HAHAHAHA: " + loseMessage);
     }
 
     /// <summary>
@@ -446,7 +446,8 @@ public class GameManager : MonoBehaviour
         this.grid.InstantiateMissing();
         this.gui.FillList();
         ChangeEnemyMovement();
-        if(this.phase != 0) NextCondition();
+        //if(this.phase != 0) 
+            NextCondition();
         this.phase++;
         NewRound(WeightType.START);
     }
@@ -468,7 +469,7 @@ public class GameManager : MonoBehaviour
         if (allMapConditions.Count <= 0) return;
         List<IMapCondition> possible = allMapConditions.Where(n => n.Difficulty() <= this.phase).ToList();
         if(possible.Count <= 0) return;
-        Unity.Mathematics.Random rnd = new Unity.Mathematics.Random(0x6E624EB7u);
+        Unity.Mathematics.Random rnd = new Unity.Mathematics.Random((uint)Environment.TickCount);
         int index = rnd.NextInt(possible.Count);
         possible[index].Initiate(this.phase);
         currentCond = possible[index];

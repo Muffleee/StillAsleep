@@ -191,26 +191,28 @@ public class Grid
 
             if (candidates.Count == 0)
             {
-                UnityEngine.Debug.LogWarning($"No candidates for ({x},{y}); leaving empty this pass.");
-                continue;
+                GridObj alternativeTemplate = new GridObj(new WallStatus(), GameManager.emptyWeight);
+                this.grid[x, y] = new GridObj(new Vector2Int(x, y), alternativeTemplate.GetWallStatus().Clone());
             }
-
-            GridObj chosenTemplate = this.PickWeightedRandom(candidates);
-            candidates.Remove(chosenTemplate);
-            this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-            while (!this.CheckSolvability(new Vector2Int(x,y)))
+            else
             {
-                if (candidates.Count == 0)
-                {
-                    chosenTemplate = new GridObj(new WallStatus(), GameManager.emptyWeight);
-                    this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
-                    break;
-                }
-                chosenTemplate = this.PickWeightedRandom(candidates);
+
+                GridObj chosenTemplate = this.PickWeightedRandom(candidates);
                 candidates.Remove(chosenTemplate);
                 this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+                while (!this.CheckSolvability(new Vector2Int(x, y)))
+                {
+                    if (candidates.Count == 0)
+                    {
+                        chosenTemplate = new GridObj(new WallStatus(), GameManager.emptyWeight);
+                        this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+                        break;
+                    }
+                    chosenTemplate = this.PickWeightedRandom(candidates);
+                    candidates.Remove(chosenTemplate);
+                    this.grid[x, y] = new GridObj(new Vector2Int(x, y), chosenTemplate.GetWallStatus().Clone());
+                }
             }
-            
             this.SetRandomGridType(this.grid[x,y]);
 
             if(this.grid[x,y].GetGridType() == GridType.MANUAL_REPLACEABLE) this.grid[x,y].RemoveAllWalls();
@@ -497,6 +499,9 @@ public class Grid
         PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(currentGridPos.x + addLeft, currentGridPos.y + addFront));
         Vector2Int enemyGridPos = EnemyMovement.INSTANCE.GetEnemyGridPos();
         EnemyMovement.INSTANCE.SetEnemyGridPos(new Vector2Int(enemyGridPos.x + addLeft, enemyGridPos.y + addFront));
+        Vector2Int otherEnemyGridPos = Opponent.INSTANCE.GetGridPos();
+        Opponent.INSTANCE.SetGridPos(new Vector2Int(otherEnemyGridPos.x + addLeft, otherEnemyGridPos.y + addFront));
+
         this.grid = newGrid;
     }
 
