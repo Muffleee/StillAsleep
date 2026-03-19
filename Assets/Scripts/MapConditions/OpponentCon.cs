@@ -8,7 +8,7 @@ public class OpponentCon : IMapCondition
 
     public int Difficulty()
     {
-        return 0;
+        return 4;
     }
 
     public void Initiate(int phase)
@@ -22,6 +22,5 @@ public class OpponentCon : IMapCondition
     {
         Opponent.INSTANCE.EndCondition();
         Opponent.INSTANCE.gameObject.SetActive(false);
-        Debug.Log("Deactivate");
     }
 }

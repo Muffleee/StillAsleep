@@ -458,7 +458,7 @@ public class GameManager : MonoBehaviour
         if (allMapConditions.Count <= 0) return;
         List<IMapCondition> possible = allMapConditions.Where(n => n.Difficulty() <= this.phase).ToList();
         if(possible.Count <= 0) return;
-        Unity.Mathematics.Random rnd = new Unity.Mathematics.Random(0x6E624EB7u);
+        Unity.Mathematics.Random rnd = new Unity.Mathematics.Random((uint)Environment.TickCount);
         int index = rnd.NextInt(possible.Count);
         possible[index].Initiate(this.phase);
         currentCond = possible[index];

@@ -14,6 +14,7 @@ public class Opponent : Movement
     private void Awake()
     {
         INSTANCE = this;
+        isActive = false;
         this.gameObject.SetActive(false);
     }
 
@@ -21,10 +22,10 @@ public class Opponent : Movement
     {
         switch (phase)
         {
-            case < 3: stuckMax = 5; break;
-            case < 5: stuckMax = 3; break;
-            case < 7: stuckMax = 2; break;
-            case < 8: stuckMax = 1; break;
+            case < 5: stuckMax = 5; break;
+            case < 7: stuckMax = 3; break;
+            case < 9: stuckMax = 2; break;
+            case < 13: stuckMax = 1; break;
             default: stuckMax = 1; break;
         }
     }
@@ -36,7 +37,9 @@ public class Opponent : Movement
     public void EndCondition()
     {
         PlayerMovement.INSTANCE.onPlayerMoved.RemoveListener(OnPlayerMove);
-        this.transform.root.gameObject.SetActive(false);
+        isActive = false;
+        this.transform.gameObject.SetActive(false);
+        
     }
     private void StartEnemy()
     {
@@ -73,7 +76,7 @@ public class Opponent : Movement
 
         if (playerPos == this.gridPos) 
         { 
-            GameManager.INSTANCE.LoseGame("Oh oh, he caught you!");
+            GameManager.INSTANCE.LoseGame("Well... you're squished.");
             return true;
         }
         return false;
@@ -94,7 +97,7 @@ public class Opponent : Movement
         WallPos? direction = null;
         int diffX = playerPos.x - this.gridPos.x;
         int diffY = playerPos.y - this.gridPos.y;
-        Debug.Log("diff X: " + diffX + "diff Y: " + diffY);
+
         if(Math.Abs(diffX) > Math.Abs(diffY))
         {
             direction = CheckX(playerPos, enemyPos, (stuckFor >= stuckMax));
@@ -121,7 +124,6 @@ public class Opponent : Movement
             direction = WallPos.LEFT;
             stuckFor = 0;
         }
-        Debug.Log("X: " + direction);
         return direction;
     }
 
@@ -138,7 +140,6 @@ public class Opponent : Movement
             direction = WallPos.FRONT;
             stuckFor = 0;
         }
-        Debug.Log("Y: " + direction);
         return direction;
     }
     private WallPos? CheckX(Vector2Int playerPos, Vector2Int enemyPos, bool destroyWall)
@@ -233,4 +234,6 @@ public class Opponent : Movement
         this.transform.position = endPos;
 
     }
+
+    public bool IsActive() { return isActive; }
 }

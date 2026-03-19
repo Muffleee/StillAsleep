@@ -139,6 +139,7 @@ public class EnemyMovement : Movement
         List<WallPos> allowed = new List<WallPos>();
         List<WallPos> destroyNextWall = new List<WallPos>();
         Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        Vector2Int opponentPos = Opponent.INSTANCE.GetGridPos();
 
 
         int diffX = playerPos.x - this.gridPos.x;
@@ -150,7 +151,7 @@ public class EnemyMovement : Movement
 
         foreach (WallPos wallPos in Enum.GetValues(typeof(WallPos)))
         {
-            if (this.IsValidMove(wallPos) == MoveType.WALK)
+            if (this.IsValidMove(wallPos) == MoveType.WALK && ((Opponent.INSTANCE.IsActive()) ? thisGrid.GetAdjacentGridObj(thisGrid.GetGridObj(this.gridPos), wallPos).GetGridPos() != opponentPos: true))
             {
                 allowed.Add(wallPos);
             }
