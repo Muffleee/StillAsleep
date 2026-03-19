@@ -6,7 +6,7 @@ public class Inventory : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private byte maxInventorySize = 10; 
     [SerializeField] private InventoryUI inventoryUI;
-    private const bool DEBUG = true;
+    private const bool DEBUG = false;
     
     private int currentSelectedItem = 0; 
     private List<IItem> inventory = new List<IItem>();
