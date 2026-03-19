@@ -423,6 +423,7 @@ public class GameManager : MonoBehaviour
     }
     private void NewPhase()
     {
+        if(currentCond != null) currentCond.Deactivate();
         this.grid.DestroyGrid();
         EnergyCrystal.DestroyAllCrystals();
         playerResources.ResetEnergy();
@@ -457,7 +458,6 @@ public class GameManager : MonoBehaviour
     }
     private void NextCondition()
     {
-        if(currentCond != null) currentCond.Deactivate();
         if (allMapConditions.Count <= 0) return;
         List<IMapCondition> possible = allMapConditions.Where(n => n.Difficulty() <= this.phase).ToList();
         if(possible.Count <= 0) return;

@@ -10,14 +10,15 @@ public class CountdownCond : IMapCondition
 {
     private PlayerMovement playerMovement;
     private TMP_Text countdownText;
+    private Coroutine countdown;
     private bool isActive = false;
     private float currentCountdown = 0;
     private float currentDuration = -1;
-    private readonly float[] durations = {10, 10, 10, 9, 9, 8, 7, 6, 5, 4, 3.5f, 3, 2.75f, 2.5f, 2.25f, 2, 1.75f, 1.5f, 1.25f, 1};
+    private readonly float[] durations = {10, 9, 8, 7, 6, 5, 4, 3.5f, 3, 2.75f, 2.5f, 2.25f, 2, 1.75f, 1.5f, 1.25f, 1};
 
     public int Difficulty()
     {
-        return 5;
+        return 0;
     }
 
     public void Initiate(int level)
@@ -34,13 +35,13 @@ public class CountdownCond : IMapCondition
 
         countdownText.GameObject().SetActive(true);
 
-        GameManager.INSTANCE.StartCoroutine(CountdownCoroutine());
         isActive = true;
+        countdown = GameManager.INSTANCE.StartCoroutine(CountdownCoroutine());
     }
 
     public void Deactivate()
     {
-        GameManager.INSTANCE.StopCoroutine(CountdownCoroutine());
+        GameManager.INSTANCE.StopCoroutine(countdown);
         isActive = false;
 
         countdownText.text = "";
@@ -56,11 +57,12 @@ public class CountdownCond : IMapCondition
 
     private IEnumerator CountdownCoroutine()
     {
+        float deltaTimeSeconds = .1f;
         while (currentCountdown > 0)
         {
-            currentCountdown--;
-            countdownText.text = currentCountdown.ToString();
-            yield return new WaitForSeconds(1);
+            currentCountdown -= deltaTimeSeconds;
+            countdownText.text = currentCountdown.ToString("F1");
+            yield return new WaitForSeconds(deltaTimeSeconds);
         }
 
         GameManager.INSTANCE.LoseGame("Time ran out!");
