@@ -413,6 +413,8 @@ MonoBehaviour:
     type: 3}
   prefabItemTrapForcefield: {fileID: 2536640785500377010, guid: 189e4efb7249c304daa5a52d45ab1215,
     type: 3}
+  prefabItemBoxTrap: {fileID: 2337348669800149896, guid: 6bb11f3f2c4d82a4887a4ee309b55241,
+    type: 3}
   prefabItemTerrainScanner: {fileID: 932056728395071911, guid: e972fc1089999434494657606c84d55e,
     type: 3}
   iconItemClock: {fileID: 21300000, guid: a1cb5c44464d93b4888c0c43fc7f8b64, type: 3}

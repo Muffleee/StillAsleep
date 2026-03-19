@@ -21,7 +21,9 @@ public class EnemyMovement : Movement
     private readonly List<Vector2Int> positionHistory = new List<Vector2Int>();
     private Vector2Int? stickyTrapGridPos = null;
     private int stickyTrapTurnsLeft = 0;
+    private ItemBoxTrap activeBoxTrap = null; 
     private const int MAX_HISTORY_SIZE = 20;
+    private bool isTrapTriggered = false; 
 
     private void Awake()
     {
@@ -58,6 +60,8 @@ public class EnemyMovement : Movement
         positionHistory.Clear();
         stickyTrapGridPos = null;
         stickyTrapTurnsLeft = 0;
+        activeBoxTrap = null;
+        
         this.gridPos = pos;
         Vector3 newPosition = this.gameManager.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos(this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         newPosition.y = 1;
@@ -65,10 +69,13 @@ public class EnemyMovement : Movement
         this.gameObject.SetActive(true);
         isInstantiated = true;
     }
-    public void PlaceStickyTrap(Vector2Int trapGridPos, int stuckTurns)
+
+    public void PlaceStickyTrap(Vector2Int trapGridPos, int stuckTurns, ItemBoxTrap boxTrap = null)
     {
         stickyTrapGridPos = trapGridPos;
         stickyTrapTurnsLeft = Mathf.Max(1, stuckTurns);
+        activeBoxTrap = boxTrap;
+        isTrapTriggered = false; 
     }
 
     public void Rewind(int steps)
@@ -103,14 +110,27 @@ public class EnemyMovement : Movement
     {
         if (!isInstantiated) return;
 
+        // --- TRAP TRIGGER LOGIC ---
         if (stickyTrapGridPos.HasValue && this.gridPos == stickyTrapGridPos.Value && stickyTrapTurnsLeft > 0)
         {
+            if (!isTrapTriggered)
+            {
+                if (activeBoxTrap != null) activeBoxTrap.ToggleOpen();
+                isTrapTriggered = true;
+            }
+
             stickyTrapTurnsLeft--;
+
             if (stickyTrapTurnsLeft <= 0)
             {
+                if (activeBoxTrap != null)
+                {
+                    Destroy(activeBoxTrap.gameObject);
+                    activeBoxTrap = null;
+                }
                 stickyTrapGridPos = null;
             }
-            return;
+            return; 
         }
 
         stepCounter++;
