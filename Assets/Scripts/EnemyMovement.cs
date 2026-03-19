@@ -105,6 +105,16 @@ public class EnemyMovement : Movement
         positionHistory.RemoveRange(targetIndex, positionHistory.Count - targetIndex);
         this.lastGridPos = rewindTarget;
         this.ResetFigure(rewindTarget);
+
+        // Check for win immediately after rewinding
+        if (PlayerMovement.INSTANCE != null)
+        {
+            Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+            if (playerPos.x == this.gridPos.x && playerPos.y == this.gridPos.y)
+            {
+                if (this.winScreen != null) this.winScreen.ShowWinScreen();
+            }
+        }
     }
 
     public Vector2Int GetEnemyGridPos()

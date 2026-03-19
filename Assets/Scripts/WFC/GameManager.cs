@@ -326,6 +326,11 @@ public class GameManager : MonoBehaviour
     {
         if (!enableItemSpawning) return false;
         if (tile == null || tile.GetGridType() != GridType.REGULAR) return false;
+        // Prevent items from spawning on the player's current position ---
+        if (PlayerMovement.INSTANCE != null && tile.GetGridPos() == PlayerMovement.INSTANCE.GetCurrentGridPos())
+        {
+            return false; 
+        }
         if (spawnableItemPrefabs == null || spawnableItemPrefabs.Length == 0)
         {
             Debug.LogWarning("Item Spawning is enabled, but the prefab array is empty!");
