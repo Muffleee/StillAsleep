@@ -11,11 +11,12 @@ public class GridObj
     public static float PLACEMENT_FACTOR = 2f;
     public static float WALL_OFFSET = 1f;
     private bool isPlaceable = true;
-    private GameObject wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab;
+    private GameObject wallPrefab, floorPrefab, destructibleWallPrefab, exitPrefab, underfloorPrefab;
     private Vector2Int gridPos;
     private WallStatus wallStatus;
     private GameObject parentObj = null;
     private GameObject floorObj = null;
+    private GameObject underfloorObj = null;
     private GameObject fogObj = null;
     private Dictionary<WallPos, GameObject> wallObjs = new Dictionary<WallPos, GameObject>() { { WallPos.FRONT, null }, { WallPos.BACK, null }, { WallPos.LEFT, null }, { WallPos.RIGHT, null } };
     private UnityEvent<GridObj, WallPos>[] destructibleWallCallbacks = new UnityEvent<GridObj, WallPos>[] { null, null, null, null };
@@ -78,6 +79,7 @@ public class GridObj
 
         this.wallPrefab = builder.GetPrefabLibrary().GetRandomWallPrefab();
         this.floorPrefab = builder.GetPrefabLibrary().GetRandomFloorPrefab();
+        this.underfloorPrefab = builder.GetPrefabLibrary().GetRandomUnderfloorPrefab();
         this.destructibleWallPrefab = builder.GetPrefabLibrary().prefabDestructibleWall;
         this.exitPrefab = builder.GetPrefabLibrary().prefabExit;
         GameManager.AllGridObjs.Add(this);
@@ -320,6 +322,9 @@ public class GridObj
         this.parentObj = GameObject.Instantiate(new GameObject($"Parent at [{worldPos.x}], {worldPos.y}, {worldPos.z}"), worldPos, Quaternion.identity);
         this.floorObj = GameObject.Instantiate(this.floorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.identity);
 
+        if(this.GetGridType() != GridType.REPLACEABLE && this.GetGridType() != GridType.MANUAL_REPLACEABLE)
+            this.underfloorObj = GameObject.Instantiate(this.underfloorPrefab, this.GetWorldPos(worldOffsetX, worldOffsetY), Quaternion.Euler(WallStatus.GetWallRotation(WallStatus.GetRandomWallPos())));
+
         this.floorObj.transform.SetParent(this.parentObj.transform);
         if (this.interactable is Spike spike) spike.InstantiateSpikes(this.floorObj);
         this.interactable.SetColor(this.floorObj);
@@ -524,6 +529,8 @@ public class GridObj
         this.DestroyFog();
         GameObject.Destroy(this.floorObj);
         this.floorObj = null;
+        GameObject.Destroy(this.underfloorObj);
+        this.underfloorObj = null;
         foreach(WallPos wallPos in Enum.GetValues(typeof(WallPos))){
             if (this.wallObjs[wallPos] == null) continue;
             GameObject.Destroy(this.wallObjs[wallPos]);

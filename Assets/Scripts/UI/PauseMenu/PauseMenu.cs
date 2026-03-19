@@ -97,13 +97,15 @@ public class PauseMenu : MonoBehaviour
     }
 
     private void ShowOptions()
-    {   
+    {
+        AudioManager.Instance.PlayButtonClick();
         this.mainPanel.SetActive(false);
         this.optionsPanel.SetActive(true);
     }
 
     private void HideOptions()
     {
+        AudioManager.Instance.PlayButtonClick();
         this.optionsPanel.SetActive(false);
         this.mainPanel.SetActive(true);
     }

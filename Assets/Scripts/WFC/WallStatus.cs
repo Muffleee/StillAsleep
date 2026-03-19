@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,6 +78,16 @@ public class WallStatus
     {
         float yRot = wallPos == WallPos.LEFT || wallPos == WallPos.RIGHT ? 90f : 0f;
         return new Vector3(0f, yRot, 0f);
+    }
+
+    /// <summary>
+    /// Returns a random WallPos
+    /// </summary>
+    /// <returns></returns>
+    public static WallPos GetRandomWallPos()
+    {   
+        Array values = Enum.GetValues(typeof(WallPos));
+        return (WallPos) values.GetValue(UnityEngine.Random.Range(0, values.Length));
     }
 
     /// <summary>
