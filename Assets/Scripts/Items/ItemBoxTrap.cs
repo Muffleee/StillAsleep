@@ -8,7 +8,7 @@ public class ItemBoxTrap : MonoBehaviour
     [SerializeField] private GameObject vfx;
     [SerializeField] private Transform lidR;
     [SerializeField] private Transform lidL;
-    private bool isOpen = false;
+    private bool isOpen = true;
     private bool isRotating = false;
 
     public void ToggleOpen()
