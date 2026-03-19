@@ -444,6 +444,7 @@ MonoBehaviour:
   pathfinding: {fileID: 220377180}
   fogCondition: {fileID: 220377182}
   Audio: {fileID: 7712494145165585650, guid: dcfaec5b534bece499f2638d66792c9c, type: 3}
+  WinScreen: {fileID: 1217895561}
   player: {fileID: 6834562829543864865}
   enableEnergyCrystals: 1
   crystalBaseChance: 0.05
@@ -453,10 +454,12 @@ MonoBehaviour:
   crystalBaseMax: 6
   crystalBonusMax: 10
   enableItemSpawning: 1
-  itemSpawnChance: 0.05
+  itemSpawnChance: 0.1
   spawnableItemPrefabs:
-  - {fileID: 6553842447854481309, guid: 44354df684ffad147bc14b1daac8c0f9, type: 3}
-  - {fileID: 5714447126237544670, guid: 969fce7480425d547812f3008868a84c, type: 3}
+  - {fileID: 4164902247873927100, guid: f5643e4bb32f915409a68433711c1e2a, type: 3}
+  - {fileID: 7291365165085134826, guid: a432f799c717f644f8de33c29a99ee4f, type: 3}
+  - {fileID: 904072862348660821, guid: 65a07578a571c8346b5bc18e02a40492, type: 3}
+  - {fileID: 2536640785500377010, guid: 189e4efb7249c304daa5a52d45ab1215, type: 3}
 --- !u!4 &220377177
 Transform:
   m_ObjectHideFlags: 0
@@ -537,12 +540,15 @@ MonoBehaviour:
     type: 3}
   prefabItemTrapForcefield: {fileID: 2536640785500377010, guid: 189e4efb7249c304daa5a52d45ab1215,
     type: 3}
+  prefabItemBoxTrap: {fileID: 2337348669800149896, guid: 6bb11f3f2c4d82a4887a4ee309b55241,
+    type: 3}
   prefabItemTerrainScanner: {fileID: 932056728395071911, guid: e972fc1089999434494657606c84d55e,
     type: 3}
-  iconItemClock: {fileID: 0}
-  iconItemPickaxe: {fileID: 0}
-  iconItemTrapForcefield: {fileID: 0}
-  iconItemScanner: {fileID: 0}
+  iconItemClock: {fileID: 21300000, guid: a1cb5c44464d93b4888c0c43fc7f8b64, type: 3}
+  iconItemPickaxe: {fileID: 21300000, guid: b68a4b09a6996c043acce7e5c787bd06, type: 3}
+  iconItemTrapForcefield: {fileID: 21300000, guid: 3888bbf4a452bf8479a10b8b0f4db722,
+    type: 3}
+  iconItemScanner: {fileID: 21300000, guid: e420572038e47fa4ba1600e142079931, type: 3}
 --- !u!114 &220377180
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1469,6 +1475,12 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8035139586016312334, guid: a67d1a124d5a25545886cde5c0041e5c,
+        type: 3}
+      propertyPath: imgDefault
+      value: 
+      objectReference: {fileID: 21300000, guid: 3c53014e14882ea48af5c114c5fea100,
+        type: 3}
     - target: {fileID: 8035139586016312334, guid: a67d1a124d5a25545886cde5c0041e5c,
         type: 3}
       propertyPath: toggles.Array.size

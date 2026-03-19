@@ -45,13 +45,6 @@ public class WinScreen : MonoBehaviour
         if (this.loseQuitButton != null)
             this.loseQuitButton.onClick.AddListener(this.QuitGame);
     }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.L))
-            ShowLoseScreen("Du hast L gedrückt!");
-    }
-
     public void ShowWinScreen()
     {
         if (this.nextRoundPanel != null)

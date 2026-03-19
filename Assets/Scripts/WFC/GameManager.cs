@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Pathfinding pathfinding;
     [SerializeField] private FogOfWarScript fogCondition;
     [SerializeField] private GameObject Audio;
+    [SerializeField] private WinScreen WinScreen;
 
     public static int emptyWeight;
     public static int corridorWeight;
@@ -258,6 +259,7 @@ public class GameManager : MonoBehaviour
     public void LoseGame(string loseMessage)
     {
         // TODO implement this
+        WinScreen.ShowLoseScreen(loseMessage);
         Debug.Log("LOSER HAHAHAHA: " + loseMessage);
     }
 
@@ -282,7 +284,7 @@ public class GameManager : MonoBehaviour
         }
         this.playerResources.Spend(cost);
 
-        GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus());
+        GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus().Clone());
         toPlace.UpdateWallStatus(this.grid.GetNeighbors(toPlace));
         this.grid.PlaceObj(toPlace);
         AudioManager.Instance.PlayTilePlacing();
@@ -324,6 +326,11 @@ public class GameManager : MonoBehaviour
     {
         if (!enableItemSpawning) return false;
         if (tile == null || tile.GetGridType() != GridType.REGULAR) return false;
+        // Prevent items from spawning on the player's current position ---
+        if (PlayerMovement.INSTANCE != null && tile.GetGridPos() == PlayerMovement.INSTANCE.GetCurrentGridPos())
+        {
+            return false; 
+        }
         if (spawnableItemPrefabs == null || spawnableItemPrefabs.Length == 0)
         {
             Debug.LogWarning("Item Spawning is enabled, but the prefab array is empty!");
@@ -406,6 +413,11 @@ public class GameManager : MonoBehaviour
 
     public void OnWin(WeightType weightType)
     {
+        // Free the player from any active trap animations or locks
+        if (PlayerMovement.INSTANCE != null)
+        {
+            PlayerMovement.INSTANCE.ResetPlayerState();
+        }
         
         if(this.round % 3 == 0)
         {

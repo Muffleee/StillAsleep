@@ -8,13 +8,8 @@ public class ItemBoxTrap : MonoBehaviour
     [SerializeField] private GameObject vfx;
     [SerializeField] private Transform lidR;
     [SerializeField] private Transform lidL;
-    private bool isOpen = false;
+    private bool isOpen = false; 
     private bool isRotating = false;
-
-    void Update()
-    {
-        if(Input.GetKey(KeyCode.B)) this.ToggleOpen();
-    }
 
     public void ToggleOpen()
     {
@@ -50,7 +45,7 @@ public class ItemBoxTrap : MonoBehaviour
         float rotated = 0f;
         float direction = Mathf.Sign(angle);
         float targetAmount = Mathf.Abs(angle);
-        if(!this.isOpen) this.ToggleVfx();
+        if(this.isOpen) this.ToggleVfx();
         while (rotated < targetAmount)
         {
             float step = speed * Time.deltaTime;
@@ -61,7 +56,7 @@ public class ItemBoxTrap : MonoBehaviour
             rotated += step;
             yield return null;
         }
-        if(this.isOpen) this.ToggleVfx();
+        if(!this.isOpen) this.ToggleVfx();
         this.isRotating = false;
     }
 }
