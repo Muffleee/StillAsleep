@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5446146602398319994}
   m_Layer: 0
-  m_Name: TerrainScanner
+  m_Name: ScannerParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
