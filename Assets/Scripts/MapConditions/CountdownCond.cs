@@ -18,7 +18,7 @@ public class CountdownCond : IMapCondition
 
     public int Difficulty()
     {
-        return 0;
+        return 5;
     }
 
     public void Initiate(int level)
