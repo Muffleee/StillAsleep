@@ -19,6 +19,6 @@ public class ButtonFog : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         fogImage.color = color;
     }
 
-    public void OnPointerEnter(PointerEventData eventData) => hovering = true;
-    public void OnPointerExit(PointerEventData eventData) => hovering = false;
+    public void OnPointerEnter(PointerEventData eventData) { hovering = true; }
+    public void OnPointerExit(PointerEventData eventData) { hovering = false; }
 }
