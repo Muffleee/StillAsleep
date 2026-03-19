@@ -21,7 +21,9 @@ public class EnemyMovement : Movement
     private readonly List<Vector2Int> positionHistory = new List<Vector2Int>();
     private Vector2Int? stickyTrapGridPos = null;
     private int stickyTrapTurnsLeft = 0;
+    private ItemBoxTrap activeBoxTrap = null; 
     private const int MAX_HISTORY_SIZE = 20;
+    private bool isTrapTriggered = false; 
 
     private void Awake()
     {
@@ -49,6 +51,19 @@ public class EnemyMovement : Movement
     /// <param name="pos"></param>
     public void InstantiateEnemy(Vector2Int pos)
     {
+        // If the enemy has a trap when the round resets, destroy it
+        if (activeBoxTrap != null)
+        {
+            Destroy(activeBoxTrap.gameObject);
+        }
+
+        // Wipe the enemy's memory of the trap so it doesn't stay stuck
+        positionHistory.Clear();
+        stickyTrapGridPos = null;
+        stickyTrapTurnsLeft = 0;
+        activeBoxTrap = null;
+        isTrapTriggered = false;
+
         if (isInstantiated) { ResetFigure(pos); return; }
         if (!gameManager.GetCurrentGrid().IsInsideGrid(pos))
         {
@@ -58,6 +73,8 @@ public class EnemyMovement : Movement
         positionHistory.Clear();
         stickyTrapGridPos = null;
         stickyTrapTurnsLeft = 0;
+        activeBoxTrap = null;
+        
         this.gridPos = pos;
         Vector3 newPosition = this.gameManager.GetCurrentGrid().GetGridArray()[pos.x, pos.y].GetWorldPos(this.gameManager.GetCurrentGrid().GetWorldOffsetX(), this.gameManager.GetCurrentGrid().GetWorldOffsetY());
         newPosition.y = 1;
@@ -65,10 +82,13 @@ public class EnemyMovement : Movement
         this.gameObject.SetActive(true);
         isInstantiated = true;
     }
-    public void PlaceStickyTrap(Vector2Int trapGridPos, int stuckTurns)
+
+    public void PlaceStickyTrap(Vector2Int trapGridPos, int stuckTurns, ItemBoxTrap boxTrap = null)
     {
         stickyTrapGridPos = trapGridPos;
         stickyTrapTurnsLeft = Mathf.Max(1, stuckTurns);
+        activeBoxTrap = boxTrap;
+        isTrapTriggered = false; 
     }
 
     public void Rewind(int steps)
@@ -85,6 +105,16 @@ public class EnemyMovement : Movement
         positionHistory.RemoveRange(targetIndex, positionHistory.Count - targetIndex);
         this.lastGridPos = rewindTarget;
         this.ResetFigure(rewindTarget);
+
+        // Check for win immediately after rewinding
+        if (PlayerMovement.INSTANCE != null)
+        {
+            Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+            if (playerPos.x == this.gridPos.x && playerPos.y == this.gridPos.y)
+            {
+                if (this.winScreen != null) this.winScreen.ShowWinScreen();
+            }
+        }
     }
 
     public Vector2Int GetEnemyGridPos()
@@ -103,14 +133,34 @@ public class EnemyMovement : Movement
     {
         if (!isInstantiated) return;
 
+        Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        if (playerPos.x == this.gridPos.x && playerPos.y == this.gridPos.y)
+        {
+            if (this.winScreen != null) this.winScreen.ShowWinScreen();
+            return; // Stop doing anything else, the game is won!
+        }
+
+        // --- TRAP TRIGGER LOGIC ---
         if (stickyTrapGridPos.HasValue && this.gridPos == stickyTrapGridPos.Value && stickyTrapTurnsLeft > 0)
         {
+            if (!isTrapTriggered)
+            {
+                if (activeBoxTrap != null) activeBoxTrap.ToggleOpen();
+                isTrapTriggered = true;
+            }
+
             stickyTrapTurnsLeft--;
+
             if (stickyTrapTurnsLeft <= 0)
             {
+                if (activeBoxTrap != null)
+                {
+                    Destroy(activeBoxTrap.gameObject);
+                    activeBoxTrap = null;
+                }
                 stickyTrapGridPos = null;
             }
-            return;
+            return; 
         }
 
         stepCounter++;
@@ -158,12 +208,7 @@ public class EnemyMovement : Movement
             }
         }
 
-        if (diffX == 0 && diffY == 0)
-        {
-            this.winScreen.ShowWinScreen();
-            return null;
-        }
-        else if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
+        if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
         else if (diffX <= 0 && (allowed.Contains(WallPos.RIGHT) || destroyNextWall.Contains(WallPos.RIGHT)))
         {
             bestDir = WallPos.RIGHT;

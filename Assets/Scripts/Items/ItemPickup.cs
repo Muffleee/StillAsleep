@@ -1,8 +1,20 @@
 using UnityEngine;
 
+public enum ItemType 
+{ 
+    None, 
+    TimeReversal, 
+    WallBreaker, 
+    Sludge, 
+    Scanner
+}
+
 public class ItemPickup : MonoBehaviour
 {
-    [SerializeField] private Item itemData;
+    [Header("Item Setup")]
+    [Tooltip("Select which item this 3D object represents")]
+    public ItemType itemType; 
+    
     [SerializeField] private float pickupRadius = 1.5f;
 
     private void Update()
@@ -11,40 +23,48 @@ public class ItemPickup : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, PlayerMovement.INSTANCE.transform.position);
 
-        // 3. If the player is close enough, start listening for the 'E' key
-        if (distanceToPlayer <= pickupRadius)
+        if (distanceToPlayer <= pickupRadius && Input.GetKeyDown(KeyCode.E))
         {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                PickUpItem();
-            }
+            PickUpItem();
         }
     }
 
     private void PickUpItem()
     {
-        if (itemData == null) return;
-
         Inventory playerInventory = Object.FindAnyObjectByType<Inventory>();
         if (playerInventory == null) return;
 
+        IItem itemData = GenerateItemData();
+        if (itemData == null) return;
+
         if (playerInventory.AddItem(itemData))
         {
-            Debug.Log($"{itemData.itemName} picked up successfully!");
+            Debug.Log($"{itemData.GetName()} picked up successfully!");
             Destroy(gameObject);
         }
         else
         {
-            Vector3 dropLocation = transform.position; 
+            Vector3 dropLocation = transform.position + new Vector3(0, 0.5f, 0); 
             
             playerInventory.SwapWithSelected(itemData, dropLocation);
-            
             Destroy(gameObject); 
         }
     }
-    // Add this so the GameManager can read the weight!
+
+    private IItem GenerateItemData()
+    {
+        switch (itemType)
+        {
+            case ItemType.TimeReversal: return new TimeReversalItem();
+            case ItemType.WallBreaker:  return new WallBreakerItem();
+            case ItemType.Sludge:       return new SludgeItem();
+            case ItemType.Scanner:      return new ScannerItem();
+            default: return null;
+        }
+    }
+
     public IItem GetItemData() 
     { 
-        return itemData; 
+        return GenerateItemData(); 
     }
 }

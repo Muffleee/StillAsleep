@@ -63,10 +63,32 @@ public class Inventory : MonoBehaviour
     {
         if (slot >= 0 && slot < maxInventorySize && inventory[slot] != null)
         {
-            inventory[slot].OnUse();
-            inventory[slot] = null; 
-            if (inventoryUI != null) inventoryUI.ClearSlot(slot); 
-            return true;
+            IItem itemToUse = inventory[slot];
+
+            if (PlayerMovement.INSTANCE == null) return false;
+            PlayerResources playerResources = PlayerMovement.INSTANCE.GetComponent<PlayerResources>();
+
+            if (playerResources != null)
+            {
+                int cost = itemToUse.GetEnergyCost();
+
+                if (playerResources.CanAfford(cost))
+                {
+                    playerResources.Spend(cost);
+                    itemToUse.OnUse();
+
+                    inventory[slot] = null; 
+                    if (inventoryUI != null) inventoryUI.ClearSlot(slot); 
+                    
+                    return true; 
+                }
+                else
+                {
+                    // Not enough energy
+                    Debug.LogWarning($"Not enough energy! {itemToUse.GetName()} costs {cost} energy.");
+                    return false; 
+                }
+            }
         }
         return false;
     }
