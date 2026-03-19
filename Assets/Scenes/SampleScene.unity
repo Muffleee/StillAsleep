@@ -1086,6 +1086,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8035139586016312334, guid: a67d1a124d5a25545886cde5c0041e5c,
         type: 3}
+      propertyPath: imgDefault
+      value: 
+      objectReference: {fileID: 21300000, guid: 3c53014e14882ea48af5c114c5fea100,
+        type: 3}
+    - target: {fileID: 8035139586016312334, guid: a67d1a124d5a25545886cde5c0041e5c,
+        type: 3}
       propertyPath: toggles.Array.size
       value: 3
       objectReference: {fileID: 0}

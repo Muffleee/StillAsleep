@@ -51,6 +51,19 @@ public class EnemyMovement : Movement
     /// <param name="pos"></param>
     public void InstantiateEnemy(Vector2Int pos)
     {
+        // If the enemy has a trap when the round resets, destroy it
+        if (activeBoxTrap != null)
+        {
+            Destroy(activeBoxTrap.gameObject);
+        }
+
+        // Wipe the enemy's memory of the trap so it doesn't stay stuck
+        positionHistory.Clear();
+        stickyTrapGridPos = null;
+        stickyTrapTurnsLeft = 0;
+        activeBoxTrap = null;
+        isTrapTriggered = false;
+
         if (isInstantiated) { ResetFigure(pos); return; }
         if (!gameManager.GetCurrentGrid().IsInsideGrid(pos))
         {
@@ -109,6 +122,13 @@ public class EnemyMovement : Movement
     public void MoveEnemy()
     {
         if (!isInstantiated) return;
+
+        Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        if (playerPos.x == this.gridPos.x && playerPos.y == this.gridPos.y)
+        {
+            if (this.winScreen != null) this.winScreen.ShowWinScreen();
+            return; // Stop doing anything else, the game is won!
+        }
 
         // --- TRAP TRIGGER LOGIC ---
         if (stickyTrapGridPos.HasValue && this.gridPos == stickyTrapGridPos.Value && stickyTrapTurnsLeft > 0)
@@ -178,12 +198,7 @@ public class EnemyMovement : Movement
             }
         }
 
-        if (diffX == 0 && diffY == 0)
-        {
-            this.winScreen.ShowWinScreen();
-            return null;
-        }
-        else if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
+        if (allowed.Count <= 0 && destroyNextWall.Count <= 0) return null;
         else if (diffX <= 0 && (allowed.Contains(WallPos.RIGHT) || destroyNextWall.Contains(WallPos.RIGHT)))
         {
             bestDir = WallPos.RIGHT;
