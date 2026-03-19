@@ -190,6 +190,11 @@ public class PlayerMovement : Movement
         GridObj destinationTile = cGrid.GetGridArray()[this.gridPos.x, this.gridPos.y];
 
         destinationTile.GetInteract().OnUse(destinationTile);
+        if ((destinationTile.GetGridType() == GridType.TRAP || destinationTile.GetGridType() == GridType.HIDDENTRAP) && mt != MoveType.TRAP)
+        {
+            anim.TriggerMoveAnim(MoveType.TRAP);
+            this.LockMovement(3.292f);
+        }
         if(destinationTile.GetGridType() == GridType.ICE)
         {
             this.TryMove(wallPos);
@@ -218,6 +223,7 @@ public class PlayerMovement : Movement
         {   
             MoveType mtb = this.IsValidMove(bufferedMove.Value);
             if(mtb != MoveType.INVALID) StartCoroutine(MovementCoroutine(bufferedMove.Value, mtb));
+            if(mtb == MoveType.TRAP) this.LockMovement(3.292f);
             bufferedMove = null;
         } else 
         {
@@ -369,6 +375,21 @@ public class PlayerMovement : Movement
     {
         lastGridPos = newLastGridPos;
     }
+    public void ResetPlayerState()
+    {
+        StopAllCoroutines(); // Stops any active movement Lerps
+        CancelInvoke(nameof(UnlockMovement)); // Kills the 3-second trap timer
+        this.isLocked = false;
+        this.isMoving = false;
+        this.bufferedMove = null;
+        
+        // Forces the animator back to the Idle state
+        if (anim != null) 
+        {
+            anim.TriggerMoveAnim(MoveType.INVALID); 
+        }
+    }
+    // ------------------------------------------------------------------------------
 }
 
 

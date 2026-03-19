@@ -413,6 +413,11 @@ public class GameManager : MonoBehaviour
 
     public void OnWin(WeightType weightType)
     {
+        // Free the player from any active trap animations or locks
+        if (PlayerMovement.INSTANCE != null)
+        {
+            PlayerMovement.INSTANCE.ResetPlayerState();
+        }
         
         if(this.round % 3 == 0)
         {
