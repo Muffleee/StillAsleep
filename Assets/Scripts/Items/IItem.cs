@@ -224,6 +224,7 @@ public class ScannerItem : IItem
     private const int ENERGY_COST = 1;
     private const int SPAWN_WEIGHT = 4;
     private const float REVEAL_SECONDS = 4f;
+    private const int radius = 5;
 
     private class RendererColorSnapshot
     {
@@ -281,24 +282,59 @@ public class ScannerItem : IItem
 
         GridObj[,] gridArray = grid.GetGridArray();
         List<RendererColorSnapshot> snapshots = new List<RendererColorSnapshot>();
+        
+        Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        int centerX = playerPos.x;
+        int centerY = playerPos.y;
+        int rSquared = radius * radius;
 
-        foreach (GridObj tile in gridArray)
+        for (int x = centerX - radius; x <= centerX + radius; x++)
         {
-            if (tile == null || tile.GetGridType() != GridType.HIDDENTRAP) continue;
+            if (x < 0 || x >= grid.width) continue;
 
-            GameObject floorObj = tile.GetFloorObj();
-            if (floorObj == null) continue;
+            int dx = x - centerX;
+            int dxSquared = dx * dx;
 
-            Renderer[] renderers = floorObj.GetComponentsInChildren<Renderer>(true);
-            foreach (Renderer currentRenderer in renderers)
+            for (int y = centerY - radius; y <= centerY + radius; y++)
             {
-                if (currentRenderer == null || currentRenderer.material == null) continue;
-                if (!currentRenderer.material.HasProperty("_Color")) continue;
+                
+                if (y < 0 || y >= grid.height || gridArray[x,y].GetGridType() != GridType.HIDDENTRAP) continue;
+                GridObj tile = gridArray[x, y];
+                int dy = y - centerY;
 
-                snapshots.Add(new RendererColorSnapshot(currentRenderer, currentRenderer.material.color));
-                currentRenderer.material.color = Color.red;
+                if (dxSquared + dy * dy > rSquared) continue;
+
+                GameObject floorObj = tile.GetFloorObj();
+                if (floorObj == null) continue;
+                tile.ReplaceFloorPrefab(GameManager.INSTANCE.GetPrefabLibrary().prefabTrap, grid.GetWorldOffsetX(), grid.GetWorldOffsetY());
+                Renderer[] renderers = floorObj.GetComponentsInChildren<Renderer>(true);
+                foreach (Renderer currentRenderer in renderers)
+                {
+                    if (currentRenderer == null || currentRenderer.material == null) continue;
+                    if (!currentRenderer.material.HasProperty("_Color")) continue;
+
+                    snapshots.Add(new RendererColorSnapshot(currentRenderer, currentRenderer.material.color));
+                    currentRenderer.material.color = Color.red;
+                }
             }
         }
+        //foreach (GridObj tile in gridArray)
+        //{
+        //    if (tile == null || tile.GetGridType() != GridType.HIDDENTRAP) continue;
+
+        //    GameObject floorObj = tile.GetFloorObj();
+        //    if (floorObj == null) continue;
+
+        //    Renderer[] renderers = floorObj.GetComponentsInChildren<Renderer>(true);
+        //    foreach (Renderer currentRenderer in renderers)
+        //    {
+        //        if (currentRenderer == null || currentRenderer.material == null) continue;
+        //        if (!currentRenderer.material.HasProperty("_Color")) continue;
+
+        //        snapshots.Add(new RendererColorSnapshot(currentRenderer, currentRenderer.material.color));
+        //        currentRenderer.material.color = Color.red;
+        //    }
+        //}
 
         yield return new WaitForSeconds(revealDuration);
 

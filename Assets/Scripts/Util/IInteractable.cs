@@ -335,7 +335,7 @@ public class HiddenTrap : IInteractable
 
     GameObject IInteractable.GetPrefab()
     {
-        return GameManager.INSTANCE.GetPrefabLibrary().prefabTrap;
+        return GameManager.INSTANCE.GetPrefabLibrary().GetRandomFloorPrefab();
     }
 
     void IInteractable.TriggerAnimation(Animator animator, MoveType mt) {}
