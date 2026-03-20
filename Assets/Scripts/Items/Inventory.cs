@@ -75,13 +75,22 @@ public class Inventory : MonoBehaviour
 
                 if (playerResources.CanAfford(cost))
                 {
-                    playerResources.Spend(cost);
-                    itemToUse.OnUse();
+                    // --- NEW: Try to use the item first before spending energy! ---
+                    bool wasUsedSuccessfully = itemToUse.OnUse();
 
-                    inventory[slot] = null; 
-                    if (inventoryUI != null) inventoryUI.ClearSlot(slot); 
-                    
-                    return true; 
+                    if (wasUsedSuccessfully)
+                    {
+                        playerResources.Spend(cost); // Deduct energy
+                        inventory[slot] = null;      // Remove item
+                        if (inventoryUI != null) inventoryUI.ClearSlot(slot); 
+                        
+                        return true; 
+                    }
+                    else 
+                    {
+                        // The item failed to activate (e.g. Pickaxe found no wall)
+                        return false; 
+                    }
                 }
                 else
                 {
