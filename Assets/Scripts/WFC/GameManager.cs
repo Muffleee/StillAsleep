@@ -431,7 +431,7 @@ public class GameManager : MonoBehaviour
         this.grid.SetNewGrid(this.width, this.height);
         this.grid.CollapseWorld();
         this.SetWeights(WeightType.NORMAL);
-        PlayerMovement.INSTANCE.ResetFigure(new Vector2Int(0,0));
+        PlayerMovement.INSTANCE.ResetFigure(new Vector2Int(2,0));
         
         Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
         this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos), MaxGridArea);
