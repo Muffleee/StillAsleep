@@ -23,16 +23,7 @@ public static class ItemHelper
             return WallPos.FRONT;
         }
 
-        Vector2Int current = PlayerMovement.INSTANCE.GetCurrentGridPos();
-        Vector2Int last = PlayerMovement.INSTANCE.GetLastGridPos();
-        Vector2Int delta = current - last;
-
-        if (delta == Vector2Int.right) return WallPos.RIGHT;
-        if (delta == Vector2Int.left) return WallPos.LEFT;
-        if (delta == new Vector2Int(0, 1)) return WallPos.BACK;
-        if (delta == new Vector2Int(0, -1)) return WallPos.FRONT;
-
-        return WallPos.FRONT;
+        return PlayerMovement.INSTANCE.GetFacing();
     }
 }
 

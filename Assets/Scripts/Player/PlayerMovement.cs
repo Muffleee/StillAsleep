@@ -105,6 +105,7 @@ public class PlayerMovement : Movement
             }
             else
             {
+                RotateModel(wallPos);
                 if(this.DEBUG) Debug.Log("Movement was blocked by wall");
             }
         } else
@@ -370,6 +371,12 @@ public class PlayerMovement : Movement
             lastGridPos = GetCurrentGridPos();
         return lastGridPos;
     }
+
+    public WallPos GetFacing()
+    {
+        return this.facing;
+    }
+    
     public void SetLastGridPos(Vector2Int newLastGridPos)
     {
         lastGridPos = newLastGridPos;
