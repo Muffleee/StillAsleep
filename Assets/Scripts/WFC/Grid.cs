@@ -943,4 +943,6 @@ public class Grid
     }
 
     public List<GridObj> GetAllRotatingTiles() { return rotatingTiles; }
+    public void AddToRotating(GridObj obj) {  if(obj.GetGridType() == GridType.ROTATING) rotatingTiles.Add(obj); }
+    public void AddToSpike(GridObj obj) {  if(obj.GetGridType() == GridType.SPIKE) spikeTiles.Add(obj); }
 }

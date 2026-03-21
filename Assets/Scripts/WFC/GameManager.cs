@@ -197,7 +197,8 @@ public class GameManager : MonoBehaviour
         if (tutorial) return;
         enemyMovement.MoveEnemy();
         this.RefreshFog();
-        
+        this.grid.RotateTiles();
+
         GridObj toObj = this.grid.GetGridObj(to);
         if(toObj != null && toObj.GetGridType() == GridType.TRAP)
         {
@@ -238,7 +239,7 @@ public class GameManager : MonoBehaviour
 
     public void AfterEnemyMove()
     {
-        this.grid.RotateTiles();
+        
     }
     /// <summary>
     /// Make the player lose the game
@@ -386,7 +387,7 @@ public class GameManager : MonoBehaviour
 
     public void OnWin(WeightType weightType)
     {
-        if (tutorial) { tutManager.OnWin(); return; }
+        if (tutorial || tutManager.IsInEndphase()) { tutManager.OnWin(); return; }
         // Free the player from any active trap animations or locks
         if (PlayerMovement.INSTANCE != null)
         {
@@ -403,7 +404,7 @@ public class GameManager : MonoBehaviour
             ScoreManager.INSTANCE?.AddScore(100, true, "New Round");
         }
     }
-    private void NewPhase()
+    public void NewPhase()
     {
         if(currentCond != null) currentCond.Deactivate();
         this.grid.DestroyGrid();
@@ -531,11 +532,16 @@ public class GameManager : MonoBehaviour
     public PlayerMovement GetPlayerMovement() { return this.playerMovement; }
     public EnemyMovement GetEnemyMovement() { return this.enemyMovement; }
     public Pathfinding GetPathfinding() { return this.pathfinding; }
+    public TutorialManager GetTutManager() { return this.tutManager; }
+    public IMapCondition GetMapCondition(int index) { return allMapConditions[index]; }
     public bool IsMovingDisabled() { return tutManager.IsMovingDisabled(); }
     public bool IsPlacingDisabled() { return tutManager.IsPlacingDisabled(); }
     public bool IsTutorialCurrently() { return tutorial; }
+    public void SetTutorialCurrently(bool tut) { tutorial = tut; }
     public int GetRound() { return this.round; }
     public int GetPhase() {  return this.phase; }
+    public GameObject GetItemPrefab(int index) { return spawnableItemPrefabs[index]; }
+    public void ResetPhaseRound() {  this.phase = 0; this.round = 0; }
 }
 
 public enum WeightType

@@ -107,6 +107,7 @@ public class WallBreakerItem : IItem
     {
         if (GameManager.INSTANCE == null) return;
         if (PlayerMovement.INSTANCE == null) return;
+        if (GameManager.INSTANCE.IsTutorialCurrently() == true) GameManager.INSTANCE.GetTutManager().NextStep();
 
         Grid grid = GameManager.INSTANCE.GetCurrentGrid();
         if (grid == null) return;
