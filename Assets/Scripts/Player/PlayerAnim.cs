@@ -26,10 +26,14 @@ public class PlayerAnim : MonoBehaviour
             case MoveType.TRAP:
                 trigger = "TriggerTrap";
                 break;
+            case MoveType.SLIDE:
+                trigger = "TriggerSlide";
+                break;
             default:
                 trigger = "TriggerIdle";
                 break;
         }
+        Debug.Log(trigger);
         this.animator.SetTrigger(trigger);
     }
 }

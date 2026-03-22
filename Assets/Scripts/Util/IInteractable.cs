@@ -63,6 +63,7 @@ public class Regular : IInteractable
         {
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -139,7 +140,8 @@ public class Trap : IInteractable
         if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
         {
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
-            if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -187,6 +189,7 @@ public class JumpingPads : IInteractable
             }
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if(nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
@@ -248,6 +251,7 @@ public class ManualReplaceable : IInteractable
         {
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -324,6 +328,7 @@ public class HiddenTrap : IInteractable
         {
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -358,6 +363,7 @@ public class Ice : IInteractable
         {
             if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -391,6 +397,7 @@ public class Rotating : IInteractable
         {
             if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -439,6 +446,7 @@ public class Spike : IInteractable
         {
             if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;

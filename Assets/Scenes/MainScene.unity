@@ -454,7 +454,7 @@ MonoBehaviour:
   manualReplacable: 8
   trap: 5
   hiddenTrap: 3
-  ice: 0
+  ice: 10
   rotating: 0
   spike: 0
   enableEnergyCrystals: 1
