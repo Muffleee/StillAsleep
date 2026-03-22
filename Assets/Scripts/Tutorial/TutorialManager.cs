@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TutorialManager: MonoBehaviour
 {
-    [SerializeField] private GameObject tutorialLayover;
+    [SerializeField] private Canvas tutorialLayover;
     [SerializeField] private TMP_Text tutorialText;
+    [SerializeField] private Button resetButton;
     private TutorialGrid tutGrid;
     private Queue<Action> tutorials = new Queue<Action>();
     private String currentMessage = null;
@@ -31,17 +33,17 @@ public class TutorialManager: MonoBehaviour
         tutorials.Enqueue(FogCondTutorial);
         tutorials.Enqueue(CountdownCondTutorial);
         tutorials.Enqueue(OpponentCondTutorial);
+        tutorials.Enqueue(LastTutorial);
+        tutorialLayover.gameObject.SetActive(false);
+        resetButton.gameObject.SetActive(false);
     }
-    private void Start()
-    {
-        PlayerMovement.INSTANCE.onPlayerMoved.AddListener(PlayerMove);
-    }
+
     private void PlayerMove(Vector2Int lastPlayerPos, Vector2Int playerPos, WallPos direction, long steps)
     {
         EnemyMovement.INSTANCE.MoveEnemy();
         GameManager.INSTANCE.GetCurrentGrid().RotateTiles();
         if (currentPlayerSteps == 0) currentPlayerSteps = steps;
-        if(steps == currentPlayerSteps + 2)
+        if(steps == currentPlayerSteps + 1)
         {
             Debug.Log("nextStep");
             NextStep();
@@ -78,6 +80,10 @@ public class TutorialManager: MonoBehaviour
         {
             NextStep();
         }
+        if(tutorialPhase == 11 && Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            Debug.Log("Return to Main Menu");
+        }
     }
     public void SpawnCrystalOnObject(GridObj tile, int worldOffsetX, int worldOffsetY) 
     {
@@ -89,15 +95,17 @@ public class TutorialManager: MonoBehaviour
     }
     public void StartTutorial(Grid grid)
     {
+        PlayerMovement.INSTANCE.onPlayerMoved.AddListener(PlayerMove);
         if (tutGrid == null) tutGrid = new TutorialGrid();
-        tutorialLayover.SetActive(true);
+        tutorialLayover.gameObject.SetActive(true);
+        resetButton.gameObject.SetActive(true);
         tutGrid.FillInitialGridLayout(grid.GetGridArray());
         startGridObj = grid.GetGridObj(0, 0);
         enemyGridObj = grid.GetGridObj(3, 3);
         EnemyMovement.INSTANCE.InstantiateEnemy(new Vector2Int(3, 3));
         grid.IncreaseGrid(WallPos.LEFT, 1000);
         grid.InstantiateMissing();
-        
+        SimpleWindowController.INSTANCE.ToggleWindow();
         NextStep();
     }
     public void OnWin()
@@ -108,18 +116,27 @@ public class TutorialManager: MonoBehaviour
             tutorialText.text = "Congratulations, you won! Just click the left mouse button to carry on with the tutorial!";
         } else
         {
-            
+            tutorialText.text = "Congratulations, you won! Click to continue with the next condition!";
+            NextStep();
         }
     }
     public void OnLose()
     {
-        screenUp = true;
-        tutorialText.text = "You lost! But don't worry, just click the left mouse button and you can carry on with the tutorial!";
+        if (tutorialPhase <= 7)
+        {
+            screenUp = true;
+            tutorialText.text = "You lost! But don't worry, just click the left mouse button and you can carry on with the tutorial!";
+        } else
+        {
+            tutorialText.text = "You lost! But don't worry, just click to start this condition again!";
+            screenUp = true;
+        }
     }
-    private void ResetGame()
+    public void ResetGame()
     {
         if (tutorialPhase <= 7)
         {
+            PlayerMovement.INSTANCE.ResetPlayerState();
             PlayerMovement.INSTANCE.ResetFigure(startGridObj.GetGridPos());
             EnemyMovement.INSTANCE.ResetFigure(enemyGridObj.GetGridPos());
         } else
@@ -134,7 +151,10 @@ public class TutorialManager: MonoBehaviour
             }
             if (currentCond != null) currentCond.Deactivate();
             GameManager.INSTANCE.NewPhase();
-            GameManager.INSTANCE.GetMapCondition(1).Initiate(0);
+            currentCond = GameManager.INSTANCE.GetMapCondition(condition);
+            currentCond.Initiate(0);
+            EnemyMovement.INSTANCE.ResetFigure(new Vector2Int(3, 3));
+            PlayerMovement.INSTANCE.ResetPlayerState();
             GameManager.INSTANCE.ResetPhaseRound();
         }
 
@@ -154,7 +174,17 @@ public class TutorialManager: MonoBehaviour
     public void PlaceableTutorial()
     {
         disablePlacing = false;
-        Debug.Log("placable tutorial yayy");
+        RectTransform r = tutorialLayover.GetComponent<RectTransform>();
+        Vector2 offsetMin = r.offsetMin;
+        Vector2 offsetMax = r.offsetMax;
+
+        offsetMin.y = 800f;
+        offsetMax.y = 0f;
+
+        r.offsetMin = offsetMin;
+        r.offsetMax = offsetMax;
+
+        SimpleWindowController.INSTANCE.ToggleWindow();
         tutorialText.text = "You can place tiles in your inventory on a green tile at the border of the dungeon by using drag and drop or " +
             "by selecting one and clicking on the tile where you want to place it. " +
             "Placing a tile costs you one energy.";
@@ -164,6 +194,17 @@ public class TutorialManager: MonoBehaviour
     private void GenerateTutorial()
     {
         disablePlacing = true;
+        SimpleWindowController.INSTANCE.ToggleWindow();
+        RectTransform r = tutorialLayover.GetComponent<RectTransform>();
+        Vector2 offsetMin = r.offsetMin;
+        Vector2 offsetMax = r.offsetMax;
+
+        offsetMin.y = 50f;
+        offsetMax.y = -750f;
+
+        r.offsetMin = offsetMin;
+        r.offsetMax = offsetMax;
+
         tutorialText.text = "After some steps, the green replacable tiles at the border will be randomly filled.";
         currentMessage = tutorialText.text;
     }
@@ -198,12 +239,12 @@ public class TutorialManager: MonoBehaviour
         tutGrid.IncreaseThirdTime(grid.GetGridArray());
         Vector3 worldPos = gridArr[6, 3].GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY());
         worldPos.y += 0.5f;
-        GameObject selectedPrefab = GameManager.INSTANCE.GetItemPrefab(0);
+        GameObject selectedPrefab = GameManager.INSTANCE.GetItemPrefab(1);
         Instantiate(selectedPrefab, worldPos, Quaternion.identity);
         grid.CollapseWorld();
         grid.IncreaseGrid(WallPos.RIGHT, 1000);
         grid.InstantiateMissing();
-        tutorialText.text = "You can pick up Items with E and use them with F. Scroll through your inventory slots using the mouse wheel. \n The pickaxe destroys the wall in the direction you are looking.\n The scanner reveals all hidden traps in a certain radius. \n The box can be placed on the tile your pointer is on and holds the enemy in place for a few rounds. \n The clock can reverse the time so you ghost will be placed back 4 steps";
+        tutorialText.text = "You can pick up Items with E and use them with F. Scroll through your inventory slots using the mouse wheel. \n The pickaxe destroys the wall in the direction you are looking.\n The scanner reveals all hidden traps in a certain radius. \n The box can be placed where your pointer is and holds the enemy in place. \n The clock can reverse the time so you ghost will be placed back some steps.";
         currentMessage = tutorialText.text;
     }
 
@@ -215,6 +256,17 @@ public class TutorialManager: MonoBehaviour
 
     private void FogCondTutorial()
     {
+        SimpleWindowController.INSTANCE.ToggleWindow();
+        RectTransform r = tutorialLayover.GetComponent<RectTransform>();
+        Vector2 offsetMin = r.offsetMin;
+        Vector2 offsetMax = r.offsetMax;
+
+        offsetMin.y = 900f;
+        offsetMax.y = 0f;
+
+        r.offsetMin = offsetMin;
+        r.offsetMax = offsetMax;
+        PlayerMovement.INSTANCE.onPlayerMoved.RemoveListener(PlayerMove);
         GameManager.INSTANCE.SetTutorialCurrently(false);
         endPhase = true;
         ResetGame();
@@ -234,6 +286,11 @@ public class TutorialManager: MonoBehaviour
         ResetGame();
         disablePlacing = false;
         tutorialText.text = "Catch your ghost! This is the last condition that can occur. Avoid the spike ball!";
+        currentMessage = tutorialText.text;
+    }
+    private void LastTutorial()
+    {
+        tutorialText.text = "Congratulations, you finished the tutorial! Click to get back to the main menu!";
         currentMessage = tutorialText.text;
     }
     public bool IsPlacingDisabled() { return disablePlacing; }

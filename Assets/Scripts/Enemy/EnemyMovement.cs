@@ -80,7 +80,7 @@ public class EnemyMovement : Movement
         this.transform.position = newPosition;
         this.gameObject.SetActive(true);
         isInstantiated = true;
-        Debug.Log("Instantiate Enemy on pos: " + pos.x + ", " + pos.y + ", with gridPos: " + this.gridPos.x + ", " + this.gridPos.y);
+        Debug.Log("Instantiate Enemy on pos: " + pos.x + ", " + pos.y + ", with gridPos: " + this.gridPos.x + ", " + this.gridPos.y + " and world offsets: " + GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX() + ", " + GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
     }
 
     public void PlaceStickyTrap(Vector2Int trapGridPos, int stuckTurns, ItemBoxTrap boxTrap = null)

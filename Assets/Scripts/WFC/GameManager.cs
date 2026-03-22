@@ -77,7 +77,7 @@ public class GameManager : MonoBehaviour
 
 
     public static List<GridObj> AllGridObjs = new List<GridObj>();
-    bool tutorial = true;
+    private bool tutorial = false;
 
     private int phase;
     private int round;
@@ -90,6 +90,7 @@ public class GameManager : MonoBehaviour
         {
             Instantiate(Audio);
         }
+        this.tutorial = MainMenu.tutorial;
     }
     /// <summary>
     /// Initializes the grid, clearing the collapse-list and start the collapsing process from the first node
@@ -255,9 +256,9 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator LoseGameAfterTime(float delay, string loseMessage)
     {
-        if (tutorial) { tutManager.OnLose(); return; }
         yield return new WaitForSeconds(delay);
-        WinScreen.ShowLoseScreen(loseMessage);
+        if (tutorial || tutManager.IsInEndphase()) tutManager.OnLose();
+        else WinScreen.ShowLoseScreen(loseMessage);
     }
 
     /// <summary>

@@ -47,7 +47,7 @@ public class WinScreen : MonoBehaviour
     }
     public void ShowWinScreen()
     {
-        if (GameManager.INSTANCE.IsTutorialCurrently()) { GameManager.INSTANCE.OnWin(WeightType.NORMAL); return; }
+        if (GameManager.INSTANCE.IsTutorialCurrently() || GameManager.INSTANCE.GetTutManager().IsInEndphase()) { GameManager.INSTANCE.OnWin(WeightType.NORMAL); return; }
         if (this.nextRoundPanel != null)
         {
             this.nextRoundPanel.SetActive(true);

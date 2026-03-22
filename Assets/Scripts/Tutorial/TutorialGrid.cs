@@ -53,14 +53,12 @@ public class TutorialGrid
             grid[0, 0] = new GridObj(new Vector2Int(0, 0), new WallStatus(WallType.NONE, WallType.NONE, WallType.REGULAR, WallType.NONE));
             grid[0, 0].SetGridType(GridType.REGULAR);
         }
-        g.PlaceObj(grid[0, 0]);
         if (grid[0, 2].GetGridType() is GridType.REPLACEABLE)
         {
             grid[0, 2].DestroyObj();
             grid[0, 2] = new GridObj(new Vector2Int(0, 2), new WallStatus(WallType.REGULAR, WallType.NONE, WallType.REGULAR, WallType.NONE));
             grid[0, 2].SetGridType(GridType.JUMPINGPAD);
         }
-        g.PlaceObj(grid[0, 2]);
         if (grid[0, 1].GetGridType() is GridType.REPLACEABLE)
         {
             grid[0, 1].DestroyObj();
@@ -68,14 +66,12 @@ public class TutorialGrid
             if(grid[0, 2].GetGridType() == GridType.JUMPINGPAD) grid[0, 1].SetGridType(GridType.REGULAR);
             else grid[0, 1].SetGridType(GridType.JUMPINGPAD);
         }
-        g.PlaceObj(grid[0, 1]);
         if (grid[0, 3].GetGridType() is GridType.REPLACEABLE)
         {
             grid[0, 3].DestroyObj();
             grid[0, 3] = new GridObj(new Vector2Int(0, 3), new WallStatus(WallType.NONE, WallType.NONE, WallType.NONE, WallType.REGULAR));
             grid[0, 3].SetGridType(GridType.TRAP);
         }
-        g.PlaceObj(grid[0, 3]);
         if (grid[0, 4].GetGridType() is GridType.REPLACEABLE)
         {
             grid[0, 4].DestroyObj();
@@ -83,7 +79,10 @@ public class TutorialGrid
             if (grid[0, 3].GetGridType() == GridType.TRAP) grid[0, 4].SetGridType(GridType.REGULAR);
             else grid[0, 4].SetGridType(GridType.TRAP);
         }
-        g.PlaceObj(grid[0, 4]);
+        for(int i = 0; i <= 4; i++)
+        {
+            g.PlaceObj(grid[0, i]);
+        }
         return grid;
     }
 

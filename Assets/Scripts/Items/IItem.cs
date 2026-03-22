@@ -101,8 +101,6 @@ public class WallBreakerItem : IItem
         if (GameManager.INSTANCE == null) return false;
         if (PlayerMovement.INSTANCE == null) return false;
 
-        if (GameManager.INSTANCE.IsTutorialCurrently() == true) GameManager.INSTANCE.GetTutManager().NextStep();
-
         Grid grid = GameManager.INSTANCE.GetCurrentGrid();
         if (grid == null) return false;
 
@@ -123,6 +121,7 @@ public class WallBreakerItem : IItem
             return false; 
         }
 
+        if (GameManager.INSTANCE.IsTutorialCurrently() == true) GameManager.INSTANCE.GetTutManager().NextStep();
         current.RemoveWall(direction);
         next.RemoveWall(opposite);
         return true; // Successfully used
