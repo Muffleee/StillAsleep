@@ -5,11 +5,13 @@ using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CountdownCond : IMapCondition
 {
     private PlayerMovement playerMovement;
     private TMP_Text countdownText;
+    private Image countdownFill;
     private Coroutine countdown;
     private bool isActive = false;
     private float currentCountdown = 0;
@@ -24,6 +26,7 @@ public class CountdownCond : IMapCondition
     public void Initiate(int level)
     {
         countdownText = GameManager.INSTANCE.GetPrefabLibrary().countdownText;
+        countdownFill = GameManager.INSTANCE.GetPrefabLibrary().countdownFill;
 
         PlayerMovement.INSTANCE.onPlayerMoved.AddListener(ResetCountdown);
 
@@ -31,9 +34,10 @@ public class CountdownCond : IMapCondition
         if (currentDuration <= 0) return;
 
         currentCountdown = currentDuration;
-        countdownText.text = currentCountdown.ToString();
+        UpdateBar();
 
         countdownText.GameObject().SetActive(true);
+        countdownFill.GameObject().SetActive(true);
 
         isActive = true;
         countdown = GameManager.INSTANCE.StartCoroutine(CountdownCoroutine());
@@ -48,11 +52,20 @@ public class CountdownCond : IMapCondition
         currentCountdown = 0;
 
         countdownText.GameObject().SetActive(false);
+        countdownFill.GameObject().SetActive(false);
     }
 
     void ResetCountdown(Vector2Int lastPos, Vector2Int newPos, WallPos direction, long count)
     {
         currentCountdown = currentDuration;
+    }
+
+    private void UpdateBar()
+    {
+        float ratio = Mathf.Clamp01(currentCountdown / currentDuration);
+        countdownFill.fillAmount = ratio;
+
+        countdownFill.color = Color.Lerp(Color.red, Color.green, ratio);
     }
 
     private IEnumerator CountdownCoroutine()
@@ -62,6 +75,7 @@ public class CountdownCond : IMapCondition
         {
             currentCountdown -= deltaTimeSeconds;
             countdownText.text = currentCountdown.ToString("F1");
+            UpdateBar();
             yield return new WaitForSeconds(deltaTimeSeconds);
         }
 
