@@ -179,20 +179,23 @@ public class JumpingPads : IInteractable
     MoveType IInteractable.IsValidMove(GridObj curr, GridObj nextObj, WallPos wPos)
     {
         PlayerResources pr = GameObject.FindObjectOfType<PlayerResources>();
-        if (pr != null && pr.CurrentEnergy > 0 && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && curr.HasWallAt(wPos))
+
+        // Create a single, strict rule for whether the next tile is valid to land on
+        bool nextIsValid = nextObj != null && nextObj.GetGridType() != GridType.REPLACEABLE && nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE;
+
+        // If there is a wall and the landing spot is safe -> JUMP
+        if (pr != null && pr.CurrentEnergy > 0 && curr.HasWallAt(wPos) && nextIsValid)
         {
-            
-            if(nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
-            {
-                pr.Spend(1);   // 1 Energie abziehen
-                return MoveType.JUMP;
-            }
-            if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
-            if(nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
-            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
+            pr.Spend(1);
+            return MoveType.JUMP;
+        }
+
+        // If there is NO wall and the landing spot is safe -> WALK
+        if (!curr.HasWallAt(wPos) && nextIsValid)
+        {
+            if (nextObj.GetGridType() == GridType.TRAP || nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
             return MoveType.WALK;
         }
-        if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE)) return MoveType.WALK;
         return MoveType.INVALID;
     }
     

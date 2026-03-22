@@ -8,6 +8,7 @@ public class Movement : MonoBehaviour
     [SerializeField] protected GameObject model;
     protected Vector2Int lastGridPos;
     protected Vector2Int gridPos;
+    protected WallPos facing;
     protected int stepCounter;
     /// <summary>
     /// Check if a movement in a given direction is valid.
@@ -122,6 +123,7 @@ public class Movement : MonoBehaviour
 
     protected void RotateModel(WallPos dir)
     {
+        facing = dir;
         int rotation;
         switch (dir)
         {

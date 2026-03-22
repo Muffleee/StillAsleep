@@ -423,6 +423,7 @@ public class GameManager : MonoBehaviour
     }
     private void NewPhase()
     {
+        if(currentCond != null) currentCond.Deactivate();
         this.grid.DestroyGrid();
         EnergyCrystal.DestroyAllCrystals();
         playerResources.ResetEnergy();
@@ -430,7 +431,7 @@ public class GameManager : MonoBehaviour
         this.grid.SetNewGrid(this.width, this.height);
         this.grid.CollapseWorld();
         this.SetWeights(WeightType.NORMAL);
-        PlayerMovement.INSTANCE.ResetFigure(new Vector2Int(0,0));
+        PlayerMovement.INSTANCE.ResetFigure(new Vector2Int(2,0));
         
         Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
         this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos), MaxGridArea);
@@ -457,7 +458,6 @@ public class GameManager : MonoBehaviour
     }
     private void NextCondition()
     {
-        if(currentCond != null) currentCond.Deactivate();
         if (allMapConditions.Count <= 0) return;
         List<IMapCondition> possible = allMapConditions.Where(n => n.Difficulty() <= this.phase).ToList();
         if(possible.Count <= 0) return;
