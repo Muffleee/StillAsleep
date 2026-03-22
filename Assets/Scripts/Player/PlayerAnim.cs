@@ -36,4 +36,13 @@ public class PlayerAnim : MonoBehaviour
         Debug.Log(trigger);
         this.animator.SetTrigger(trigger);
     }
+
+    /// <summary>
+    /// Trigger any player animation
+    /// </summary>
+    /// <param name="trigger"></param>
+    public void TriggerAnim(string trigger)
+    {
+        this.animator.SetTrigger(trigger);
+    }
 }

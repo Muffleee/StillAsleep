@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
@@ -66,6 +67,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject Audio;
     [SerializeField] private WinScreen WinScreen;
     [SerializeField] private GameObject player;
+    [SerializeField] private PlayerAnim anim;
 
     private PlayerResources playerResources;
     private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
@@ -250,8 +252,16 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Make the player lose the game
     /// </summary>
-    public void LoseGame(string loseMessage)
+    public void LoseGame(string loseMessage = "Game Over!")
+    {   
+        this.anim.TriggerAnim("TriggerLose");
+        this.playerMovement.LockMovement(2f);
+        StartCoroutine(LoseGameAfterTime(2f, loseMessage));
+    }
+
+    private IEnumerator LoseGameAfterTime(float delay, string loseMessage)
     {
+        yield return new WaitForSeconds(delay);
         WinScreen.ShowLoseScreen(loseMessage);
     }
 

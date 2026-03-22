@@ -8,7 +8,7 @@ public interface IItem
     public int GetSpawnWeight();
     public Sprite GetIcon();
     public GameObject GetPrefab();
-    public bool OnUse(); // --- CHANGED TO BOOL ---
+    public bool OnUse();
     public string GetName();
     public string GetDescription();
 }
@@ -28,7 +28,7 @@ public static class ItemHelper
 }
 
 /// <summary>
-/// Zeitumkehrmodul -> Setzt den Gegner um einige Schritte zurueck.
+/// Time reversal - resets enemy the given amount of steps
 /// </summary>
 public class TimeReversalItem : IItem
 {
@@ -55,8 +55,8 @@ public class TimeReversalItem : IItem
         return library.prefabItemClock;
     }
 
-    string IItem.GetName() => "Zeitumkehrmodul";
-    string IItem.GetDescription() => $"Setzt den Gegner um {REWIND_STEPS} Schritte zurueck.";
+    string IItem.GetName() => "Lucid Dial";
+    string IItem.GetDescription() => $"Rewind time and reset your ghost {REWIND_STEPS} steps.";
 
     bool IItem.OnUse()
     {
@@ -93,8 +93,8 @@ public class WallBreakerItem : IItem
         return library.prefabItemPickaxe;
     }
 
-    string IItem.GetName() => "Spitzhacke";
-    string IItem.GetDescription() => "Zerstoert die Wand in deiner Blickrichtung.";
+    string IItem.GetName() => "Pickaxe";
+    string IItem.GetDescription() => "Use it to destroy a wall you are looking at.";
 
     bool IItem.OnUse()
     {
@@ -156,8 +156,8 @@ public class SludgeItem : IItem
         return library.prefabItemTrapForcefield;
     }
 
-    string IItem.GetName() => "Klebefalle";
-    string IItem.GetDescription() => "Blockiert den Gegner kurz auf dem Feld vor dir.";
+    string IItem.GetName() => "Stasis Crate";
+    string IItem.GetDescription() => "Deploy on a field to trap your ghost when it walks over it.";
 
     bool IItem.OnUse()
     {
@@ -248,7 +248,7 @@ public class ScannerItem : IItem
     }
 
     string IItem.GetName() => "Scanner";
-    string IItem.GetDescription() => $"Macht Hidden Traps fuer {REVEAL_SECONDS:0} Sekunden sichtbar.";
+    string IItem.GetDescription() => $"Use it to reveal all hidden traps in your proximity.";
 
     bool IItem.OnUse()
     {
