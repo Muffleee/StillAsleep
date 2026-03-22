@@ -454,7 +454,7 @@ MonoBehaviour:
   manualReplacable: 8
   trap: 5
   hiddenTrap: 3
-  ice: 0
+  ice: 10
   rotating: 0
   spike: 0
   enableEnergyCrystals: 1
@@ -479,6 +479,7 @@ MonoBehaviour:
   Audio: {fileID: 7712494145165585650, guid: dcfaec5b534bece499f2638d66792c9c, type: 3}
   WinScreen: {fileID: 1217895561}
   player: {fileID: 6834562829543864865}
+  anim: {fileID: 6834562829543864872}
 --- !u!4 &220377177
 Transform:
   m_ObjectHideFlags: 0
@@ -10449,6 +10450,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5ee59591d4335ea459582fdbd63b4997, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6834562829543864872 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2192744806992252275, guid: 220c7dec9ee469541a1aa4ec393fa355,
+    type: 3}
+  m_PrefabInstance: {fileID: 6834562829543864864}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6834562829543864865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 846f3978ceb1b6c41a096bebab00397d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807

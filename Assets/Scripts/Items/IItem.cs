@@ -8,7 +8,7 @@ public interface IItem
     public int GetSpawnWeight();
     public Sprite GetIcon();
     public GameObject GetPrefab();
-    public void OnUse();
+    public bool OnUse();
     public string GetName();
     public string GetDescription();
 }
@@ -17,26 +17,18 @@ public static class ItemHelper
 {
     public static WallPos GetPlayerFacingDirection()
     {
+        // Using your original movement calculation!
         if (PlayerMovement.INSTANCE == null)
         {
             return WallPos.FRONT;
         }
 
-        Vector2Int current = PlayerMovement.INSTANCE.GetCurrentGridPos();
-        Vector2Int last = PlayerMovement.INSTANCE.GetLastGridPos();
-        Vector2Int delta = current - last;
-
-        if (delta == Vector2Int.right) return WallPos.RIGHT;
-        if (delta == Vector2Int.left) return WallPos.LEFT;
-        if (delta == new Vector2Int(0, 1)) return WallPos.BACK;
-        if (delta == new Vector2Int(0, -1)) return WallPos.FRONT;
-
-        return WallPos.FRONT;
+        return PlayerMovement.INSTANCE.GetFacing();
     }
 }
 
 /// <summary>
-/// Zeitumkehrmodul -> Setzt den Gegner um einige Schritte zurueck.
+/// Time reversal - resets enemy the given amount of steps
 /// </summary>
 public class TimeReversalItem : IItem
 {
@@ -63,13 +55,14 @@ public class TimeReversalItem : IItem
         return library.prefabItemClock;
     }
 
-    string IItem.GetName() => "Zeitumkehrmodul";
-    string IItem.GetDescription() => $"Setzt den Gegner um {REWIND_STEPS} Schritte zurueck.";
+    string IItem.GetName() => "Lucid Dial";
+    string IItem.GetDescription() => $"Rewind time and reset your ghost {REWIND_STEPS} steps.";
 
-    void IItem.OnUse()
+    bool IItem.OnUse()
     {
-        if (EnemyMovement.INSTANCE == null) return;
+        if (EnemyMovement.INSTANCE == null) return false;
         EnemyMovement.INSTANCE.Rewind(REWIND_STEPS);
+        return true; // Successfully used
     }
 }
 
@@ -100,17 +93,18 @@ public class WallBreakerItem : IItem
         return library.prefabItemPickaxe;
     }
 
-    string IItem.GetName() => "Spitzhacke";
-    string IItem.GetDescription() => "Zerstoert die Wand in deiner Blickrichtung.";
+    string IItem.GetName() => "Pickaxe";
+    string IItem.GetDescription() => "Use it to destroy a wall you are looking at.";
 
-    void IItem.OnUse()
+    bool IItem.OnUse()
     {
-        if (GameManager.INSTANCE == null) return;
-        if (PlayerMovement.INSTANCE == null) return;
+        if (GameManager.INSTANCE == null) return false;
+        if (PlayerMovement.INSTANCE == null) return false;
+
         if (GameManager.INSTANCE.IsTutorialCurrently() == true) GameManager.INSTANCE.GetTutManager().NextStep();
 
         Grid grid = GameManager.INSTANCE.GetCurrentGrid();
-        if (grid == null) return;
+        if (grid == null) return false;
 
         Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
         WallPos direction = ItemHelper.GetPlayerFacingDirection();
@@ -118,15 +112,20 @@ public class WallBreakerItem : IItem
         GridObj current = grid.GetGridObj(playerPos);
         GridObj next = grid.GetAdjacentGridObj(playerPos, direction);
 
-        if (current == null || next == null) return;
+        if (current == null || next == null) return false;
 
         WallPos opposite = WallStatus.GetOppositePos(direction);
         bool hasWallToBreak = current.HasWallAt(direction) || next.HasWallAt(opposite);
 
-        if (!hasWallToBreak) return;
+        if (!hasWallToBreak) 
+        {
+            Debug.LogWarning("There is no wall in front of you to break!");
+            return false; 
+        }
 
         current.RemoveWall(direction);
         next.RemoveWall(opposite);
+        return true; // Successfully used
     }
 }
 
@@ -159,17 +158,17 @@ public class SludgeItem : IItem
         return library.prefabItemTrapForcefield;
     }
 
-    string IItem.GetName() => "Klebefalle";
-    string IItem.GetDescription() => "Blockiert den Gegner kurz auf dem Feld vor dir.";
+    string IItem.GetName() => "Stasis Crate";
+    string IItem.GetDescription() => "Deploy on a field to trap your ghost when it walks over it.";
 
-    void IItem.OnUse()
+    bool IItem.OnUse()
     {
-        if (GameManager.INSTANCE == null || EnemyMovement.INSTANCE == null) return;
+        if (GameManager.INSTANCE == null || EnemyMovement.INSTANCE == null) return false;
 
         Grid grid = GameManager.INSTANCE.GetCurrentGrid();
-        if (grid == null) return;
+        if (grid == null) return false;
 
-        //RAYCAST FROM MOUSE TO FIND TARGET TILE ---
+        // RAYCAST FROM MOUSE TO FIND TARGET TILE
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
         GridObj target = null;
@@ -185,15 +184,15 @@ public class SludgeItem : IItem
             }
         }
 
-        // Fallback: If mouse is not over a valid tile, place under player
-        if (target == null && PlayerMovement.INSTANCE != null)
+        // --- THE FIX: If the mouse missed a valid tile, cancel and show a warning! ---
+        if (target == null)
         {
-            target = grid.GetGridObj(PlayerMovement.INSTANCE.GetCurrentGridPos());
+            Debug.LogWarning("Invalid placement! You must click directly on a valid map tile.");
+            return false; // Returns false so you don't lose the item or energy
         }
+        // -----------------------------------------------------------------------------
 
-        if (target == null) return;
-
-        // SPAWN THE TRAPBOX AT MOUSE LOCATION
+        // SPAWN THE TRAPBOX AT TARGET LOCATION
         Vector3 spawnPos = target.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY());
         GameObject boxPrefab = GameManager.INSTANCE.GetPrefabLibrary().prefabItemBoxTrap; 
 
@@ -203,7 +202,10 @@ public class SludgeItem : IItem
             ItemBoxTrap boxTrapScript = trapVisual.GetComponent<ItemBoxTrap>();
 
             EnemyMovement.INSTANCE.PlaceStickyTrap(target.GetGridPos(), STUCK_TURNS, boxTrapScript);
+            return true; // Successfully used!
         }
+        
+        return false;
     }
 }
 
@@ -248,11 +250,11 @@ public class ScannerItem : IItem
     }
 
     string IItem.GetName() => "Scanner";
-    string IItem.GetDescription() => $"Macht Hidden Traps fuer {REVEAL_SECONDS:0} Sekunden sichtbar.";
+    string IItem.GetDescription() => $"Use it to reveal all hidden traps in your proximity.";
 
-    void IItem.OnUse()
+    bool IItem.OnUse()
     {
-        if (GameManager.INSTANCE == null) return;
+        if (GameManager.INSTANCE == null) return false;
 
         if (TerrainScannerEffect.INSTANCE != null)
         {
@@ -260,6 +262,7 @@ public class ScannerItem : IItem
         }
 
         GameManager.INSTANCE.StartCoroutine(RevealHiddenTrapsCoroutine(REVEAL_SECONDS));
+        return true; // Successfully used
     }
 
     private IEnumerator RevealHiddenTrapsCoroutine(float revealDuration)

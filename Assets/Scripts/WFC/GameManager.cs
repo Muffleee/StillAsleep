@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -68,6 +69,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private WinScreen WinScreen;
     [SerializeField] private GameObject player;
     [SerializeField] private TutorialManager tutManager;
+    [SerializeField] private PlayerAnim anim;
 
     private PlayerResources playerResources;
     private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
@@ -244,9 +246,17 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Make the player lose the game
     /// </summary>
-    public void LoseGame(string loseMessage)
+    public void LoseGame(string loseMessage = "Game Over!")
+    {   
+        this.anim.TriggerAnim("TriggerLose");
+        this.playerMovement.LockMovement(2f);
+        StartCoroutine(LoseGameAfterTime(2f, loseMessage));
+    }
+
+    private IEnumerator LoseGameAfterTime(float delay, string loseMessage)
     {
         if (tutorial) { tutManager.OnLose(); return; }
+        yield return new WaitForSeconds(delay);
         WinScreen.ShowLoseScreen(loseMessage);
     }
 
@@ -414,7 +424,7 @@ public class GameManager : MonoBehaviour
         this.grid.SetNewGrid(this.width, this.height);
         this.grid.CollapseWorld();
         this.SetWeights(WeightType.NORMAL);
-        PlayerMovement.INSTANCE.ResetFigure(new Vector2Int(0,0));
+        PlayerMovement.INSTANCE.ResetFigure(new Vector2Int(2,0));
         
         Vector2Int currentGridPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
         this.grid.IncreaseGrid(this.grid.GetNextGenPos(currentGridPos), MaxGridArea);

@@ -137,15 +137,14 @@ public class EnemyMovement : Movement
         if (playerPos.x == this.gridPos.x && playerPos.y == this.gridPos.y)
         {
             if (this.winScreen != null) this.winScreen.ShowWinScreen();
-            return; // Stop doing anything else, the game is won!
+            return; 
         }
 
-        // --- TRAP TRIGGER LOGIC ---
         if (stickyTrapGridPos.HasValue && this.gridPos == stickyTrapGridPos.Value && stickyTrapTurnsLeft > 0)
         {
-            if (!isTrapTriggered)
+            if (!isTrapTriggered && activeBoxTrap != null)
             {
-                if (activeBoxTrap != null) activeBoxTrap.ToggleOpen();
+                activeBoxTrap.ToggleOpen();
                 isTrapTriggered = true;
             }
 
@@ -173,12 +172,25 @@ public class EnemyMovement : Movement
                 positionHistory.RemoveAt(0);
             }
             this.RotateModel(direction.Value);
-            this.StartMovement(direction.Value, MoveType.WALK);
-        } else
-        {
-            GameManager.INSTANCE.AfterEnemyMove();
-        }
 
+            Vector2Int nextTile = this.GetNextGridPos(direction.Value);
+            
+            if (stickyTrapGridPos.HasValue && nextTile == stickyTrapGridPos.Value)
+            {
+                if (!isTrapTriggered && activeBoxTrap != null)
+                {
+                    Debug.Log("Enemy is walking into the trap! Triggering animation NOW!");
+                    activeBoxTrap.ToggleOpen();
+                    isTrapTriggered = true;
+                }
+                else if (activeBoxTrap == null)
+                {
+                    Debug.LogWarning("The enemy sees the trap, but activeBoxTrap is NULL! Make sure the ItemBoxTrap script is attached to your 3D Trap Prefab!");
+                }
+            }
+            this.StartMovement(direction.Value, MoveType.WALK);
+        }
+        GameManager.INSTANCE.AfterEnemyMove();
     }
 
     /// <summary>

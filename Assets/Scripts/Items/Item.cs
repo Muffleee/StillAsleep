@@ -38,9 +38,11 @@ public class Item : ScriptableObject, IItem
         return prefab;
     }
 
-    public virtual void OnUse()
+    public virtual bool OnUse()
     {
         // This is what happens when the player clicks it in the inventory
+        // Return true if it was used successfully, or false if the action failed.
+        return true; 
     }
 
     public string GetName()
