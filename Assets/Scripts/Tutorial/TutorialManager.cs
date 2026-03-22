@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class TutorialManager: MonoBehaviour
@@ -13,11 +14,12 @@ public class TutorialManager: MonoBehaviour
     private Queue<Action> tutorials = new Queue<Action>();
     private String currentMessage = null;
     private bool screenUp = false;
-    bool disablePlacing = true;
-    long currentPlayerSteps = 0;
+    private bool disablePlacing = true;
+    private bool disableMoving = false;
+    private long currentPlayerSteps = 0;
     private GridObj startGridObj = null;
     private GridObj enemyGridObj = null;
-    int tutorialPhase = 0;
+    private int tutorialPhase = 0;
     private IMapCondition currentCond;
     private bool endPhase = false;
 
@@ -45,7 +47,6 @@ public class TutorialManager: MonoBehaviour
         if (currentPlayerSteps == 0) currentPlayerSteps = steps;
         if(steps == currentPlayerSteps + 1)
         {
-            Debug.Log("nextStep");
             NextStep();
         }
         if(this.tutorialPhase == 4 && (lastPlayerPos == new Vector2Int(0,2) && playerPos == new Vector2Int(0,3) || lastPlayerPos == new Vector2Int(0, 3) && playerPos == new Vector2Int(0, 2)))
@@ -82,7 +83,9 @@ public class TutorialManager: MonoBehaviour
         }
         if(tutorialPhase == 11 && Input.GetKeyDown(KeyCode.Mouse0))
         {
-            Debug.Log("Return to Main Menu");
+            Time.timeScale = 1f;
+
+            SceneManager.LoadScene("Menu");
         }
     }
     public void SpawnCrystalOnObject(GridObj tile, int worldOffsetX, int worldOffsetY) 
@@ -95,6 +98,7 @@ public class TutorialManager: MonoBehaviour
     }
     public void StartTutorial(Grid grid)
     {
+        if (this.resetButton != null) this.resetButton.onClick.AddListener(this.ResetGame);
         PlayerMovement.INSTANCE.onPlayerMoved.AddListener(PlayerMove);
         if (tutGrid == null) tutGrid = new TutorialGrid();
         tutorialLayover.gameObject.SetActive(true);
@@ -161,7 +165,6 @@ public class TutorialManager: MonoBehaviour
     }
     public void EnemyTutorial()
     {
-        Debug.Log("Enemy Tutoriaaal");
         tutorialText.text = "Your goal is to catch your own ghost. Move using WASD and zoom in and out with STRG/CTRL + mouse wheel. You ghost is sometimes able to destroy walls that are blocking him.";
         currentMessage = tutorialText.text;
     }
@@ -290,10 +293,11 @@ public class TutorialManager: MonoBehaviour
     }
     private void LastTutorial()
     {
+        disableMoving = true;
         tutorialText.text = "Congratulations, you finished the tutorial! Click to get back to the main menu!";
         currentMessage = tutorialText.text;
     }
     public bool IsPlacingDisabled() { return disablePlacing; }
-    public bool IsMovingDisabled() { return screenUp;  }
+    public bool IsMovingDisabled() { return (screenUp || disableMoving);  }
     public bool IsInEndphase() { return endPhase; }
 }
