@@ -177,16 +177,6 @@ public class TutorialManager: MonoBehaviour
     public void PlaceableTutorial()
     {
         disablePlacing = false;
-        RectTransform r = tutorialLayover.GetComponent<RectTransform>();
-        Vector2 offsetMin = r.offsetMin;
-        Vector2 offsetMax = r.offsetMax;
-
-        offsetMin.y = 800f;
-        offsetMax.y = 0f;
-
-        r.offsetMin = offsetMin;
-        r.offsetMax = offsetMax;
-
         SimpleWindowController.INSTANCE.ToggleWindow();
         tutorialText.text = "You can place tiles in your inventory on a green tile at the border of the dungeon by using drag and drop or " +
             "by selecting one and clicking on the tile where you want to place it. " +
@@ -198,16 +188,6 @@ public class TutorialManager: MonoBehaviour
     {
         disablePlacing = true;
         SimpleWindowController.INSTANCE.ToggleWindow();
-        RectTransform r = tutorialLayover.GetComponent<RectTransform>();
-        Vector2 offsetMin = r.offsetMin;
-        Vector2 offsetMax = r.offsetMax;
-
-        offsetMin.y = 50f;
-        offsetMax.y = -750f;
-
-        r.offsetMin = offsetMin;
-        r.offsetMax = offsetMax;
-
         tutorialText.text = "After some steps, the green replacable tiles at the border will be randomly filled.";
         currentMessage = tutorialText.text;
     }
@@ -260,15 +240,6 @@ public class TutorialManager: MonoBehaviour
     private void FogCondTutorial()
     {
         SimpleWindowController.INSTANCE.ToggleWindow();
-        RectTransform r = tutorialLayover.GetComponent<RectTransform>();
-        Vector2 offsetMin = r.offsetMin;
-        Vector2 offsetMax = r.offsetMax;
-
-        offsetMin.y = 900f;
-        offsetMax.y = 0f;
-
-        r.offsetMin = offsetMin;
-        r.offsetMax = offsetMax;
         PlayerMovement.INSTANCE.onPlayerMoved.RemoveListener(PlayerMove);
         GameManager.INSTANCE.SetTutorialCurrently(false);
         endPhase = true;
