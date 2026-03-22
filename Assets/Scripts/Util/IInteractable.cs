@@ -194,6 +194,7 @@ public class JumpingPads : IInteractable
         if (!curr.HasWallAt(wPos) && nextIsValid)
         {
             if (nextObj.GetGridType() == GridType.TRAP || nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
