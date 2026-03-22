@@ -189,12 +189,17 @@ public class JumpingPads : IInteractable
             pr.Spend(1);
             return MoveType.JUMP;
         }
+        else if (pr != null && pr.CurrentEnergy <= 0 && curr.HasWallAt(wPos) && nextIsValid)
+        {
+            AudioManager.Instance.PlayNoCrystal();
+            GameManager.INSTANCE.NoCrystals.Invoke();
+        }
 
         // If there is NO wall and the landing spot is safe -> WALK
         if (!curr.HasWallAt(wPos) && nextIsValid)
         {
             if (nextObj.GetGridType() == GridType.TRAP || nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
-            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
+            if (nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;

@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.Search;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Main game manager class, handles game initialization, world generation, and move and click events
@@ -73,7 +74,7 @@ public class GameManager : MonoBehaviour
     private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
     private IMapCondition currentCond;
 
-
+    [HideInInspector] public UnityEvent NoCrystals = new UnityEvent();
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
     bool tutorialOpen = false;
@@ -89,6 +90,7 @@ public class GameManager : MonoBehaviour
         {
             Instantiate(Audio);
         }
+        INSTANCE = this;
     }
     /// <summary>
     /// Initializes the grid, clearing the collapse-list and start the collapsing process from the first node
@@ -96,7 +98,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         fogCondition.SetIsActive(false);
-        INSTANCE = this;
+        
         
         this.grid = new Grid(this.width, this.height);
         grid.tutorialUpdate.AddListener(UpdateTutorialText);
@@ -282,6 +284,8 @@ public class GameManager : MonoBehaviour
         if (!this.playerResources.CanAfford(cost))
         {
             if(DEBUG) Debug.Log("Nicht genug Energie!");
+            AudioManager.Instance.PlayNoCrystal();
+            this.NoCrystals.Invoke();
             return;
         }
         this.playerResources.Spend(cost);

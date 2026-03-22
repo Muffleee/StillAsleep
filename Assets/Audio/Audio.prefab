@@ -222,6 +222,7 @@ MonoBehaviour:
   trap: {fileID: 8300000, guid: d6209bca4291f934ab5d13471931ecf3, type: 3}
   intro: {fileID: 8300000, guid: c1140a64b800ba842a1baad8c4c8150e, type: 3}
   loop: {fileID: 8300000, guid: f98e0979f0c43dd42af20214e3c14e5d, type: 3}
+  noCrystal: {fileID: 8300000, guid: d16bc4ac1610dea4da632dc0f2c7843f, type: 3}
 --- !u!82 &620722032342088814
 AudioSource:
   m_ObjectHideFlags: 0
