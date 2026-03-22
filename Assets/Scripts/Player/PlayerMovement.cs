@@ -68,6 +68,7 @@ public class PlayerMovement : Movement
 
         if(Input.GetKeyDown(KeyCode.Escape)) 
         {
+            if(this.winScreen.IsWinLoseActive()) return;
             if(this.pausescreen.IsPauseMenuActive())
             {
                 this.pausescreen.HidePauseMenu();
