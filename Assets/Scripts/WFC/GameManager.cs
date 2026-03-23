@@ -175,13 +175,6 @@ public class GameManager : MonoBehaviour
         }
         
     }
-    /// <summary>
-    /// if the player clicks the left mouse button, the tutorial text closes and opens the next one if one is in line
-    /// </summary>
-    private void Update()
-    {
-        
-    }
 
     public void WhileMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {
@@ -496,12 +489,13 @@ public class GameManager : MonoBehaviour
     {
         Vector2Int enemyPos = new Vector2Int(0, 0);
         Vector2Int playerPos = PlayerMovement.INSTANCE.GetCurrentGridPos();
+        Vector2Int opponentPos = Opponent.INSTANCE.GetGridPos();
         if (playerPos.x > (this.grid.width / 2))
         {
             for (int i = 3; i >= 0; i--)
             {
                 enemyPos.x = playerPos.x - i;
-                if (this.grid.IsInsideGrid(enemyPos)) break;
+                if (this.grid.IsInsideGrid(enemyPos) && (enemyPos.x != opponentPos.x)) break;
             }
         }
         else
@@ -509,7 +503,7 @@ public class GameManager : MonoBehaviour
             for (int i = 3; i >= 0; i--)
             {
                 enemyPos.x = playerPos.x + i;
-                if (this.grid.IsInsideGrid(enemyPos)) break;
+                if (this.grid.IsInsideGrid(enemyPos) && (enemyPos.x != opponentPos.x)) break;
             }
         }
         if (playerPos.y > (this.grid.height / 2))
@@ -517,7 +511,7 @@ public class GameManager : MonoBehaviour
             for (int i = 3; i >= 0; i--)
             {
                 enemyPos.y = playerPos.y - i;
-                if (this.grid.IsInsideGrid(enemyPos)) break;
+                if (this.grid.IsInsideGrid(enemyPos) && (enemyPos.y != opponentPos.y)) break;
             }
         }
         else
@@ -525,7 +519,7 @@ public class GameManager : MonoBehaviour
             for (int i = 3; i >= 0; i--)
             {
                 enemyPos.y = playerPos.y + i;
-                if (this.grid.IsInsideGrid(enemyPos)) break;
+                if (this.grid.IsInsideGrid(enemyPos) && (enemyPos.y != opponentPos.y)) break;
             }
         }
         EnemyMovement.INSTANCE.InstantiateEnemy(enemyPos);

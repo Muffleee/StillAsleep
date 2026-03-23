@@ -34,6 +34,6 @@ public class TorchSpawn : MonoBehaviour
 
     void Start()
     {
-        this.SpawnTorchByChance(0.05f);
+        this.SpawnTorchByChance(0.08f);
     }
 }

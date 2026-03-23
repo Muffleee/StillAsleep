@@ -35,7 +35,7 @@ public class TimeReversalItem : IItem
 {
     private const int ENERGY_COST = 2;
     private const int SPAWN_WEIGHT = 2;
-    private const int REWIND_STEPS = 4;
+    private const int REWIND_STEPS = 2;
 
     int IItem.GetEnergyCost() => ENERGY_COST;
     int IItem.GetSpawnWeight() => SPAWN_WEIGHT;
