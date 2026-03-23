@@ -64,7 +64,7 @@ public class PlayerMovement : Movement
     /// </summary>
     private void Update()
     {   
-        if(this.isLocked || GameManager.INSTANCE.IsTutorialOpen()) return;
+        if(this.isLocked || GameManager.INSTANCE.IsMovingDisabled()) return;
 
         if(Input.GetKeyDown(KeyCode.Escape)) 
         {

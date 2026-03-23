@@ -12,7 +12,6 @@ public class Grid
     public int width => this.grid.GetLength(0);
     public int height => this.grid.GetLength(1);
     private GridObj[,] grid;
-    public UnityEvent<GridObj, string> tutorialUpdate = new UnityEvent<GridObj, string> ();
     List<GridObj> rotatingTiles = new List<GridObj> ();
     List<GridObj> spikeTiles = new List<GridObj> ();
     /// <summary>
@@ -21,14 +20,6 @@ public class Grid
     private int worldOffsetX = 0;
     private int worldOffsetY = 0;
     private Exit exit;
-    /// <summary>
-    /// The tutorial booleans so that everything is only introduced once
-    /// </summary>
-    private bool jumpingIntro = false;
-    private bool exitIntro = false;
-    private bool trapIntro = false;
-    private bool replaceableIntro = false;
-    private bool manReplaceableIntro = false;
     /// <summary>
     /// Create a new grid given an initial size.
     /// </summary>
@@ -390,38 +381,8 @@ public class Grid
                 if (obj == null || obj.IsInstantiated()) continue;
                 Dictionary<WallPos, GridObj> neighbors = this.GetNeighbors(obj);
                 obj.InstantiateObj(this.worldOffsetX, this.worldOffsetY, neighbors);
-                if (MainMenu.tutorial) StartTutorial(obj);
             }
         }
-    }
-    /// <summary>
-    /// Setting the tutorialText to introduce the player
-    /// </summary>
-    /// <param name="type"> what type of grid is going to be introduced</param>
-    private void StartTutorial(GridObj obj)
-    {
-        GridType type = obj.GetGridType();
-        switch (type)
-        {
-            case GridType.JUMPINGPAD: 
-                if (!jumpingIntro) tutorialUpdate.Invoke(obj, "This is a jumping pad. \n With it you can jump over adjacent walls by using 1 Energy.");
-                jumpingIntro = true;
-                break;
-            case GridType.REPLACEABLE: 
-                if (!replaceableIntro) tutorialUpdate.Invoke(obj, "This is a replaceable tile.\n You can place a tile using from your inventory there. This costs 1 Energy! The playfield will expand in direction of the replacable tiles.");
-                replaceableIntro = true;
-                break;
-            case GridType.MANUAL_REPLACEABLE: 
-                if (!manReplaceableIntro) tutorialUpdate.Invoke(obj, "This is a manually replaceable tile. \n This is also a replacable tile, but it will not be filled unless you place one of your tiles by using 1 Energy.");
-                manReplaceableIntro = true; 
-                break;
-            case GridType.TRAP: 
-                if (!trapIntro) tutorialUpdate.Invoke(obj, "This is a trap. \n Standing on it will cost you Energy. Be careful! There might be hidden traps around.");
-                trapIntro = true;
-                break;
-            case GridType.REGULAR: break;
-        }
-        if (jumpingIntro && replaceableIntro && manReplaceableIntro && trapIntro) MainMenu.tutorial = false;
     }
 
     public void IncreaseGrid(WallPos direction,long MaxGridArea)
@@ -499,8 +460,8 @@ public class Grid
         PlayerMovement.INSTANCE.SetCurrentGridPos(new Vector2Int(currentGridPos.x + addLeft, currentGridPos.y + addFront));
         Vector2Int enemyGridPos = EnemyMovement.INSTANCE.GetEnemyGridPos();
         EnemyMovement.INSTANCE.SetEnemyGridPos(new Vector2Int(enemyGridPos.x + addLeft, enemyGridPos.y + addFront));
-        Vector2Int otherEnemyGridPos = Opponent.INSTANCE.GetGridPos();
-        Opponent.INSTANCE.SetGridPos(new Vector2Int(otherEnemyGridPos.x + addLeft, otherEnemyGridPos.y + addFront));
+        Vector2Int opponentGridPos = Opponent.INSTANCE.GetGridPos();
+        Opponent.INSTANCE.SetGridPos(new Vector2Int(opponentGridPos.x + addLeft, opponentGridPos.y + addFront));
 
         this.grid = newGrid;
     }
@@ -693,8 +654,7 @@ public class Grid
 
         WallPos chosen = free[UnityEngine.Random.Range(0, free.Count)];
         gridObj.PlaceWallAt(chosen, WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
-        if(!exitIntro) tutorialUpdate.Invoke(gridObj, "This is the exit. \n Your goal is to reach it. It moves away from you, but only between tiles with no walls! \n Maybe you can make use of this feature...");
-        exitIntro = true;
+        
         GridObj adjacentGridObj = this.GetAdjacentGridObj(gridObj, chosen);
         adjacentGridObj?.PlaceWallAt(WallStatus.GetOppositePos(chosen), WallType.EXIT, this.worldOffsetX, this.worldOffsetY);
 
@@ -943,4 +903,6 @@ public class Grid
     }
 
     public List<GridObj> GetAllRotatingTiles() { return rotatingTiles; }
+    public void AddToRotating(GridObj obj) {  if(obj.GetGridType() == GridType.ROTATING) rotatingTiles.Add(obj); }
+    public void AddToSpike(GridObj obj) {  if(obj.GetGridType() == GridType.SPIKE) spikeTiles.Add(obj); }
 }

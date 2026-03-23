@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.Search;
@@ -68,6 +69,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject Audio;
     [SerializeField] private WinScreen WinScreen;
     [SerializeField] private GameObject player;
+    [SerializeField] private TutorialManager tutManager;
     [SerializeField] private PlayerAnim anim;
 
     private PlayerResources playerResources;
@@ -76,8 +78,7 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector] public UnityEvent NoCrystals = new UnityEvent();
     public static List<GridObj> AllGridObjs = new List<GridObj>();
-    private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
-    bool tutorialOpen = false;
+    private bool tutorial = false;
 
     private int phase;
     private int round;
@@ -86,11 +87,12 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        INSTANCE = this;
         if (AudioManager.Instance == null)
         {
             Instantiate(Audio);
         }
-        INSTANCE = this;
+        this.tutorial = MainMenu.tutorial;
     }
     /// <summary>
     /// Initializes the grid, clearing the collapse-list and start the collapsing process from the first node
@@ -101,10 +103,15 @@ public class GameManager : MonoBehaviour
         
         
         this.grid = new Grid(this.width, this.height);
-        grid.tutorialUpdate.AddListener(UpdateTutorialText);
         this.playerResources = this.player.GetComponent<PlayerResources>();
-
-        NewPhase();
+        if (tutorial)
+        {
+            tutManager.StartTutorial(grid);
+        }
+        else
+        {
+            NewPhase();
+        }
     }
     /// <summary>
     /// sets the static weights
@@ -173,20 +180,6 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (tutorialOpen)
-        {
-            if (Input.GetMouseButtonDown(0))
-            {
-                gui.CloseTutorialText();
-                tutorialOpen = false;
-                if (tutorials.Count > 0)
-                {
-                    tutorialOpen = true;
-                    (GridObj, string) next= tutorials.Dequeue();
-                    gui.OpenTutorialText(next.Item1.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY()), next.Item2);
-                }
-            }
-        }
         
     }
 
@@ -206,9 +199,11 @@ public class GameManager : MonoBehaviour
     /// <param name="step">Count of all movement steps taken by the player</param>
     public void OnMove(Vector2Int from, Vector2Int to, WallPos direction, long step)
     {
+        if (tutorial) return;
         enemyMovement.MoveEnemy();
         this.RefreshFog();
-        
+        this.grid.RotateTiles();
+
         GridObj toObj = this.grid.GetGridObj(to);
         if(toObj != null && toObj.GetGridType() == GridType.TRAP)
         {
@@ -249,7 +244,7 @@ public class GameManager : MonoBehaviour
 
     public void AfterEnemyMove()
     {
-        this.grid.RotateTiles();
+        
     }
     /// <summary>
     /// Make the player lose the game
@@ -264,7 +259,8 @@ public class GameManager : MonoBehaviour
     private IEnumerator LoseGameAfterTime(float delay, string loseMessage)
     {
         yield return new WaitForSeconds(delay);
-        WinScreen.ShowLoseScreen(loseMessage);
+        if (tutorial || tutManager.IsInEndphase()) tutManager.OnLose();
+        else WinScreen.ShowLoseScreen(loseMessage);
     }
 
     /// <summary>
@@ -293,6 +289,7 @@ public class GameManager : MonoBehaviour
         GridObj toPlace = new GridObj(selected.GetGridPos(), virtualObj.GetWallStatus().Clone());
         toPlace.UpdateWallStatus(this.grid.GetNeighbors(toPlace));
         this.grid.PlaceObj(toPlace);
+        if (tutorial) tutManager.PlacedTile();
         AudioManager.Instance.PlayTilePlacing();
 
         this.gui.RemoveSelected(false);
@@ -309,6 +306,7 @@ public class GameManager : MonoBehaviour
         if (prefabLibrary == null || prefabLibrary.prefabEnergyCrystal == null) return false;
         if (playerResources == null) return false;
         if (tile.GetGridType() != GridType.REGULAR) return false;
+        if (tutorial) { tutManager.SpawnCrystalOnObject(tile, worldOffsetX, worldOffsetY); return true; }
 
         float denom = Mathf.Max(1, playerResources.MaxEnergy);
         float energyRatio = playerResources.CurrentEnergy / denom; // 0..1
@@ -330,6 +328,7 @@ public class GameManager : MonoBehaviour
 
   public bool TrySpawnItem(GridObj tile, int worldOffsetX, int worldOffsetY)
     {
+        if (tutorial) return true;
         if (!enableItemSpawning) return false;
         if (tile == null || tile.GetGridType() != GridType.REGULAR) return false;
         // Prevent items from spawning on the player's current position ---
@@ -401,24 +400,9 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
-
-
-    /// <summary>
-    /// Calls a function in gui to set the tutorial text if one is not already open
-    /// enqeues the tutorial to the line
-    /// </summary>
-    /// <param name="text"></param>
-    private void UpdateTutorialText(GridObj obj, string text)
-    {
-        tutorials.Enqueue((obj,text));
-        if (tutorialOpen) return;
-        (GridObj, string) next = tutorials.Dequeue();
-        gui.OpenTutorialText(next.Item1.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY()), next.Item2);
-        tutorialOpen = true;
-    }
-
     public void OnWin(WeightType weightType)
     {
+        if (tutorial || tutManager.IsInEndphase()) { tutManager.OnWin(); return; }
         // Free the player from any active trap animations or locks
         if (PlayerMovement.INSTANCE != null)
         {
@@ -435,7 +419,7 @@ public class GameManager : MonoBehaviour
             ScoreManager.INSTANCE?.AddScore(100, true, "New Round");
         }
     }
-    private void NewPhase()
+    public void NewPhase()
     {
         if(currentCond != null) currentCond.Deactivate();
         this.grid.DestroyGrid();
@@ -561,11 +545,18 @@ public class GameManager : MonoBehaviour
     public Grid GetCurrentGrid() { return this.grid; }
     public PrefabLibrary GetPrefabLibrary() { return this.prefabLibrary; }
     public PlayerMovement GetPlayerMovement() { return this.playerMovement; }
-    public bool IsTutorialOpen() { return this.tutorialOpen; }
     public EnemyMovement GetEnemyMovement() { return this.enemyMovement; }
     public Pathfinding GetPathfinding() { return this.pathfinding; }
+    public TutorialManager GetTutManager() { return this.tutManager; }
+    public IMapCondition GetMapCondition(int index) { return allMapConditions[index]; }
+    public bool IsMovingDisabled() { return tutManager.IsMovingDisabled(); }
+    public bool IsPlacingDisabled() { return tutManager.IsPlacingDisabled(); }
+    public bool IsTutorialCurrently() { return tutorial; }
+    public void SetTutorialCurrently(bool tut) { tutorial = tut; }
     public int GetRound() { return this.round; }
     public int GetPhase() {  return this.phase; }
+    public GameObject GetItemPrefab(int index) { return spawnableItemPrefabs[index]; }
+    public void ResetPhaseRound() {  this.phase = 0; this.round = 0; }
     public IMapCondition GetCurrentCondition() { return this.currentCond; }
 }
 

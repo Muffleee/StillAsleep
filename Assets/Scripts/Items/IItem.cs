@@ -121,6 +121,7 @@ public class WallBreakerItem : IItem
             return false; 
         }
 
+        if (GameManager.INSTANCE.IsTutorialCurrently() == true) GameManager.INSTANCE.GetTutManager().NextStep();
         current.RemoveWall(direction);
         next.RemoveWall(opposite);
         return true; // Successfully used

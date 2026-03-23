@@ -39,6 +39,7 @@ public class TileDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, I
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (GameManager.INSTANCE.IsTutorialCurrently() && GameManager.INSTANCE.IsPlacingDisabled()) return;
         string tileName = GetComponentInChildren<Text>().text;
         GameObject prefab = uiController.GetPrefabByName(tileName);
 
