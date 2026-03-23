@@ -152,7 +152,7 @@ GameObject:
   - component: {fileID: 220377184}
   - component: {fileID: 220377183}
   - component: {fileID: 220377185}
-  - component: {fileID: 220377187}
+  - component: {fileID: 220377186}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -211,8 +211,11 @@ MonoBehaviour:
   Audio: {fileID: 7712494145165585650, guid: dcfaec5b534bece499f2638d66792c9c, type: 3}
   WinScreen: {fileID: 1217895561}
   player: {fileID: 6834562829543864865}
-  tutManager: {fileID: 220377187}
+  tutManager: {fileID: 0}
   anim: {fileID: 6834562829543864872}
+  NoCrystals:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &220377177
 Transform:
   m_ObjectHideFlags: 0
@@ -287,6 +290,7 @@ MonoBehaviour:
   prefabSpike: {fileID: 960423842509520024, guid: 1c5c56b66450c5149a329a93e7037574,
     type: 3}
   countdownText: {fileID: 1355855199}
+  countdownFill: {fileID: 0}
   prefabItemClock: {fileID: 4164902247873927100, guid: f5643e4bb32f915409a68433711c1e2a,
     type: 3}
   prefabItemPickaxe: {fileID: 7291365165085134826, guid: a432f799c717f644f8de33c29a99ee4f,
@@ -393,7 +397,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scoreDisplay: {fileID: 1185083564}
   pr: {fileID: 6834562829543864871}
---- !u!114 &220377187
+--- !u!114 &220377186
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -402,11 +406,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 220377175}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 543fba6870660fd47ae03d876ea26f07, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f9410d353b85654cb176d350a237094, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialLayover: {fileID: 1972897687}
+  tutorialLayover: {fileID: 760168615}
   tutorialText: {fileID: 8056266}
+  resetButton: {fileID: 0}
 --- !u!1001 &270545163
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1446,6 +1451,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ca18ff33c432f5748b559a5be89f404f, type: 3}
+--- !u!223 &760168615 stripped
+Canvas:
+  m_CorrespondingSourceObject: {fileID: 2206636359858725614, guid: ca18ff33c432f5748b559a5be89f404f,
+    type: 3}
+  m_PrefabInstance: {fileID: 760168614}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &799553476
 GameObject:
   m_ObjectHideFlags: 0
@@ -2076,15 +2087,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23f11f1e348a9c34c88991298fe0b116, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  duration: 7
   size: 50
+  speed: 7
   terrainScanner: {fileID: 1678933100}
---- !u!1 &1972897687 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7527334806867042860, guid: ca18ff33c432f5748b559a5be89f404f,
-    type: 3}
-  m_PrefabInstance: {fileID: 760168614}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2044472049
 PrefabInstance:
   m_ObjectHideFlags: 0

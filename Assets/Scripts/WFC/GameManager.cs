@@ -98,7 +98,7 @@ public class GameManager : MonoBehaviour
     /// Initializes the grid, clearing the collapse-list and start the collapsing process from the first node
     /// </summary>
     void Start()
-    {
+    {   
         fogCondition.SetIsActive(false);
         
         
@@ -372,7 +372,7 @@ public class GameManager : MonoBehaviour
 
         // 4. Find the winner
         foreach (GameObject prefab in spawnableItemPrefabs)
-        {
+        {   
             if (prefab != null)
             {
                 ItemPickup pickupComponent = prefab.GetComponent<ItemPickup>();

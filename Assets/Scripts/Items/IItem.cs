@@ -135,7 +135,7 @@ public class WallBreakerItem : IItem
 public class SludgeItem : IItem
 {
     private const int ENERGY_COST = 2;
-    private const int SPAWN_WEIGHT = 3;
+    private const int SPAWN_WEIGHT = 2;
     private const int STUCK_TURNS = 2;
 
     int IItem.GetEnergyCost() => ENERGY_COST;

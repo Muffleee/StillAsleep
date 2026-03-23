@@ -39,7 +39,6 @@ public class ItemPickup : MonoBehaviour
 
         if (playerInventory.AddItem(itemData))
         {
-            Debug.Log($"{itemData.GetName()} picked up successfully!");
             Destroy(gameObject);
         }
         else
@@ -47,7 +46,7 @@ public class ItemPickup : MonoBehaviour
             Vector3 dropLocation = transform.position + new Vector3(0, 0.5f, 0); 
             
             playerInventory.SwapWithSelected(itemData, dropLocation);
-            Destroy(gameObject); 
+            Destroy(gameObject);
         }
     }
 

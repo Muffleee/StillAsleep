@@ -464,7 +464,7 @@ MonoBehaviour:
   - {fileID: 4164902247873927100, guid: f5643e4bb32f915409a68433711c1e2a, type: 3}
   - {fileID: 7291365165085134826, guid: a432f799c717f644f8de33c29a99ee4f, type: 3}
   - {fileID: 904072862348660821, guid: 65a07578a571c8346b5bc18e02a40492, type: 3}
-  - {fileID: 2536640785500377010, guid: 189e4efb7249c304daa5a52d45ab1215, type: 3}
+  - {fileID: 1476494239627451871, guid: 7a1731522a7ffe44080a40099e0b9268, type: 3}
   prefabLibrary: {fileID: 220377179}
   playerMovement: {fileID: 6834562829543864870}
   enemyMovement: {fileID: 270545165}
@@ -668,7 +668,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 220377175}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 543fba6870660fd47ae03d876ea26f07, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f9410d353b85654cb176d350a237094, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   tutorialLayover: {fileID: 443803937}
@@ -2268,7 +2268,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 769223953354909763, guid: 67eeeb0f9309065468a56e0962c34b9d, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1727563025347829559, guid: 67eeeb0f9309065468a56e0962c34b9d,
@@ -2280,6 +2281,10 @@ PrefabInstance:
       insertIndex: 2
       addedObject: {fileID: 1283335969}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1902961373767669124, guid: 67eeeb0f9309065468a56e0962c34b9d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1929359287}
     - targetCorrespondingSourceObject: {fileID: 2547062599645891440, guid: 67eeeb0f9309065468a56e0962c34b9d,
         type: 3}
       insertIndex: -1
@@ -10136,6 +10141,20 @@ MonoBehaviour:
   size: 21
   speed: 7
   terrainScanner: {fileID: 1678933100}
+--- !u!1 &1929359278 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1902961373767669124, guid: 67eeeb0f9309065468a56e0962c34b9d,
+    type: 3}
+  m_PrefabInstance: {fileID: 719180137}
+  m_PrefabAsset: {fileID: 0}
+--- !u!81 &1929359287
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1929359278}
+  m_Enabled: 0
 --- !u!1 &1991189091
 GameObject:
   m_ObjectHideFlags: 0

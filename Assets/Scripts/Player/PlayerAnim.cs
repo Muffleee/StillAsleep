@@ -33,7 +33,6 @@ public class PlayerAnim : MonoBehaviour
                 trigger = "TriggerIdle";
                 break;
         }
-        Debug.Log(trigger);
         this.animator.SetTrigger(trigger);
     }
 
