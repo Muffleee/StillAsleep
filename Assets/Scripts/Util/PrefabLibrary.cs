@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PrefabLibrary : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class PrefabLibrary : MonoBehaviour
     [SerializeField] public GameObject prefabRotating;
     [SerializeField] public SpikeTrap prefabSpike;
     [SerializeField] public TMP_Text countdownText;
-
+    [SerializeField] public Image countdownFill; 
     [SerializeField] public GameObject prefabItemClock;
     [SerializeField] public GameObject prefabItemPickaxe;
     [SerializeField] public GameObject prefabItemTrapForcefield;

@@ -173,4 +173,12 @@ public class WinScreen : MonoBehaviour
             Time.timeScale = 1f;
         }
     }
+
+    public bool IsWinLoseActive()
+    {
+        bool winActive = this.winScreenPanel.activeSelf;
+        bool loseActive = this.loseScreenPanel.activeSelf;
+        bool nextRoundActive = this.nextRoundPanel.activeSelf;
+        return winActive || loseActive || nextRoundActive;
+    }
 }

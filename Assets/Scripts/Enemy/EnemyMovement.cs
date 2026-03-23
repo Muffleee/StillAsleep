@@ -158,6 +158,8 @@ public class EnemyMovement : Movement
                 }
                 stickyTrapGridPos = null;
             }
+
+            GameManager.INSTANCE.AfterEnemyMove();
             return; 
         }
 
@@ -312,7 +314,6 @@ public class EnemyMovement : Movement
     protected override IEnumerator MovementCoroutine(WallPos wallPos, MoveType mt)
     {
         yield return base.MovementCoroutine(wallPos, mt);
-        GameManager.INSTANCE.AfterEnemyMove();
     }
     /// <summary>
     /// Called whenever a wall gets destroyed. Removes the respective wall at the WallPos of the GridObj.

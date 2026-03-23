@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +14,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip trap;
     [SerializeField] private AudioClip intro;
     [SerializeField] private AudioClip loop;
+    [SerializeField] private AudioClip noCrystal;
     private static float soundVolume = 1.0f; 
     private static float musicVolume = 1.0f;
     private AudioSource loopSource;
@@ -99,5 +101,9 @@ public class AudioManager : MonoBehaviour
         sfxSource.loop = false;
         sfxSource.volume = AudioManager.soundVolume;
         sfxSource.PlayScheduled(AudioSettings.dspTime + 0.15f);
+    }
+    public void PlayNoCrystal()
+    {
+        sfxSource.PlayOneShot(noCrystal, Mathf.Max(AudioManager.soundVolume-0.3f, 0));
     }
 }

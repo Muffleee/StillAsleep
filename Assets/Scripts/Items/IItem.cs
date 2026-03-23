@@ -8,7 +8,7 @@ public interface IItem
     public int GetSpawnWeight();
     public Sprite GetIcon();
     public GameObject GetPrefab();
-    public bool OnUse(); // --- CHANGED TO BOOL ---
+    public bool OnUse();
     public string GetName();
     public string GetDescription();
 }
@@ -23,26 +23,17 @@ public static class ItemHelper
             return WallPos.FRONT;
         }
 
-        Vector2Int current = PlayerMovement.INSTANCE.GetCurrentGridPos();
-        Vector2Int last = PlayerMovement.INSTANCE.GetLastGridPos();
-        Vector2Int delta = current - last;
-
-        if (delta == Vector2Int.right) return WallPos.RIGHT;
-        if (delta == Vector2Int.left) return WallPos.LEFT;
-        if (delta == new Vector2Int(0, 1)) return WallPos.BACK;
-        if (delta == new Vector2Int(0, -1)) return WallPos.FRONT;
-
-        return WallPos.FRONT;
+        return PlayerMovement.INSTANCE.GetFacing();
     }
 }
 
 /// <summary>
-/// Zeitumkehrmodul -> Setzt den Gegner um einige Schritte zurueck.
+/// Time reversal - resets enemy the given amount of steps
 /// </summary>
 public class TimeReversalItem : IItem
 {
     private const int ENERGY_COST = 2;
-    private const int SPAWN_WEIGHT = 5;
+    private const int SPAWN_WEIGHT = 2;
     private const int REWIND_STEPS = 4;
 
     int IItem.GetEnergyCost() => ENERGY_COST;
@@ -64,8 +55,8 @@ public class TimeReversalItem : IItem
         return library.prefabItemClock;
     }
 
-    string IItem.GetName() => "Zeitumkehrmodul";
-    string IItem.GetDescription() => $"Setzt den Gegner um {REWIND_STEPS} Schritte zurueck.";
+    string IItem.GetName() => "Lucid Dial";
+    string IItem.GetDescription() => $"Rewind time and reset your ghost {REWIND_STEPS} steps.";
 
     bool IItem.OnUse()
     {
@@ -81,7 +72,7 @@ public class TimeReversalItem : IItem
 public class WallBreakerItem : IItem
 {
     private const int ENERGY_COST = 2;
-    private const int SPAWN_WEIGHT = 4;
+    private const int SPAWN_WEIGHT = 6;
 
     int IItem.GetEnergyCost() => ENERGY_COST;
     int IItem.GetSpawnWeight() => SPAWN_WEIGHT;
@@ -102,8 +93,8 @@ public class WallBreakerItem : IItem
         return library.prefabItemPickaxe;
     }
 
-    string IItem.GetName() => "Spitzhacke";
-    string IItem.GetDescription() => "Zerstoert die Wand in deiner Blickrichtung.";
+    string IItem.GetName() => "Pickaxe";
+    string IItem.GetDescription() => "Use it to destroy a wall you are looking at.";
 
     bool IItem.OnUse()
     {
@@ -143,7 +134,7 @@ public class WallBreakerItem : IItem
 public class SludgeItem : IItem
 {
     private const int ENERGY_COST = 2;
-    private const int SPAWN_WEIGHT = 4;
+    private const int SPAWN_WEIGHT = 3;
     private const int STUCK_TURNS = 2;
 
     int IItem.GetEnergyCost() => ENERGY_COST;
@@ -165,8 +156,8 @@ public class SludgeItem : IItem
         return library.prefabItemTrapForcefield;
     }
 
-    string IItem.GetName() => "Klebefalle";
-    string IItem.GetDescription() => "Blockiert den Gegner kurz auf dem Feld vor dir.";
+    string IItem.GetName() => "Stasis Crate";
+    string IItem.GetDescription() => "Deploy on a field to trap your ghost when it walks over it.";
 
     bool IItem.OnUse()
     {
@@ -222,7 +213,7 @@ public class SludgeItem : IItem
 public class ScannerItem : IItem
 {
     private const int ENERGY_COST = 1;
-    private const int SPAWN_WEIGHT = 4;
+    private const int SPAWN_WEIGHT = 6;
     private const float REVEAL_SECONDS = 4f;
 
     private class RendererColorSnapshot
@@ -257,7 +248,7 @@ public class ScannerItem : IItem
     }
 
     string IItem.GetName() => "Scanner";
-    string IItem.GetDescription() => $"Macht Hidden Traps fuer {REVEAL_SECONDS:0} Sekunden sichtbar.";
+    string IItem.GetDescription() => $"Use it to reveal all hidden traps in your proximity.";
 
     bool IItem.OnUse()
     {

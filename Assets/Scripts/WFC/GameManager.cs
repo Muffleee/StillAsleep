@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.Search;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Main game manager class, handles game initialization, world generation, and move and click events
@@ -66,12 +68,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject Audio;
     [SerializeField] private WinScreen WinScreen;
     [SerializeField] private GameObject player;
+    [SerializeField] private PlayerAnim anim;
 
     private PlayerResources playerResources;
     private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
     private IMapCondition currentCond;
 
-
+    [HideInInspector] public UnityEvent NoCrystals = new UnityEvent();
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private Queue<(GridObj, string)> tutorials = new Queue<(GridObj, string)>();
     bool tutorialOpen = false;
@@ -87,6 +90,7 @@ public class GameManager : MonoBehaviour
         {
             Instantiate(Audio);
         }
+        INSTANCE = this;
     }
     /// <summary>
     /// Initializes the grid, clearing the collapse-list and start the collapsing process from the first node
@@ -94,7 +98,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         fogCondition.SetIsActive(false);
-        INSTANCE = this;
+        
         
         this.grid = new Grid(this.width, this.height);
         grid.tutorialUpdate.AddListener(UpdateTutorialText);
@@ -250,8 +254,16 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Make the player lose the game
     /// </summary>
-    public void LoseGame(string loseMessage)
+    public void LoseGame(string loseMessage = "Game Over!")
+    {   
+        this.anim.TriggerAnim("TriggerLose");
+        this.playerMovement.LockMovement(2f);
+        StartCoroutine(LoseGameAfterTime(2f, loseMessage));
+    }
+
+    private IEnumerator LoseGameAfterTime(float delay, string loseMessage)
     {
+        yield return new WaitForSeconds(delay);
         WinScreen.ShowLoseScreen(loseMessage);
     }
 
@@ -272,6 +284,8 @@ public class GameManager : MonoBehaviour
         if (!this.playerResources.CanAfford(cost))
         {
             if(DEBUG) Debug.Log("Nicht genug Energie!");
+            AudioManager.Instance.PlayNoCrystal();
+            this.NoCrystals.Invoke();
             return;
         }
         this.playerResources.Spend(cost);
@@ -552,6 +566,7 @@ public class GameManager : MonoBehaviour
     public Pathfinding GetPathfinding() { return this.pathfinding; }
     public int GetRound() { return this.round; }
     public int GetPhase() {  return this.phase; }
+    public IMapCondition GetCurrentCondition() { return this.currentCond; }
 }
 
 public enum WeightType

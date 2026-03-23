@@ -76,7 +76,7 @@ public class Opponent : Movement
 
         if (playerPos == this.gridPos) 
         { 
-            GameManager.INSTANCE.LoseGame("Well... you're squished.");
+            GameManager.INSTANCE.LoseGame("Well... you were squished!");
             return true;
         }
         return false;

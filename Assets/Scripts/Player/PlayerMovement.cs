@@ -68,6 +68,7 @@ public class PlayerMovement : Movement
 
         if(Input.GetKeyDown(KeyCode.Escape)) 
         {
+            if(this.winScreen.IsWinLoseActive()) return;
             if(this.pausescreen.IsPauseMenuActive())
             {
                 this.pausescreen.HidePauseMenu();
@@ -83,28 +84,30 @@ public class PlayerMovement : Movement
         {
             this.winScreen.ShowWinScreen();
         }
-        if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK); }
-        else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT); }
-        else if (Input.GetKeyDown(KeyCode.A)) { this.TryMove(WallPos.LEFT); }
-        else if (Input.GetKeyDown(KeyCode.D)) { this.TryMove(WallPos.RIGHT); };
+        if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK, false); }
+        else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT, false); }
+        else if (Input.GetKeyDown(KeyCode.A)) { this.TryMove(WallPos.LEFT, false); }
+        else if (Input.GetKeyDown(KeyCode.D)) { this.TryMove(WallPos.RIGHT, false); };
     }
 
     /// <summary>
     /// Assert whether a movement in a given direction is valid and, if so, execute that move.
     /// </summary>
     /// <param name="wallPos">Direction in which the player wants to move.</param>
-    private void TryMove(WallPos wallPos)
+    private void TryMove(WallPos wallPos, bool isIce)
     {   
         if(!this.isMoving)
         {   
             MoveType mt = this.IsValidMove(wallPos);
             if (mt != MoveType.INVALID)
             {   
+                if(isIce) mt = MoveType.SLIDE;
                 if(mt == MoveType.TRAP) this.LockMovement(3.292f); // lock for longer animation of trap
                 this.StartMovement(wallPos, mt);
             }
             else
             {
+                RotateModel(wallPos);
                 if(this.DEBUG) Debug.Log("Movement was blocked by wall");
             }
         } else
@@ -196,7 +199,7 @@ public class PlayerMovement : Movement
         }
         if(destinationTile.GetGridType() == GridType.ICE)
         {
-            this.TryMove(wallPos);
+            this.TryMove(wallPos, true);
         }
         //if (destinationTile != null && destinationTile.IsTrap()) 
         //{
@@ -345,12 +348,19 @@ public class PlayerMovement : Movement
     public void LockMovement(float timeSecs)
     {
         this.isLocked = true;
+        if(GameManager.INSTANCE.GetCurrentCondition() is CountdownCond cd)
+        {
+            cd.ResetCountdown();
+            cd.PauseCountdown();
+        }
         Invoke(nameof(UnlockMovement), timeSecs);
     }
 
     public void UnlockMovement()
     {
         this.isLocked = false;
+        if(GameManager.INSTANCE.GetCurrentCondition() is CountdownCond cd)
+            cd.ResumeCountdown();
     }
 
     public bool IsLocked() { return this.isLocked; }
@@ -370,6 +380,12 @@ public class PlayerMovement : Movement
             lastGridPos = GetCurrentGridPos();
         return lastGridPos;
     }
+
+    public WallPos GetFacing()
+    {
+        return this.facing;
+    }
+    
     public void SetLastGridPos(Vector2Int newLastGridPos)
     {
         lastGridPos = newLastGridPos;
@@ -394,5 +410,5 @@ public class PlayerMovement : Movement
 
 public enum MoveType
 {
-    INVALID, WALK, JUMP, TRAP   
+    INVALID, WALK, JUMP, TRAP, SLIDE
 }

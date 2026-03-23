@@ -63,6 +63,7 @@ public class Regular : IInteractable
         {
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -109,7 +110,7 @@ public class Trap : IInteractable
         pr.RemoveEnergy(cost);
         if (wouldGoNegative && PlayerMovement.INSTANCE != null)
         {
-            GameManager.INSTANCE?.LoseGame("You ran out of energy in a trap!");
+            GameManager.INSTANCE?.LoseGame("You got trapped with no energy!");
             ScoreManager.INSTANCE.AddScore(-200, false, "LOSE");
             return;
         }
@@ -139,7 +140,8 @@ public class Trap : IInteractable
         if(!curr.HasWallAt(wPos) && nextObj != null && (nextObj.GetGridType() != GridType.REPLACEABLE) && (nextObj.GetGridType() != GridType.MANUAL_REPLACEABLE))
         {
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
-            if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -187,11 +189,17 @@ public class JumpingPads : IInteractable
             pr.Spend(1);
             return MoveType.JUMP;
         }
+        else if (pr != null && pr.CurrentEnergy <= 0 && curr.HasWallAt(wPos) && nextIsValid)
+        {
+            AudioManager.Instance.PlayNoCrystal();
+            GameManager.INSTANCE.NoCrystals.Invoke();
+        }
 
         // If there is NO wall and the landing spot is safe -> WALK
         if (!curr.HasWallAt(wPos) && nextIsValid)
         {
             if (nextObj.GetGridType() == GridType.TRAP || nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if (nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -252,6 +260,7 @@ public class ManualReplaceable : IInteractable
         {
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -298,7 +307,7 @@ public class HiddenTrap : IInteractable
 
         if (wouldGoNegative && PlayerMovement.INSTANCE != null)
         {
-            GameManager.INSTANCE?.LoseGame("You ran out of energy in a hidden trap!");
+            GameManager.INSTANCE?.LoseGame("You got sneakily trapped with no energy!");
             ScoreManager.INSTANCE?.AddScore(-150, false, "LOSE");
         }
         ScoreManager.INSTANCE.AddScore(-40, false, "Hidden Trap");
@@ -328,6 +337,7 @@ public class HiddenTrap : IInteractable
         {
             if(nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if(nextObj.GetGridType() == GridType.HIDDENTRAP)return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -362,6 +372,7 @@ public class Ice : IInteractable
         {
             if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -395,6 +406,7 @@ public class Rotating : IInteractable
         {
             if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;
@@ -428,7 +440,7 @@ public class Spike : IInteractable
         spikes = GameObject.Instantiate(GameManager.INSTANCE.GetPrefabLibrary().prefabSpike, pos, Quaternion.identity, floor.transform);
     }
     void IInteractable.SetColor(GameObject obj) { return; }
-    void IInteractable.OnUse(GridObj obj) { if (spikesOut) GameManager.INSTANCE.LoseGame("The spikes pierced through your body..."); }
+    void IInteractable.OnUse(GridObj obj) { if (spikesOut) GameManager.INSTANCE.LoseGame("Spikes pierced through your body..."); }
 
     /// <summary>
     /// Check whether a given move is valid. Movement is valid if there are no walls between the origin and the destination, and if the destination isn't a replaceable tile.
@@ -443,6 +455,7 @@ public class Spike : IInteractable
         {
             if (nextObj.GetGridType() == GridType.TRAP) return MoveType.TRAP;
             if (nextObj.GetGridType() == GridType.HIDDENTRAP) return MoveType.TRAP;
+            if(nextObj.GetGridType() == GridType.ICE) return MoveType.SLIDE;
             return MoveType.WALK;
         }
         return MoveType.INVALID;

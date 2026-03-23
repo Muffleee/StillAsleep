@@ -96,6 +96,8 @@ public class Inventory : MonoBehaviour
                 {
                     // Not enough energy
                     if(DEBUG) Debug.LogWarning($"Not enough energy! {itemToUse.GetName()} costs {cost} energy."); // TODO play sound
+                    AudioManager.Instance.PlayNoCrystal();
+                    GameManager.INSTANCE.NoCrystals.Invoke();
                     return false; 
                 }
             }
