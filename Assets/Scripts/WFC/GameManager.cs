@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int rotating = 0;
     [SerializeField] private int spike = 0;
     [SerializeField] private bool enableEnergyCrystals = true;
-    [SerializeField, Range(0f, 1f)] private float crystalBaseChance = 0.05f;
+    [SerializeField, Range(0f, 1f)] private float crystalBaseChance = 0.03f;
     [SerializeField, Range(0f, 1f)] private float crystalMinChance = 0.02f;
     [SerializeField, Range(0f, 1f)] private float crystalMaxChance = 0.25f;
     [SerializeField] private float crystalEnergyBias = 1.5f;

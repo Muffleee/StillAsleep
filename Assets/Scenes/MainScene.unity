@@ -445,21 +445,21 @@ MonoBehaviour:
   oneWall: 6
   empty: 10
   jumping: 6
-  manualReplacable: 8
+  manualReplacable: 10
   trap: 5
   hiddenTrap: 3
   ice: 0
   rotating: 0
   spike: 0
   enableEnergyCrystals: 1
-  crystalBaseChance: 0.05
+  crystalBaseChance: 0.03
   crystalMinChance: 0.02
   crystalMaxChance: 0.25
   crystalEnergyBias: 1.5
   crystalBaseMax: 6
   crystalBonusMax: 10
   enableItemSpawning: 1
-  itemSpawnChance: 0.1
+  itemSpawnChance: 0.04
   spawnableItemPrefabs:
   - {fileID: 4164902247873927100, guid: f5643e4bb32f915409a68433711c1e2a, type: 3}
   - {fileID: 7291365165085134826, guid: a432f799c717f644f8de33c29a99ee4f, type: 3}
@@ -3862,8 +3862,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -475, y: -313}
-  m_SizeDelta: {x: -880, y: -325}
+  m_AnchoredPosition: {x: -455, y: -355.5}
+  m_SizeDelta: {x: -1820, y: -1015}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1312518390
 MonoBehaviour:
@@ -10039,8 +10039,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -457.5, y: 237.5}
-  m_SizeDelta: {x: -845, y: -1525}
+  m_AnchoredPosition: {x: -454.5, y: 212.5}
+  m_SizeDelta: {x: -1781, y: -1025}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1917494756
 MonoBehaviour:
