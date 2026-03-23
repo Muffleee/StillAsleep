@@ -448,7 +448,7 @@ MonoBehaviour:
   manualReplacable: 8
   trap: 5
   hiddenTrap: 3
-  ice: 10
+  ice: 0
   rotating: 0
   spike: 0
   enableEnergyCrystals: 1
@@ -475,6 +475,9 @@ MonoBehaviour:
   player: {fileID: 6834562829543864865}
   tutManager: {fileID: 220377186}
   anim: {fileID: 6834562829543864872}
+  NoCrystals:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &220377177
 Transform:
   m_ObjectHideFlags: 0

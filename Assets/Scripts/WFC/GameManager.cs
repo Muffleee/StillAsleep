@@ -7,6 +7,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEditor.Search;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Main game manager class, handles game initialization, world generation, and move and click events
@@ -75,7 +76,7 @@ public class GameManager : MonoBehaviour
     private List<IMapCondition> allMapConditions = new List<IMapCondition> { new FogOfWarCon(), new CountdownCond(), new OpponentCon()};
     private IMapCondition currentCond;
 
-
+    [HideInInspector] public UnityEvent NoCrystals = new UnityEvent();
     public static List<GridObj> AllGridObjs = new List<GridObj>();
     private bool tutorial = false;
 
@@ -86,6 +87,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        INSTANCE = this;
         if (AudioManager.Instance == null)
         {
             Instantiate(Audio);
@@ -98,7 +100,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         fogCondition.SetIsActive(false);
-        INSTANCE = this;
+        
         
         this.grid = new Grid(this.width, this.height);
         this.playerResources = this.player.GetComponent<PlayerResources>();
@@ -278,6 +280,8 @@ public class GameManager : MonoBehaviour
         if (!this.playerResources.CanAfford(cost))
         {
             if(DEBUG) Debug.Log("Nicht genug Energie!");
+            AudioManager.Instance.PlayNoCrystal();
+            this.NoCrystals.Invoke();
             return;
         }
         this.playerResources.Spend(cost);
@@ -553,6 +557,7 @@ public class GameManager : MonoBehaviour
     public int GetPhase() {  return this.phase; }
     public GameObject GetItemPrefab(int index) { return spawnableItemPrefabs[index]; }
     public void ResetPhaseRound() {  this.phase = 0; this.round = 0; }
+    public IMapCondition GetCurrentCondition() { return this.currentCond; }
 }
 
 public enum WeightType
