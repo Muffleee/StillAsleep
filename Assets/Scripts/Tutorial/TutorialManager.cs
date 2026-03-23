@@ -22,6 +22,7 @@ public class TutorialManager: MonoBehaviour
     private int tutorialPhase = 0;
     private IMapCondition currentCond;
     private bool endPhase = false;
+    private GameObject panel;
 
     private void Awake()
     {
@@ -98,9 +99,20 @@ public class TutorialManager: MonoBehaviour
     }
     public void StartTutorial(Grid grid)
     {
+        
         if (this.resetButton != null) this.resetButton.onClick.AddListener(this.ResetGame);
         PlayerMovement.INSTANCE.onPlayerMoved.AddListener(PlayerMove);
         if (tutGrid == null) tutGrid = new TutorialGrid();
+        panel = tutorialLayover.transform.GetChild(0).gameObject;
+        RectTransform rt = panel.GetComponent<RectTransform>();
+        Vector2 min = rt.offsetMin;
+        Vector2 max = rt.offsetMax;
+
+        min.y = 800;
+        max.y = 0;
+
+        rt.offsetMin = min;
+        rt.offsetMax = max;
         tutorialLayover.gameObject.SetActive(true);
         resetButton.gameObject.SetActive(true);
         tutGrid.FillInitialGridLayout(grid.GetGridArray());
@@ -227,7 +239,7 @@ public class TutorialManager: MonoBehaviour
         grid.CollapseWorld();
         grid.IncreaseGrid(WallPos.RIGHT, 1000);
         grid.InstantiateMissing();
-        tutorialText.text = "You can pick up Items with E and use them with F. Scroll through your inventory slots using the mouse wheel. \n The pickaxe destroys the wall in the direction you are looking.\n The scanner reveals all hidden traps in a certain radius. \n The box can be placed where your pointer is and holds the enemy in place. \n The clock can reverse the time so you ghost will be placed back some steps.";
+        tutorialText.text = "You can pick up Items with E and use them with F. Scroll through your inventory slots using the mouse wheel. Using them costs energy! \n The pickaxe destroys the wall in the direction you are looking.\n The scanner reveals all hidden traps in a certain radius. \n The box can be placed where your pointer is and holds the enemy in place. \n The clock can reverse the time so you ghost will be placed back some steps.";
         currentMessage = tutorialText.text;
     }
 
@@ -239,6 +251,15 @@ public class TutorialManager: MonoBehaviour
 
     private void FogCondTutorial()
     {
+        RectTransform rt = panel.GetComponent<RectTransform>();
+        Vector2 min = rt.offsetMin;
+        Vector2 max = rt.offsetMax;
+
+        min.y = 175;
+        max.y = -750;
+
+        rt.offsetMin = min;
+        rt.offsetMax = max;
         SimpleWindowController.INSTANCE.ToggleWindow();
         PlayerMovement.INSTANCE.onPlayerMoved.RemoveListener(PlayerMove);
         GameManager.INSTANCE.SetTutorialCurrently(false);
@@ -264,6 +285,15 @@ public class TutorialManager: MonoBehaviour
     }
     private void LastTutorial()
     {
+        RectTransform rt = panel.GetComponent<RectTransform>();
+        Vector2 min = rt.offsetMin;
+        Vector2 max = rt.offsetMax;
+
+        min.y = 800;
+        max.y = 0;
+
+        rt.offsetMin = min;
+        rt.offsetMax = max;
         disableMoving = true;
         tutorialText.text = "Congratulations, you finished the tutorial! Click to get back to the main menu!";
         currentMessage = tutorialText.text;

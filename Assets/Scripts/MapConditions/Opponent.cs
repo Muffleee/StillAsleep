@@ -43,7 +43,7 @@ public class Opponent : Movement
     }
     private void StartEnemy()
     {
-        Vector2Int startPos = new Vector2Int(2, 2);
+        Vector2Int startPos = new Vector2Int(2, 4);
         GridObj startObj = GameManager.INSTANCE.GetCurrentGrid().GetGridArray()[startPos.x, startPos.y];
         Vector3 newPos = startObj.GetWorldPos(GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetX(), GameManager.INSTANCE.GetCurrentGrid().GetWorldOffsetY());
         newPos.y = 1;
