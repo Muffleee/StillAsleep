@@ -11,6 +11,7 @@ public interface IItem
     public bool OnUse();
     public string GetName();
     public string GetDescription();
+    public ItemType GetItemType();
 }
 
 public static class ItemHelper
@@ -63,6 +64,11 @@ public class TimeReversalItem : IItem
         if (EnemyMovement.INSTANCE == null) return false;
         EnemyMovement.INSTANCE.Rewind(REWIND_STEPS);
         return true; // Successfully used
+    }
+
+    ItemType IItem.GetItemType()
+    {
+        return ItemType.TimeReversal;
     }
 }
 
@@ -126,6 +132,11 @@ public class WallBreakerItem : IItem
         next.RemoveWall(opposite);
         return true; // Successfully used
     }
+
+    ItemType IItem.GetItemType()
+    {
+        return ItemType.WallBreaker;
+    }
 }
 
 /// <summary>
@@ -135,7 +146,7 @@ public class WallBreakerItem : IItem
 public class SludgeItem : IItem
 {
     private const int ENERGY_COST = 2;
-    private const int SPAWN_WEIGHT = 2;
+    private const int SPAWN_WEIGHT = 1;
     private const int STUCK_TURNS = 2;
 
     int IItem.GetEnergyCost() => ENERGY_COST;
@@ -205,6 +216,11 @@ public class SludgeItem : IItem
         }
         
         return false;
+    }
+
+    ItemType IItem.GetItemType()
+    {
+        return ItemType.Sludge;
     }
 }
 
@@ -310,5 +326,10 @@ public class ScannerItem : IItem
 
             snapshot.renderer.material.color = snapshot.color;
         }
+    }
+
+    ItemType IItem.GetItemType()
+    {
+        return ItemType.Scanner;
     }
 }

@@ -91,6 +91,11 @@ public class EnemyMovement : Movement
         isTrapTriggered = false; 
     }
 
+    public bool IsAnyTrapActive()
+    {
+        return activeBoxTrap != null;
+    }
+
     public void Rewind(int steps)
     {
         if (!isInstantiated) return;

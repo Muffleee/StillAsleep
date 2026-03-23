@@ -68,6 +68,7 @@ public class Inventory : MonoBehaviour
             IItem itemToUse = inventory[slot];
 
             if (PlayerMovement.INSTANCE == null) return false;
+            if(GameManager.INSTANCE.GetEnemyMovement().IsAnyTrapActive() && itemToUse.GetItemType() == ItemType.Sludge) return false;
             PlayerResources playerResources = PlayerMovement.INSTANCE.GetComponent<PlayerResources>();
 
             if (playerResources != null)

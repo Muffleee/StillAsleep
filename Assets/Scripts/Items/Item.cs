@@ -8,6 +8,7 @@ public class Item : ScriptableObject, IItem
     public string description;
     public Sprite icon;
     public GameObject prefab;
+    public ItemType itemType;
     
     [Header("Mechanics")]
     public int energyCost = 0;
@@ -53,5 +54,10 @@ public class Item : ScriptableObject, IItem
     public string GetDescription()
     {
         return description;
+    }
+
+    public ItemType GetItemType()
+    {
+        return itemType;
     }
 }
