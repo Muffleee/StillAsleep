@@ -33,7 +33,7 @@ public static class ItemHelper
 public class TimeReversalItem : IItem
 {
     private const int ENERGY_COST = 2;
-    private const int SPAWN_WEIGHT = 5;
+    private const int SPAWN_WEIGHT = 2;
     private const int REWIND_STEPS = 4;
 
     int IItem.GetEnergyCost() => ENERGY_COST;
@@ -72,7 +72,7 @@ public class TimeReversalItem : IItem
 public class WallBreakerItem : IItem
 {
     private const int ENERGY_COST = 2;
-    private const int SPAWN_WEIGHT = 4;
+    private const int SPAWN_WEIGHT = 6;
 
     int IItem.GetEnergyCost() => ENERGY_COST;
     int IItem.GetSpawnWeight() => SPAWN_WEIGHT;
@@ -134,7 +134,7 @@ public class WallBreakerItem : IItem
 public class SludgeItem : IItem
 {
     private const int ENERGY_COST = 2;
-    private const int SPAWN_WEIGHT = 4;
+    private const int SPAWN_WEIGHT = 3;
     private const int STUCK_TURNS = 2;
 
     int IItem.GetEnergyCost() => ENERGY_COST;
@@ -213,7 +213,7 @@ public class SludgeItem : IItem
 public class ScannerItem : IItem
 {
     private const int ENERGY_COST = 1;
-    private const int SPAWN_WEIGHT = 4;
+    private const int SPAWN_WEIGHT = 6;
     private const float REVEAL_SECONDS = 4f;
 
     private class RendererColorSnapshot
