@@ -80,10 +80,10 @@ public class PlayerMovement : Movement
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            this.winScreen.ShowWinScreen();
-        }
+        //if (Input.GetKeyDown(KeyCode.R))
+        //{
+        //    this.winScreen.ShowWinScreen();
+        //}
         if (Input.GetKeyDown(KeyCode.W)) { this.TryMove(WallPos.BACK, false); }
         else if (Input.GetKeyDown(KeyCode.S)) { this.TryMove(WallPos.FRONT, false); }
         else if (Input.GetKeyDown(KeyCode.A)) { this.TryMove(WallPos.LEFT, false); }
