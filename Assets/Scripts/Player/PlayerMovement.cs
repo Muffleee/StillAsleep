@@ -348,12 +348,19 @@ public class PlayerMovement : Movement
     public void LockMovement(float timeSecs)
     {
         this.isLocked = true;
+        if(GameManager.INSTANCE.GetCurrentCondition() is CountdownCond cd)
+        {
+            cd.ResetCountdown();
+            cd.PauseCountdown();
+        }
         Invoke(nameof(UnlockMovement), timeSecs);
     }
 
     public void UnlockMovement()
     {
         this.isLocked = false;
+        if(GameManager.INSTANCE.GetCurrentCondition() is CountdownCond cd)
+            cd.ResumeCountdown();
     }
 
     public bool IsLocked() { return this.isLocked; }

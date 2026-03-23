@@ -566,6 +566,7 @@ public class GameManager : MonoBehaviour
     public Pathfinding GetPathfinding() { return this.pathfinding; }
     public int GetRound() { return this.round; }
     public int GetPhase() {  return this.phase; }
+    public IMapCondition GetCurrentCondition() { return this.currentCond; }
 }
 
 public enum WeightType
