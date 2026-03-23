@@ -4,14 +4,20 @@ using UnityEngine;
 
 public class TerrainScannerEffect : MonoBehaviour
 {
-    [SerializeField] private float duration = 7f;
-    [SerializeField] private float size = 50f;
+    [SerializeField] private float size = 21f;
+    [SerializeField] private float speed = 7f;
     [SerializeField] private ParticleSystem terrainScanner;
     public static TerrainScannerEffect INSTANCE;
+    public static int maxDistance = 5;
+    private float distance = 0f;
 
     void Awake()
     {
         INSTANCE = this;
+    }
+    private void Start()
+    {
+        distance = GridObj.PLACEMENT_FACTOR * maxDistance;
     }
 
     /// <summary>
@@ -34,9 +40,10 @@ public class TerrainScannerEffect : MonoBehaviour
     private void PlayTerrainScanner()
     {
         var main = terrainScanner.main;
-        main.startLifetime = duration;
+        main.startLifetime = distance / speed;
         main.startSize = size;
-
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.loop = false;
         terrainScanner.Play();
     }
 }
