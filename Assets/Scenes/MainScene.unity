@@ -10133,8 +10133,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23f11f1e348a9c34c88991298fe0b116, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  duration: 7
-  size: 50
+  size: 21
+  speed: 7
   terrainScanner: {fileID: 1678933100}
 --- !u!1 &1991189091
 GameObject:
