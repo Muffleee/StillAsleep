@@ -61,7 +61,8 @@ public class Inventory : MonoBehaviour
     public bool RemoveItem() => RemoveItem(currentSelectedItem);
 
     public bool UseItem(int slot)
-    {
+    {   
+        if(GameManager.INSTANCE.GetPlayerMovement().IsMoving()) return false;
         if (slot >= 0 && slot < maxInventorySize && inventory[slot] != null)
         {
             IItem itemToUse = inventory[slot];

@@ -404,7 +404,8 @@ public class PlayerMovement : Movement
             anim.TriggerMoveAnim(MoveType.INVALID); 
         }
     }
-    // ------------------------------------------------------------------------------
+
+    public bool IsMoving() { return this.isMoving; }
 }
 
 
