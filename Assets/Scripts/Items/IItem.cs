@@ -198,9 +198,15 @@ public class SludgeItem : IItem
         if (target == null)
         {
             Debug.LogWarning("Invalid placement! You must click directly on a valid map tile.");
-            return false; // Returns false so you don't lose the item or energy
+            return false;
         }
-        // -----------------------------------------------------------------------------
+
+        // --- THE NEW FIX: Check if the enemy is standing on the target tile!
+        if (target.GetGridPos() == EnemyMovement.INSTANCE.GetEnemyGridPos())
+        {
+            Debug.LogWarning("You cannot place the trap directly on top of the enemy!");
+            return false; // Returns false so you keep the item and your energy!
+        }
 
         // SPAWN THE TRAPBOX AT TARGET LOCATION
         Vector3 spawnPos = target.GetWorldPos(grid.GetWorldOffsetX(), grid.GetWorldOffsetY());
