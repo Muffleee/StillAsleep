@@ -2128,6 +2128,11 @@ PrefabInstance:
       propertyPath: inventory
       value: 
       objectReference: {fileID: 220377184}
+    - target: {fileID: 2022478082278651178, guid: 67eeeb0f9309065468a56e0962c34b9d,
+        type: 3}
+      propertyPath: far clip plane
+      value: 2300
+      objectReference: {fileID: 0}
     - target: {fileID: 3832636343648319687, guid: 67eeeb0f9309065468a56e0962c34b9d,
         type: 3}
       propertyPath: m_Name
@@ -2143,6 +2148,11 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 6834562829543864871}
+    - target: {fileID: 5977506318907332911, guid: 67eeeb0f9309065468a56e0962c34b9d,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6288022297011049198, guid: 67eeeb0f9309065468a56e0962c34b9d,
         type: 3}
       propertyPath: m_Name
