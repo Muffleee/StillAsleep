@@ -3410,7 +3410,7 @@ PrefabInstance:
         type: 3}
       propertyPath: noCrystal
       value: 
-      objectReference: {fileID: 8300000, guid: d16bc4ac1610dea4da632dc0f2c7843f, type: 3}
+      objectReference: {fileID: 8300000, guid: f9363c85323d65d40812ce20081d33dc, type: 3}
     - target: {fileID: 7712494145165585650, guid: dcfaec5b534bece499f2638d66792c9c,
         type: 3}
       propertyPath: m_Name
