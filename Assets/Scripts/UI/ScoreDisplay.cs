@@ -23,6 +23,7 @@ public class ScoreDisplay : MonoBehaviour
     private Coroutine countCoroutine;
     private Sprite DigitSprite(int n)  => allSprites[n];
     private Sprite LetterSprite(int i) => allSprites[10 + i];
+    private const int MAX_SCORE = 5000000;
 
     void Start()
     {
@@ -160,6 +161,11 @@ public class ScoreDisplay : MonoBehaviour
             d.SetSprite(DigitSprite(s[i] - '0'));
             d.Init();
             if (wobble > 0f) d.Trigger(wobble);
+        }
+
+        if(score >= MAX_SCORE)
+        {
+            GameManager.INSTANCE.LoseGame("Let's be honest if you were sleeping this long, you'll never wake up again. Game Over.");
         }
     }
 
