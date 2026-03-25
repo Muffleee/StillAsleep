@@ -613,7 +613,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 220377176}
   playerMovement: {fileID: 6834562829543864870}
-  revealRadius: 3
+  revealRadius: 1
   enemyRevealRadius: 1
 --- !u!114 &220377183
 MonoBehaviour:
