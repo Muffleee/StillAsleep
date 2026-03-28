@@ -448,9 +448,9 @@ MonoBehaviour:
   manualReplacable: 10
   trap: 5
   hiddenTrap: 3
-  ice: 0
-  rotating: 0
-  spike: 0
+  ice: 3
+  rotating: 3
+  spike: 1
   enableEnergyCrystals: 1
   crystalBaseChance: 0.03
   crystalMinChance: 0.02
