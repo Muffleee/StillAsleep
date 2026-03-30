@@ -94,9 +94,9 @@ public class WinScreen : MonoBehaviour
             int highScore = ScoreManager.INSTANCE.GetHighScore();
 
             statsText.text = "<b>PHASE STATS</b>\n\n";
-            statsText.text += "Phase: <pos=80%>" + phase + "\n";
-            statsText.text += "Score: <pos=80%>" + score + "\n";
-            statsText.text += "Highscore: <pos=80%>" + highScore + "\n";
+            statsText.text += "Phase: <pos=60%>" + phase + "\n";
+            statsText.text += "Score: <pos=60%>" + score + "\n";
+            statsText.text += "Highscore: <pos=60%>" + highScore + "\n";
 
             if (score >= highScore && score > 0)
                 statsText.text += "\nNew Highscore!";
@@ -118,10 +118,10 @@ public class WinScreen : MonoBehaviour
 
             statsText.text = "<b>GAME OVER</b>\n\n";
             statsText.text += "Cause of Death:\n" + reason + "\n\n";
-            statsText.text += "Phase achieved: <pos=80%>" + phase + "\n";
-            statsText.text += "Total Rounds: <pos=80%>" + totalRounds + "\n";
-            statsText.text += "Overall Score: <pos=80%>" + score + "\n";
-            statsText.text += "Highscore: <pos=80%>" + highScore + "\n";
+            statsText.text += "Phase achieved: <pos=60%>" + phase + "\n";
+            statsText.text += "Total Rounds: <pos=60%>" + totalRounds + "\n";
+            statsText.text += "Overall Score: <pos=60%>" + score + "\n";
+            statsText.text += "Highscore: <pos=60%>" + highScore + "\n";
 
             if (score >= highScore && score > 0)
                 statsText.text += "\nNew Highscore!";
