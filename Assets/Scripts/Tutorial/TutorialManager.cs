@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -23,9 +24,23 @@ public class TutorialManager: MonoBehaviour
     private IMapCondition currentCond;
     private bool endPhase = false;
     private GameObject panel;
+    private bool isInitialized = false;
 
     private void Awake()
+    {   
+        StartCoroutine(Init());
+    }
+
+    IEnumerator Init()
+    {   
+        yield return new WaitUntil(() => GameManager.INSTANCE != null);
+        yield return new WaitUntil(() => SimpleWindowController.INSTANCE != null);
+        InitTutorials();
+    }
+
+    private void InitTutorials()
     {
+        this.isInitialized = true;
         tutorials.Enqueue(EnemyTutorial);
         tutorials.Enqueue(PlaceableTutorial);
         tutorials.Enqueue(GenerateTutorial);
@@ -99,7 +114,12 @@ public class TutorialManager: MonoBehaviour
     }
     public void StartTutorial(Grid grid)
     {
-        
+        if (!isInitialized)
+        {
+            StartCoroutine(WaitAndStart(grid));
+            return;
+        }
+
         if (this.resetButton != null) this.resetButton.onClick.AddListener(this.ResetGame);
         PlayerMovement.INSTANCE.onPlayerMoved.AddListener(PlayerMove);
         if (tutGrid == null) tutGrid = new TutorialGrid();
@@ -297,6 +317,11 @@ public class TutorialManager: MonoBehaviour
         disableMoving = true;
         tutorialText.text = "Congratulations, you finished the tutorial! Click to get back to the main menu!";
         currentMessage = tutorialText.text;
+    }
+    IEnumerator WaitAndStart(Grid grid)
+    {
+        yield return new WaitUntil(() => isInitialized);
+        StartTutorial(grid);
     }
     public bool IsPlacingDisabled() { return disablePlacing; }
     public bool IsMovingDisabled() { return (screenUp || disableMoving);  }
