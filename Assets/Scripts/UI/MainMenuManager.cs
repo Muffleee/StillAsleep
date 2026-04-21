@@ -15,10 +15,10 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject optionsPanel;
     [SerializeField] private TMP_Text gameTitleText;
     [SerializeField] private Button startButton;
+    [SerializeField] private Button tutorialButton;
     [SerializeField] private Button optionsButton;
     [SerializeField] private Button quitButton;
     [SerializeField] private Button backButton;
-    [SerializeField] private Toggle tutorialToggle;
     [SerializeField] private Slider soundSlider;
     [SerializeField] private Slider musicSlider;
     [SerializeField] private Animator playerAnimator;
@@ -34,7 +34,9 @@ public class MainMenu : MonoBehaviour
 
         if (this.startButton != null)
             startButton.onClick.AddListener(StartGame);
-        if(this.optionsButton != null)
+        if (this.tutorialButton != null)
+            tutorialButton.onClick.AddListener(StartTutorial);
+        if (this.optionsButton != null)
             this.optionsButton.onClick.AddListener(ShowOptions);
         if (this.quitButton != null)
             quitButton.onClick.AddListener(QuitGame);
@@ -67,11 +69,17 @@ public class MainMenu : MonoBehaviour
 
     private void StartGame()
     {
-        MainMenu.tutorial = tutorialToggle.isOn;
+        MainMenu.tutorial = false;
         AudioManager.Instance.PlayButtonClick();
         SceneManager.LoadScene(gameSceneName);
     }
 
+    private void StartTutorial()
+    {
+        MainMenu.tutorial = true;
+        AudioManager.Instance.PlayButtonClick();
+        SceneManager.LoadScene(gameSceneName);
+    }
     private void ShowOptions()
     {
         AudioManager.Instance.PlayButtonClick();
